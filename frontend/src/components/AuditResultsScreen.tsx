@@ -6,6 +6,7 @@ import { formatToIST } from '../utils';
 interface AuditResultsScreenProps {
   sessionId: string;
   initialResults?: any;
+  viewMode?: 'overview' | 'results' | 'evidence';
   onReviewAiSuggestions: (unmappedLine: string) => void;
   onViewRemediation: (ruleId: string) => void;
   onNavigateToLedger: () => void;
@@ -14,6 +15,7 @@ interface AuditResultsScreenProps {
 export const AuditResultsScreen: React.FC<AuditResultsScreenProps> = ({
   sessionId,
   initialResults,
+  viewMode,
   onReviewAiSuggestions,
   onViewRemediation,
   onNavigateToLedger
@@ -101,7 +103,7 @@ export const AuditResultsScreen: React.FC<AuditResultsScreenProps> = ({
 
   if (isLoading) {
     return (
-      <div className="bg-slate-900 border border-slate-800 rounded p-12 text-center font-mono text-xs text-slate-300 space-y-3">
+      <div className="bg-slate-900 border border-slate-700 rounded p-12 text-center font-mono text-xs text-slate-300 space-y-3">
         <div className="w-8 h-8 border-2 border-sky-400 border-t-transparent rounded-full animate-spin mx-auto"></div>
         <div>Loading deterministic audit results from session <code className="text-sky-400 font-bold">{sessionId}</code>...</div>
       </div>
@@ -161,89 +163,77 @@ export const AuditResultsScreen: React.FC<AuditResultsScreenProps> = ({
 
   return (
     <div className="space-y-6 font-sans">
-      {/* Target Device Audit Header */}
-      <div className="bg-slate-900 border border-slate-800 rounded p-5">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800 pb-4">
-          <div>
-            <div className="flex items-center space-x-3">
-              <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-              <h1 className="text-xl font-bold text-white font-mono">
-                {hostname}
-              </h1>
-              <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-slate-800 text-slate-300 border border-slate-700">
-                {platform}
-              </span>
-            </div>
-            <p className="text-xs text-slate-400 mt-1 font-mono">
-              Session ID: <code className="text-sky-300 font-bold">{sessionId}</code>
-            </p>
+      {/* Unified Target Device & Scope Header Bar */}
+      <div className="bg-slate-900 border border-slate-700 rounded p-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-slate-700/80 pb-3">
+          <div className="flex items-center flex-wrap gap-2.5">
+            <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span>
+            <h1 className="text-base font-bold text-slate-100 font-mono tracking-tight">
+              {hostname}
+            </h1>
+            <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300 border border-slate-700">
+              {platform}
+            </span>
+            <span className="text-slate-600">|</span>
+            <span className="text-xs font-mono text-slate-400">
+              Vendor Scope: <span className="text-sky-400 font-semibold">{resolvedVendorDisplay}</span>
+            </span>
+            <span className="text-slate-600">|</span>
+            <span className="text-xs text-slate-400 font-mono">
+              Session: <code className="text-sky-300 font-semibold">{sessionId}</code>
+            </span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={loadResults}
-              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs font-mono border border-slate-700 transition-colors flex items-center gap-1.5 cursor-pointer"
+              className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs font-mono border border-slate-700 transition-[transform,background-color] duration-150 ease-out active:scale-[0.98] flex items-center gap-1.5 cursor-pointer"
             >
-              <span>↻ Refresh Session</span>
+              <span>↻ Refresh</span>
             </button>
             <button
               onClick={onNavigateToLedger}
-              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded text-xs font-mono border border-slate-700 transition-colors flex items-center gap-1.5 cursor-pointer"
+              className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded text-xs font-mono border border-slate-700 transition-[transform,background-color] duration-150 ease-out active:scale-[0.98] flex items-center gap-1.5 cursor-pointer"
             >
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              View Full Ledger & Reports
+              <span>Full Ledger &amp; Reports</span>
             </button>
           </div>
         </div>
 
-        {/* Header Metadata Ribbon */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 text-xs font-mono">
-          <div>
-            <span className="text-slate-500 block text-[10px] uppercase">Audit Timestamp (IST)</span>
-            <span className="text-slate-300 font-semibold" title={`Canonical UTC: ${timestamp}`}>{formatToIST(timestamp)}</span>
-            <span className="block text-[10px] text-slate-500 font-mono mt-0.5" title="Canonical UTC timestamp">Canonical: {timestamp}</span>
-          </div>
-          <div>
-            <span className="text-slate-500 block text-[10px] uppercase">Config File Hash (SHA-256)</span>
-            <span className="text-sky-400 select-all" title={configFileHash}>
-              {configFileHash.length > 28
-                ? `${configFileHash.substring(0, 20)}...${configFileHash.substring(configFileHash.length - 8)}`
-                : configFileHash}
-            </span>
-          </div>
-          <div>
-            <span className="text-slate-500 block text-[10px] uppercase">Evaluation Logic</span>
-            <span className="text-emerald-400 font-semibold">Deterministic Modules 2 & 4</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Framework Navigation Ribbon */}
-      <div className="bg-slate-900 border border-slate-800 rounded p-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <div className="flex items-center space-x-2">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400">Vendor Scope:</span>
-              <span className="text-xs font-mono font-bold text-sky-400 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
-                {resolvedVendorDisplay}
+        {/* Header Metadata & Framework Selector Sub-bar */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pt-3 text-xs font-mono">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-slate-400 text-[11px]">
+            <div>
+              <span className="text-slate-500 uppercase text-[10px] mr-1.5">Parsed:</span>
+              <span className="text-slate-300 font-medium" title={`Canonical UTC: ${timestamp}`}>{formatToIST(timestamp)}</span>
+            </div>
+            <div>
+              <span className="text-slate-500 uppercase text-[10px] mr-1.5">SHA-256:</span>
+              <span className="text-sky-400 select-all" title={configFileHash}>
+                {configFileHash.length > 20
+                  ? `${configFileHash.substring(0, 10)}...${configFileHash.substring(configFileHash.length - 8)}`
+                  : configFileHash || 'N/A'}
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 font-mono mt-1">
-              Select an authority framework to inspect independent deterministic control evaluations:
-            </p>
+            <div>
+              <span className="text-slate-500 uppercase text-[10px] mr-1.5">Logic:</span>
+              <span className="text-emerald-400 font-semibold">Modules 2 &amp; 4</span>
+            </div>
           </div>
 
-          {/* Framework Tabs */}
-          <div className="flex flex-wrap items-center gap-1.5" role="tablist" aria-label="Compliance Frameworks">
+          {/* Inline Framework Selector Tabs */}
+          <div className="flex flex-wrap items-center gap-1 shrink-0" role="tablist" aria-label="Compliance Frameworks">
+            <span className="text-[10px] font-mono uppercase text-slate-500 mr-1 hidden sm:inline">Framework:</span>
             <button
               role="tab"
               aria-selected={activeTab === 'baseline'}
               onClick={() => setActiveTab('baseline')}
-              className={`px-3 py-1.5 rounded text-xs font-mono font-semibold transition-all cursor-pointer ${
+              className={`px-2.5 py-1 rounded text-xs font-sans font-medium transition-[transform,background-color,border-color,color] duration-150 ease-out active:scale-[0.98] cursor-pointer ${
                 activeTab === 'baseline'
-                  ? 'bg-[#00FF41] text-black shadow-sm ring-1 ring-[#00FF41]/60'
+                  ? 'bg-sky-600 text-white shadow-sm border border-sky-500'
                   : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700'
               }`}
             >
@@ -257,9 +247,9 @@ export const AuditResultsScreen: React.FC<AuditResultsScreenProps> = ({
                 aria-selected={activeTab === fw.framework_id}
                 onClick={() => setActiveTab(fw.framework_id)}
                 title={fw.description}
-                className={`px-3 py-1.5 rounded text-xs font-mono font-semibold transition-all cursor-pointer ${
+                className={`px-2.5 py-1 rounded text-xs font-sans font-medium transition-[transform,background-color,border-color,color] duration-150 ease-out active:scale-[0.98] cursor-pointer ${
                   activeTab === fw.framework_id
-                    ? 'bg-[#00FF41] text-black shadow-sm ring-1 ring-[#00FF41]/60'
+                    ? 'bg-sky-600 text-white shadow-sm border border-sky-500'
                     : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700'
                 }`}
               >
@@ -272,170 +262,210 @@ export const AuditResultsScreen: React.FC<AuditResultsScreenProps> = ({
 
       {/* --- TAB VIEW 1: Legacy Baseline Rules --- */}
       {activeTab === 'baseline' && (
-        <div className="space-y-6">
-          {/* Summary Stat Bar */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="space-y-4">
+          {/* Posture Metric & Filter Strip (Compact, High-Density) */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {/* Total Controls */}
             <div
               onClick={() => setFilter('ALL')}
-              className={`p-4 rounded border cursor-pointer transition-all ${
+              className={`p-3 rounded border cursor-pointer transition-[border-color,background-color] duration-150 ease-out ${
                 filter === 'ALL'
-                  ? 'bg-slate-800 border-sky-500 ring-1 ring-sky-500'
-                  : 'bg-slate-900 border-slate-800 hover:border-slate-700'
+                  ? 'bg-slate-800 border-sky-500 ring-1 ring-sky-500/80 shadow-sm'
+                  : 'bg-slate-900 border-slate-700 hover:border-slate-600'
               }`}
             >
-              <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">
-                Total Controls
+              <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 uppercase tracking-wider">
+                <span>Total Controls</span>
+                <span className="text-[10px] text-slate-500 font-mono">CIS/DISA/STIG</span>
               </div>
-              <div className="text-2xl font-bold font-mono text-slate-100 mt-1">{totalCount}</div>
-              <div className="text-[10px] text-slate-500 mt-1 font-mono">CIS / DISA-STIG / Trusted</div>
+              <div className="text-xl font-bold font-mono text-slate-100 mt-0.5">{totalCount}</div>
             </div>
 
             {/* Pass Count */}
             <div
               onClick={() => setFilter('Pass')}
-              className={`p-4 rounded border cursor-pointer transition-all ${
+              className={`p-3 rounded border cursor-pointer transition-[border-color,background-color] duration-150 ease-out ${
                 filter === 'Pass'
-                  ? 'bg-emerald-950/80 border-emerald-500 ring-1 ring-emerald-500'
-                  : 'bg-[#0c1f17] border-emerald-900/60 hover:border-emerald-700'
+                  ? 'bg-emerald-950/80 border-emerald-500 ring-1 ring-emerald-500/80 shadow-sm'
+                  : 'bg-emerald-950/30 border-emerald-900/60 hover:border-emerald-700'
               }`}
             >
-              <div className="text-[11px] font-mono text-emerald-400 uppercase tracking-wider flex items-center justify-between">
+              <div className="flex items-center justify-between text-[10px] font-mono text-emerald-400 uppercase tracking-wider">
                 <span>Pass Count</span>
                 <span className="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
               </div>
-              <div className="text-2xl font-bold font-mono text-emerald-300 mt-1">{passCount}</div>
-              <div className="text-[10px] text-emerald-400/80 mt-1 font-mono">
-                {Math.round((passCount / (totalCount || 1)) * 100)}% Compliance
+              <div className="flex items-baseline justify-between mt-0.5">
+                <span className="text-xl font-bold font-mono text-emerald-300">{passCount}</span>
+                <span className="text-[11px] font-mono text-emerald-400 font-semibold">
+                  {Math.round((passCount / (totalCount || 1)) * 100)}%
+                </span>
               </div>
             </div>
 
             {/* Fail Count */}
             <div
               onClick={() => setFilter('Fail')}
-              className={`p-4 rounded border cursor-pointer transition-all ${
+              className={`p-3 rounded border cursor-pointer transition-[border-color,background-color] duration-150 ease-out ${
                 filter === 'Fail'
-                  ? 'bg-rose-950/80 border-rose-500 ring-1 ring-rose-500'
-                  : 'bg-[#220d0f] border-rose-900/60 hover:border-rose-700'
+                  ? 'bg-rose-950/80 border-rose-500 ring-1 ring-rose-500/80 shadow-sm'
+                  : 'bg-rose-950/30 border-rose-900/60 hover:border-rose-700'
               }`}
             >
-              <div className="text-[11px] font-mono text-rose-400 uppercase tracking-wider flex items-center justify-between">
+              <div className="flex items-center justify-between text-[10px] font-mono text-rose-400 uppercase tracking-wider">
                 <span>Fail Count</span>
                 <span className="inline-block w-2 h-2 rounded-full bg-rose-500"></span>
               </div>
-              <div className="text-2xl font-bold font-mono text-rose-300 mt-1">{failCount}</div>
-              <div className="text-[10px] text-rose-400/80 mt-1 font-mono">
-                Requires Remediation
+              <div className="flex items-baseline justify-between mt-0.5">
+                <span className="text-xl font-bold font-mono text-rose-300">{failCount}</span>
+                <span className="text-[10px] font-mono text-rose-400/90">
+                  Needs Remediation
+                </span>
               </div>
             </div>
 
             {/* Unknown Count */}
             <div
               onClick={() => setFilter('Unknown')}
-              className={`p-4 rounded border cursor-pointer transition-all ${
+              className={`p-3 rounded border cursor-pointer transition-[border-color,background-color] duration-150 ease-out ${
                 filter === 'Unknown'
-                  ? 'bg-amber-950/80 border-amber-500 ring-1 ring-amber-500'
-                  : 'bg-[#241a08] border-amber-900/60 hover:border-amber-700'
+                  ? 'bg-amber-950/80 border-amber-500 ring-1 ring-amber-500/80 shadow-sm'
+                  : 'bg-amber-950/30 border-amber-900/60 hover:border-amber-700'
               }`}
             >
-              <div className="text-[11px] font-mono text-amber-400 uppercase tracking-wider flex items-center justify-between">
+              <div className="flex items-center justify-between text-[10px] font-mono text-amber-400 uppercase tracking-wider">
                 <span>Unknown Count</span>
                 <span className="inline-block w-2 h-2 rounded-full bg-amber-500"></span>
               </div>
-              <div className="text-2xl font-bold font-mono text-amber-300 mt-1">{unknownCount}</div>
-              <div className="text-[10px] text-amber-400/80 mt-1 font-mono">
-                Missing Direct Evidence
+              <div className="flex items-baseline justify-between mt-0.5">
+                <span className="text-xl font-bold font-mono text-amber-300">{unknownCount}</span>
+                <span className="text-[10px] font-mono text-amber-400/90">
+                  Missing Direct Evidence
+                </span>
               </div>
             </div>
           </div>
 
-          {/* Unmapped Lines Detected Callout Card */}
+          {/* Executive Baseline Summary Card for Overview Mode */}
+          {viewMode === 'overview' && (
+            <div className="bg-slate-900 border border-slate-700 rounded p-4 space-y-3">
+              <div className="flex items-center justify-between border-b border-slate-700/80 pb-2.5">
+                <div className="flex items-center space-x-2">
+                  <span className="w-2 h-2 rounded-full bg-sky-400"></span>
+                  <h3 className="text-xs font-bold text-slate-200">
+                    Baseline Posture Overview
+                  </h3>
+                </div>
+                <span className="text-xs font-mono text-slate-400">
+                  {totalCount} Total Deterministic Controls
+                </span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs font-mono">
+                <div className="p-2.5 bg-slate-950 rounded border border-slate-700">
+                  <span className="text-slate-500 block text-[10px] uppercase">Compliance Rate</span>
+                  <span className="text-emerald-400 text-base font-bold">{Math.round((passCount / (totalCount || 1)) * 100)}%</span>
+                  <span className="block text-[10px] text-slate-400 mt-0.5">{passCount} Passing Controls</span>
+                </div>
+                <div className="p-2.5 bg-slate-950 rounded border border-slate-700">
+                  <span className="text-slate-500 block text-[10px] uppercase">Remediation Workload</span>
+                  <span className="text-rose-400 text-base font-bold">{failCount}</span>
+                  <span className="block text-[10px] text-slate-400 mt-0.5">Requiring Jinja2 CLI Fixes</span>
+                </div>
+                <div className="p-2.5 bg-slate-950 rounded border border-slate-700">
+                  <span className="text-slate-500 block text-[10px] uppercase">Review Queue</span>
+                  <span className="text-amber-400 text-base font-bold">{unknownCount}</span>
+                  <span className="block text-[10px] text-slate-400 mt-0.5">{unmappedLines.length} Unmapped Telemetry</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Unmapped Lines Detected Alert Banner (Inline, Compact) */}
           {unmappedLines.length > 0 && (
-            <div className="bg-amber-950/40 border-2 border-dashed border-amber-600/80 rounded p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-              <div className="flex items-start space-x-3">
-                <div className="p-2 rounded bg-amber-900/60 border border-amber-700 text-amber-300">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-amber-950/30 border border-amber-600/70 rounded p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="p-1.5 rounded bg-amber-900/50 border border-amber-700 text-amber-300 shrink-0">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h4 className="text-sm font-bold text-amber-200">
-                      {unmappedLines.length} Unmapped CLI Line{unmappedLines.length > 1 ? 's' : ''} Detected — AI Interpretation Available
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h4 className="text-xs font-bold text-amber-200">
+                      {unmappedLines.length} Unmapped CLI Line{unmappedLines.length > 1 ? 's' : ''} Detected
                     </h4>
-                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-900 text-amber-200 border border-amber-700 font-semibold">
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-900 text-amber-200 border border-amber-700 font-semibold leading-none">
                       PENDING REVIEW
                     </span>
                   </div>
-                  <div className="mt-1.5 space-y-1">
-                    {unmappedLines.map((line, idx) => (
-                      <div key={idx} className="text-xs text-amber-300/90 flex flex-wrap items-center gap-1.5">
-                        {unmappedLines.length > 1 && (
-                          <span className="text-[10px] font-mono text-amber-400/80 font-bold">#{idx + 1}</span>
-                        )}
-                        <code className="font-mono bg-amber-950 px-1.5 py-0.5 rounded border border-amber-800 text-amber-200 font-semibold">
-                          {line}
-                        </code>
-                        <span className="text-[11px] text-amber-300/70">
-                          not matched by deterministic rules. Candidate CSM mapping available.
-                        </span>
-                      </div>
-                    ))}
+                  <div className="text-[11px] text-amber-300/80 font-mono truncate mt-0.5">
+                    <code>{unmappedLines[0]}</code>
+                    {unmappedLines.length > 1 && <span className="text-amber-400/90 ml-1">+{unmappedLines.length - 1} more</span>}
+                    <span className="text-amber-400/60 ml-1.5 hidden md:inline">— AI mapping available</span>
                   </div>
                 </div>
               </div>
 
               <button
                 onClick={() => onReviewAiSuggestions(unmappedLines[0])}
-                className="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-slate-950 rounded text-xs font-bold uppercase tracking-wider transition-colors shrink-0 shadow-sm cursor-pointer"
+                className="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-slate-950 rounded text-xs font-bold uppercase tracking-wider transition-[transform,background-color] duration-150 ease-out active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/80 shrink-0 shadow-sm cursor-pointer"
               >
                 Review AI Suggestions &rarr;
               </button>
             </div>
           )}
 
-          {/* Rule Results Table */}
-          <div className="bg-slate-900 border border-slate-800 rounded">
-            <div className="px-5 py-3.5 border-b border-slate-800 flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <span className="w-2 h-2 rounded-full bg-slate-400"></span>
-                <h3 className="text-xs font-bold text-slate-200">
-                  Evaluated rule matrix ({filteredRules.length} of {rulesList.length})
-                </h3>
+          {/* Rule Results Table — Hidden in 'overview' mode, visible in 'results', 'evidence', and default modes */}
+          {viewMode !== 'overview' && (
+            <div className="bg-slate-900 border border-slate-700 rounded">
+              {viewMode === 'evidence' && (
+                <div className="px-5 py-2.5 bg-sky-950/30 border-b border-slate-700 flex items-center justify-between text-xs font-mono text-sky-300">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>
+                    <span>EVIDENCE TRACE MODE: Inspecting deterministic AST parsed directives &amp; telemetry lines</span>
+                  </div>
+                  <span className="text-slate-400 text-[11px]">ALL DIRECTIVES EXPANDED</span>
+                </div>
+              )}
+              <div className="px-5 py-3.5 border-b border-slate-700 flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <span className="w-2 h-2 rounded-full bg-slate-400"></span>
+                  <h3 className="text-xs font-bold text-slate-200">
+                    Evaluated rule matrix ({filteredRules.length} of {rulesList.length})
+                  </h3>
+                </div>
+                <div className="flex items-center space-x-2 text-xs">
+                  <span className="text-slate-500 font-mono text-[11px]">FILTER:</span>
+                  {(['ALL', 'Pass', 'Fail', 'Unknown'] as const).map((f) => (
+                    <button
+                      key={f}
+                      onClick={() => setFilter(f)}
+                      className={`px-2.5 py-1 text-xs font-sans font-medium rounded cursor-pointer transition-colors duration-150 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sky-500/80 ${
+                        filter === f
+                          ? 'bg-slate-800 text-sky-400 border border-slate-700 font-semibold'
+                          : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/40'
+                      }`}
+                    >
+                      {f}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div className="flex items-center space-x-2 text-xs">
-                <span className="text-slate-500 font-mono text-[11px]">FILTER:</span>
-                {(['ALL', 'Pass', 'Fail', 'Unknown'] as const).map((f) => (
-                  <button
-                    key={f}
-                    onClick={() => setFilter(f)}
-                    className={`px-2 py-0.5 text-[11px] font-mono rounded cursor-pointer ${
-                      filter === f
-                        ? 'bg-slate-800 text-[#00FF41] border border-slate-700'
-                        : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    {f}
-                  </button>
-                ))}
-              </div>
-            </div>
 
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-800 text-left">
-                <thead className="bg-slate-950 font-mono text-[11px] text-slate-400 uppercase tracking-wider">
-                  <tr>
-                    <th className="py-3 px-4 font-semibold">Rule ID</th>
-                    <th className="py-3 px-4 font-semibold">Control Focus</th>
-                    <th className="py-3 px-4 font-semibold">Verdict</th>
-                    <th className="py-3 px-4 font-semibold">Evidence Found (CSM Source)</th>
-                    <th className="py-3 px-4 font-semibold text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/60 font-sans text-xs">
-                  {filteredRules.map((rule) => {
-                    const isExpanded = expandedEvidence[rule.ruleId] || false;
-                    const hasEvidence = rule.evidenceFound && rule.evidenceFound.length > 0;
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-slate-700 text-left">
+                  <thead className="bg-slate-950 font-mono text-[11px] text-slate-400 uppercase tracking-wider">
+                    <tr>
+                      <th className="py-3 px-4 font-semibold">Rule ID</th>
+                      <th className="py-3 px-4 font-semibold">Control Focus</th>
+                      <th className="py-3 px-4 font-semibold">Verdict</th>
+                      <th className="py-3 px-4 font-semibold">Evidence Found (CSM Source)</th>
+                      <th className="py-3 px-4 font-semibold text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-700/60 font-sans text-xs">
+                    {filteredRules.map((rule) => {
+                      const isExpanded = viewMode === 'evidence' || expandedEvidence[rule.ruleId] || false;
+                      const hasEvidence = rule.evidenceFound && rule.evidenceFound.length > 0;
 
                     let statusBadge = null;
                     if (rule.status === 'Pass') {
@@ -477,7 +507,7 @@ export const AuditResultsScreen: React.FC<AuditResultsScreenProps> = ({
                         <td className="py-3 px-4 font-mono text-[11px] text-slate-300 max-w-md">
                           {hasEvidence ? (
                             <div>
-                              <div className="bg-slate-950 p-1.5 rounded border border-slate-800 text-slate-300 break-all">
+                              <div className="bg-slate-950 p-1.5 rounded border border-slate-700 text-slate-300 break-all">
                                 {isExpanded ? (
                                   <ul className="space-y-1">
                                     {rule.evidenceFound.map((ev: string, i: number) => (
@@ -534,6 +564,7 @@ export const AuditResultsScreen: React.FC<AuditResultsScreenProps> = ({
               </table>
             </div>
           </div>
+          )}
         </div>
       )}
 
@@ -542,7 +573,7 @@ export const AuditResultsScreen: React.FC<AuditResultsScreenProps> = ({
         <div className="space-y-6">
           {/* Framework Loading State */}
           {isFrameworkLoading && (
-            <div className="bg-slate-900 border border-slate-800 rounded p-12 text-center font-mono text-xs text-slate-400 space-y-3">
+            <div className="bg-slate-900 border border-slate-700 rounded p-12 text-center font-mono text-xs text-slate-400 space-y-3">
               <div className="w-8 h-8 border-2 border-sky-400 border-t-transparent rounded-full animate-spin mx-auto"></div>
               <div>Evaluating deterministic compliance controls for framework <code className="text-sky-400 font-bold">{activeTab}</code>...</div>
             </div>
@@ -564,7 +595,7 @@ export const AuditResultsScreen: React.FC<AuditResultsScreenProps> = ({
 
           {/* No Frameworks Registered State */}
           {!isFrameworkLoading && !frameworkError && availableFrameworks.length === 0 && (
-            <div className="bg-slate-900 border border-slate-800 rounded p-12 text-center font-mono text-xs space-y-3">
+            <div className="bg-slate-900 border border-slate-700 rounded p-12 text-center font-mono text-xs space-y-3">
               <div className="text-amber-400 font-bold text-sm">No Compliance Frameworks Registered</div>
               <p className="text-slate-400 max-w-lg mx-auto">
                 No deterministic compliance frameworks are registered for vendor: <code className="text-sky-300 font-bold">{resolvedVendorDisplay}</code>.
@@ -579,15 +610,15 @@ export const AuditResultsScreen: React.FC<AuditResultsScreenProps> = ({
           {!isFrameworkLoading && !frameworkError && selectedSummary && (
             <div className="space-y-6">
               {/* Selected Framework Overview */}
-              <div className="bg-slate-900 border border-slate-800 rounded p-5">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+              <div className="bg-slate-900 border border-slate-700 rounded p-4 space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-700/80 pb-3">
                   <div>
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-2.5">
                       <span className="inline-block w-2.5 h-2.5 rounded-full bg-sky-400"></span>
-                      <h2 className="text-lg font-bold text-white tracking-wide font-mono">
+                      <h2 className="text-base font-bold text-slate-100 tracking-tight font-mono">
                         {selectedSummary.framework_name || selectedFramework?.name || selectedSummary.framework_id}
                       </h2>
-                      <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-slate-800 text-sky-300 border border-slate-700">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-sky-300 border border-slate-700">
                         {selectedSummary.framework_version || selectedFramework?.version || 'v1.0'}
                       </span>
                     </div>
@@ -601,159 +632,175 @@ export const AuditResultsScreen: React.FC<AuditResultsScreenProps> = ({
 
                   <div className="text-left sm:text-right">
                     <span className="text-slate-500 block text-[10px] uppercase font-mono">Pass Rate</span>
-                    <span className="text-2xl font-bold font-mono text-emerald-400">
+                    <span className="text-xl font-bold font-mono text-emerald-400">
                       {selectedSummary.pass_rate !== null && selectedSummary.pass_rate !== undefined
                         ? `${selectedSummary.pass_rate.toFixed(2)}%`
                         : 'N/A'}
                     </span>
-                    <span className="block text-[10px] text-slate-500 font-mono mt-0.5">Authoritative Backend Metric</span>
+                    <span className="block text-[10px] text-slate-500 font-mono">Authoritative Backend Metric</span>
                   </div>
                 </div>
 
                 {/* Framework Metadata Details */}
                 {selectedFramework?.description && (
-                  <p className="text-xs text-slate-300 font-mono pt-3">
+                  <p className="text-xs text-slate-300 font-mono">
                     {selectedFramework.description}
                   </p>
                 )}
               </div>
 
-              {/* Framework Stat Cards */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Framework Stat Cards (Compact Strip) */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 {/* Total Controls */}
                 <div
                   onClick={() => setFrameworkFilter('ALL')}
-                  className={`p-4 rounded border cursor-pointer transition-all ${
+                  className={`p-3 rounded border cursor-pointer transition-[border-color,background-color] duration-150 ease-out ${
                     frameworkFilter === 'ALL'
-                      ? 'bg-slate-800 border-sky-500 ring-1 ring-sky-500'
-                      : 'bg-slate-900 border-slate-800 hover:border-slate-700'
+                      ? 'bg-slate-800 border-sky-500 ring-1 ring-sky-500/80 shadow-sm'
+                      : 'bg-slate-900 border-slate-700 hover:border-slate-600'
                   }`}
                 >
-                  <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">
-                    Total Controls
+                  <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 uppercase tracking-wider">
+                    <span>Total Controls</span>
+                    <span className="text-[10px] text-slate-500 font-mono">
+                      {selectedFramework?.control_namespace || 'Standard'}
+                    </span>
                   </div>
-                  <div className="text-2xl font-bold font-mono text-slate-100 mt-1">
+                  <div className="text-xl font-bold font-mono text-slate-100 mt-0.5">
                     {selectedSummary.total_controls}
-                  </div>
-                  <div className="text-[10px] text-slate-500 mt-1 font-mono">
-                    {selectedFramework?.control_namespace || 'Standard'} Controls
                   </div>
                 </div>
 
                 {/* Pass Count */}
                 <div
                   onClick={() => setFrameworkFilter('PASS')}
-                  className={`p-4 rounded border cursor-pointer transition-all ${
+                  className={`p-3 rounded border cursor-pointer transition-[border-color,background-color] duration-150 ease-out ${
                     frameworkFilter === 'PASS'
-                      ? 'bg-emerald-950/80 border-emerald-500 ring-1 ring-emerald-500'
-                      : 'bg-[#0c1f17] border-emerald-900/60 hover:border-emerald-700'
+                      ? 'bg-emerald-950/80 border-emerald-500 ring-1 ring-emerald-500/80 shadow-sm'
+                      : 'bg-emerald-950/30 border-emerald-900/60 hover:border-emerald-700'
                   }`}
                 >
-                  <div className="text-[11px] font-mono text-emerald-400 uppercase tracking-wider flex items-center justify-between">
+                  <div className="flex items-center justify-between text-[10px] font-mono text-emerald-400 uppercase tracking-wider">
                     <span>Pass Count</span>
                     <span className="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
                   </div>
-                  <div className="text-2xl font-bold font-mono text-emerald-300 mt-1">
-                    {selectedSummary.pass_count}
-                  </div>
-                  <div className="text-[10px] text-emerald-400/80 mt-1 font-mono">
-                    {selectedSummary.pass_rate !== null && selectedSummary.pass_rate !== undefined
-                      ? `${selectedSummary.pass_rate.toFixed(2)}% Pass Rate`
-                      : 'Deterministic Compliance'}
+                  <div className="flex items-baseline justify-between mt-0.5">
+                    <span className="text-xl font-bold font-mono text-emerald-300">
+                      {selectedSummary.pass_count}
+                    </span>
+                    <span className="text-[11px] font-mono text-emerald-400 font-semibold">
+                      {selectedSummary.pass_rate !== null && selectedSummary.pass_rate !== undefined
+                        ? `${selectedSummary.pass_rate.toFixed(1)}%`
+                        : ''}
+                    </span>
                   </div>
                 </div>
 
                 {/* Fail Count */}
                 <div
                   onClick={() => setFrameworkFilter('FAIL')}
-                  className={`p-4 rounded border cursor-pointer transition-all ${
+                  className={`p-3 rounded border cursor-pointer transition-[border-color,background-color] duration-150 ease-out ${
                     frameworkFilter === 'FAIL'
-                      ? 'bg-rose-950/80 border-rose-500 ring-1 ring-rose-500'
-                      : 'bg-[#220d0f] border-rose-900/60 hover:border-rose-700'
+                      ? 'bg-rose-950/80 border-rose-500 ring-1 ring-rose-500/80 shadow-sm'
+                      : 'bg-rose-950/30 border-rose-900/60 hover:border-rose-700'
                   }`}
                 >
-                  <div className="text-[11px] font-mono text-rose-400 uppercase tracking-wider flex items-center justify-between">
+                  <div className="flex items-center justify-between text-[10px] font-mono text-rose-400 uppercase tracking-wider">
                     <span>Fail Count</span>
                     <span className="inline-block w-2 h-2 rounded-full bg-rose-500"></span>
                   </div>
-                  <div className="text-2xl font-bold font-mono text-rose-300 mt-1">
-                    {selectedSummary.fail_count}
-                  </div>
-                  <div className="text-[10px] text-rose-400/80 mt-1 font-mono">
-                    Requires Remediation
+                  <div className="flex items-baseline justify-between mt-0.5">
+                    <span className="text-xl font-bold font-mono text-rose-300">
+                      {selectedSummary.fail_count}
+                    </span>
+                    <span className="text-[10px] font-mono text-rose-400/90">
+                      Requires Remediation
+                    </span>
                   </div>
                 </div>
 
                 {/* Unknown Count */}
                 <div
                   onClick={() => setFrameworkFilter('UNKNOWN')}
-                  className={`p-4 rounded border cursor-pointer transition-all ${
+                  className={`p-3 rounded border cursor-pointer transition-[border-color,background-color] duration-150 ease-out ${
                     frameworkFilter === 'UNKNOWN'
-                      ? 'bg-amber-950/80 border-amber-500 ring-1 ring-amber-500'
-                      : 'bg-[#241a08] border-amber-900/60 hover:border-amber-700'
+                      ? 'bg-amber-950/80 border-amber-500 ring-1 ring-amber-500/80 shadow-sm'
+                      : 'bg-amber-950/30 border-amber-900/60 hover:border-amber-700'
                   }`}
                 >
-                  <div className="text-[11px] font-mono text-amber-400 uppercase tracking-wider flex items-center justify-between">
+                  <div className="flex items-center justify-between text-[10px] font-mono text-amber-400 uppercase tracking-wider">
                     <span>Unknown Count</span>
                     <span className="inline-block w-2 h-2 rounded-full bg-amber-500"></span>
                   </div>
-                  <div className="text-2xl font-bold font-mono text-amber-300 mt-1">
-                    {selectedSummary.unknown_count}
-                  </div>
-                  <div className="text-[10px] text-amber-400/80 mt-1 font-mono">
-                    Missing Direct Evidence
+                  <div className="flex items-baseline justify-between mt-0.5">
+                    <span className="text-xl font-bold font-mono text-amber-300">
+                      {selectedSummary.unknown_count}
+                    </span>
+                    <span className="text-[10px] font-mono text-amber-400/90">
+                      Missing Direct Evidence
+                    </span>
                   </div>
                 </div>
               </div>
 
-              {/* Framework Controls Table */}
-              <div className="bg-slate-900 border border-slate-800 rounded">
-                <div className="px-5 py-3.5 border-b border-slate-800 flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <span className="w-2 h-2 rounded-full bg-sky-400"></span>
-                    <h3 className="text-xs font-bold text-slate-200">
-                      {selectedSummary.framework_name || selectedSummary.framework_id} control matrix ({filteredFrameworkResults.length} of {frameworkResultsList.length})
-                    </h3>
+              {/* Framework Controls Table — Hidden in 'overview' mode, visible in 'results', 'evidence', and default modes */}
+              {viewMode !== 'overview' && (
+                <div className="bg-slate-900 border border-slate-700 rounded">
+                  {viewMode === 'evidence' && (
+                    <div className="px-5 py-2.5 bg-sky-950/30 border-b border-slate-700 flex items-center justify-between text-xs font-mono text-sky-300">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>
+                        <span>EVIDENCE TRACE MODE: Inspecting deterministic AST parsed directives &amp; telemetry lines</span>
+                      </div>
+                      <span className="text-slate-400 text-[11px]">ALL DIRECTIVES EXPANDED</span>
+                    </div>
+                  )}
+                  <div className="px-5 py-3.5 border-b border-slate-700 flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <span className="w-2 h-2 rounded-full bg-sky-400"></span>
+                      <h3 className="text-xs font-bold text-slate-200">
+                        {selectedSummary.framework_name || selectedSummary.framework_id} control matrix ({filteredFrameworkResults.length} of {frameworkResultsList.length})
+                      </h3>
+                    </div>
+                    <div className="flex items-center space-x-2 text-xs">
+                      <span className="text-slate-500 font-mono text-[11px]">FILTER:</span>
+                      {(['ALL', 'PASS', 'FAIL', 'UNKNOWN'] as const).map((f) => (
+                        <button
+                          key={f}
+                          onClick={() => setFrameworkFilter(f)}
+                          className={`px-2 py-0.5 text-xs font-sans font-medium rounded cursor-pointer ${
+                            frameworkFilter === f
+                              ? 'bg-slate-800 text-sky-400 border border-slate-700'
+                              : 'text-slate-400 hover:text-slate-100'
+                          }`}
+                        >
+                          {f}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-2 text-xs">
-                    <span className="text-slate-500 font-mono text-[11px]">FILTER:</span>
-                    {(['ALL', 'PASS', 'FAIL', 'UNKNOWN'] as const).map((f) => (
-                      <button
-                        key={f}
-                        onClick={() => setFrameworkFilter(f)}
-                        className={`px-2 py-0.5 text-[11px] font-mono rounded cursor-pointer ${
-                          frameworkFilter === f
-                            ? 'bg-slate-800 text-[#00FF41] border border-slate-700'
-                            : 'text-slate-400 hover:text-white'
-                        }`}
-                      >
-                        {f}
-                      </button>
-                    ))}
-                  </div>
-                </div>
 
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-slate-800 text-left">
-                    <thead className="bg-slate-950 font-mono text-[11px] text-slate-400 uppercase tracking-wider">
-                      <tr>
-                        <th className="py-3 px-4 font-semibold">Control ID</th>
-                        <th className="py-3 px-4 font-semibold">Requirement / Reason</th>
-                        <th className="py-3 px-4 font-semibold">Verdict</th>
-                        <th className="py-3 px-4 font-semibold">Observed Evidence (CSM Source)</th>
-                        <th className="py-3 px-4 font-semibold text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-800/60 font-sans text-xs">
-                      {filteredFrameworkResults.length === 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-slate-700 text-left">
+                      <thead className="bg-slate-950 font-mono text-[11px] text-slate-400 uppercase tracking-wider">
                         <tr>
-                          <td colSpan={5} className="py-6 text-center text-slate-500 font-mono text-xs">
-                            No controls match filter '{frameworkFilter}'.
-                          </td>
+                          <th className="py-3 px-4 font-semibold">Control ID</th>
+                          <th className="py-3 px-4 font-semibold">Requirement / Reason</th>
+                          <th className="py-3 px-4 font-semibold">Verdict</th>
+                          <th className="py-3 px-4 font-semibold">Observed Evidence (CSM Source)</th>
+                          <th className="py-3 px-4 font-semibold text-right">Actions</th>
                         </tr>
-                      ) : (
-                        filteredFrameworkResults.map((r) => {
-                          const isExpanded = expandedFrameworkEvidence[r.control_id] || false;
+                      </thead>
+                      <tbody className="divide-y divide-slate-700/60 font-sans text-xs">
+                        {filteredFrameworkResults.length === 0 ? (
+                          <tr>
+                            <td colSpan={5} className="py-6 text-center text-slate-500 font-mono text-xs">
+                              No controls match filter '{frameworkFilter}'.
+                            </td>
+                          </tr>
+                        ) : (
+                          filteredFrameworkResults.map((r) => {
+                            const isExpanded = viewMode === 'evidence' || expandedFrameworkEvidence[r.control_id] || false;
                           const hasSourceLines = r.source_lines && r.source_lines.length > 0;
                           const hasObserved = r.observed_value !== undefined && r.observed_value !== null;
                           const statusUpper = String(r.status).toUpperCase();
@@ -808,7 +855,7 @@ export const AuditResultsScreen: React.FC<AuditResultsScreenProps> = ({
                                     </div>
                                   )}
                                   {hasObserved ? (
-                                    <div className="bg-slate-950 p-1.5 rounded border border-slate-800 text-slate-300 break-all">
+                                    <div className="bg-slate-950 p-1.5 rounded border border-slate-700 text-slate-300 break-all">
                                       {isExpanded && hasSourceLines ? (
                                         <ul className="space-y-1">
                                           {r.source_lines.map((sl: string, idx: number) => (
@@ -866,6 +913,7 @@ export const AuditResultsScreen: React.FC<AuditResultsScreenProps> = ({
                   </table>
                 </div>
               </div>
+              )}
             </div>
           )}
         </div>

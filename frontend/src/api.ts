@@ -3,7 +3,7 @@
  * Endpoints at http://127.0.0.1:8000
  */
 
-import type { LoginResponse, UserIdentity, ModelStatus, ModelModeUpdateRequest, ModelModeUpdateResponse, TrustedMappingItem, SuggestionQueueItem, FrameworksListResponse, MultiFrameworkAuditResult, AuditLedgerItem } from './types';
+import type { LoginResponse, UserIdentity, ModelStatus, ModelModeUpdateRequest, ModelModeUpdateResponse, TrustedMappingItem, SuggestionQueueItem, FrameworksListResponse, MultiFrameworkAuditResult, AuditLedgerItem, AuditSessionSummary, AuditWorkflowStatus } from './types';
 
 // Use relative path '' so Vite dev proxy forwards /api -> http://127.0.0.1:8000
 export const API_BASE = '';
@@ -133,9 +133,34 @@ export async function uploadAuditConfig(file?: File, rawConfig?: string, filenam
   }
 }
 
+// 1b. GET /api/audit/sessions
+export async function getAuditSessions(status?: string): Promise<AuditSessionSummary[]> {
+  const params = new URLSearchParams();
+  if (status && status !== 'all') params.append('status', status);
+  const qs = params.toString() ? `?${params.toString()}` : '';
+  return request<AuditSessionSummary[]>(`/api/audit/sessions${qs}`);
+}
+
 // 2. GET /api/audit/{session_id}/results
 export async function getAuditResults(sessionId: string) {
   return request<any>(`/api/audit/${sessionId}/results`);
+}
+
+// 2b. POST /api/audit/{session_id}/submit
+export async function submitAuditSession(sessionId: string): Promise<{
+  session_id: string;
+  workflow_status: AuditWorkflowStatus;
+  previous_status: string;
+  owner_user_id?: string;
+}> {
+  return request<{
+    session_id: string;
+    workflow_status: AuditWorkflowStatus;
+    previous_status: string;
+    owner_user_id?: string;
+  }>(`/api/audit/${encodeURIComponent(sessionId)}/submit`, {
+    method: 'POST',
+  });
 }
 
 // 3. POST /api/ai/suggest

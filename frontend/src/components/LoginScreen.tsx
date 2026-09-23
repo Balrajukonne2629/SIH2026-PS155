@@ -4,9 +4,11 @@ import { UserIdentity } from '../types';
 
 interface LoginScreenProps {
   onLoginSuccess: (user: UserIdentity) => void;
+  theme?: 'dark' | 'light';
+  onToggleTheme?: () => void;
 }
 
-export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
+export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess, theme, onToggleTheme }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -38,36 +40,56 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
     setErrorMessage(null);
   };
 
-
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-center items-center px-4 font-sans selection:bg-sky-500 selection:text-white">
+    <div className="min-h-screen bg-app text-content-primary flex flex-col justify-center items-center px-4 font-sans selection:bg-sky-500 selection:text-white pt-12 pb-8">
       {/* Classification banner */}
-      <div className="fixed top-0 left-0 right-0 bg-slate-950 border-b border-slate-800 px-4 py-1.5 flex items-center justify-between text-xs tracking-wider text-slate-400 font-mono">
+      <div className="fixed top-0 left-0 right-0 bg-slate-900 border-b border-slate-700 px-4 py-1.5 flex items-center justify-between text-xs text-slate-400 font-sans z-50">
         <div className="flex items-center space-x-2">
           <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-          <span className="text-slate-300 font-semibold">SECURITY CLEARANCE: LEVEL-3 RESTRICTED ACCESS</span>
+          <span className="text-slate-300 font-semibold font-mono text-[11px]">SECURITY CLEARANCE: LEVEL-3 RESTRICTED ACCESS</span>
         </div>
-        <div>
-          <span>SYSTEM: NTRO-CSM-COMPLIANCE-ENGINE v4.2</span>
+        <div className="flex items-center space-x-3">
+          <span className="text-[11px] font-mono hidden sm:inline text-slate-400">SYSTEM: NTRO-CSM v4.2</span>
+          {onToggleTheme && (
+            <button
+              type="button"
+              onClick={onToggleTheme}
+              className="p-1 px-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-[transform,background-color] duration-150 ease-out active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/80 cursor-pointer flex items-center gap-1.5 text-[11px] font-sans"
+              title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+              aria-label="Toggle Theme"
+            >
+              {theme === 'dark' ? (
+                <>
+                  <span className="text-amber-400">☀</span>
+                  <span className="hidden sm:inline">Light</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-sky-400">☾</span>
+                  <span className="hidden sm:inline">Dark</span>
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
 
       <div className="w-full max-w-md space-y-6">
         {/* Header Branding */}
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-slate-900 border border-slate-700 font-mono text-sky-400 font-bold text-lg shadow-lg">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-slate-900 border border-slate-700 font-mono text-sky-400 font-bold text-lg shadow-md">
             NT
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-white uppercase">
+          <h1 className="text-xl font-bold tracking-tight text-slate-100">
             Network Security Compliance Auditor
           </h1>
-          <p className="text-xs text-slate-400 font-mono">
+          <p className="text-xs text-slate-400">
             Deterministic Compliance Subsystem • Operator Authentication
           </p>
         </div>
 
         {/* Login Box */}
-        <div className="bg-slate-900 border border-slate-800 rounded-lg p-6 sm:p-8 shadow-xl shadow-slate-950/50">
+        <div className="bg-slate-900 border border-slate-700 rounded-lg p-6 sm:p-8 shadow-lg">
           <form onSubmit={handleSubmit} className="space-y-4">
             {errorMessage && (
               <div
@@ -80,7 +102,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
             )}
 
             <div>
-              <label htmlFor="username" className="block text-xs font-mono text-slate-300 uppercase tracking-wider mb-1.5 font-semibold">
+              <label htmlFor="username" className="block text-xs font-sans text-slate-300 mb-1.5 font-medium">
                 Operator Username
               </label>
               <input
@@ -98,7 +120,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-xs font-mono text-slate-300 uppercase tracking-wider mb-1.5 font-semibold">
+              <label htmlFor="password" className="block text-xs font-sans text-slate-300 mb-1.5 font-medium">
                 Authorization Credential / Password
               </label>
               <input
@@ -118,7 +140,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full mt-2 py-2.5 px-4 bg-sky-600 hover:bg-sky-500 text-white rounded text-xs font-mono font-bold uppercase tracking-wider transition-colors border border-sky-400 flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer shadow-sm"
+              className="w-full mt-2 py-2.5 px-4 bg-sky-600 hover:bg-sky-500 text-white rounded text-xs font-semibold transition-[transform,background-color,border-color,box-shadow] duration-150 ease-out active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/80 focus-visible:ring-offset-1 border border-sky-500 flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer shadow-sm"
             >
               {isLoading ? (
                 <>
@@ -126,28 +148,28 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                   <span>Verifying Credentials...</span>
                 </>
               ) : (
-                <span>Authenticate & Access Console &rarr;</span>
+                <span>Authenticate &amp; Access Console &rarr;</span>
               )}
             </button>
           </form>
 
           {/* Quick Select Operator Roles for Evaluation */}
-          <div className="mt-6 pt-5 border-t border-slate-800 space-y-2.5">
-            <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider font-semibold text-center">
+          <div className="mt-6 pt-5 border-t border-slate-700 space-y-2.5">
+            <div className="text-xs text-slate-400 font-medium text-center">
               Operator Role Presets (Click to autofill):
             </div>
-            <div className="text-[10px] font-mono text-slate-500 text-center">
-              Credential: <code className="text-sky-400 font-bold">StrongPassword123!</code>
+            <div className="text-xs text-slate-500 text-center font-mono">
+              Credential: <code className="text-sky-400 font-semibold">StrongPassword123!</code>
             </div>
 
-            <div className="grid grid-cols-1 gap-2 text-xs font-mono">
+            <div className="grid grid-cols-1 gap-2 text-xs">
               <button
                 type="button"
                 onClick={() => setDemoRole('secops_reviewer')}
-                className="w-full py-1.5 px-3 bg-slate-950 hover:bg-slate-800 text-slate-300 rounded border border-slate-800 hover:border-slate-700 text-left flex items-center justify-between cursor-pointer transition-colors"
+                className="w-full py-1.5 px-3 bg-slate-950 hover:bg-slate-800 text-slate-300 rounded border border-slate-700 text-left flex items-center justify-between cursor-pointer transition-[transform,background-color,border-color] duration-150 ease-out active:scale-[0.99] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sky-500/80"
               >
-                <span className="font-semibold text-sky-400">secops_reviewer</span>
-                <span className="text-[10px] text-emerald-400 font-sans px-1.5 py-0.5 rounded bg-emerald-950/60 border border-emerald-800">
+                <span className="font-semibold text-sky-400 font-mono">secops_reviewer</span>
+                <span className="text-[11px] text-emerald-400 px-1.5 py-0.5 rounded bg-emerald-950/60 border border-emerald-800 leading-none">
                   Reviewer + Approver
                 </span>
               </button>
@@ -155,10 +177,10 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
               <button
                 type="button"
                 onClick={() => setDemoRole('netadmin_uploader')}
-                className="w-full py-1.5 px-3 bg-slate-950 hover:bg-slate-800 text-slate-300 rounded border border-slate-800 hover:border-slate-700 text-left flex items-center justify-between cursor-pointer transition-colors"
+                className="w-full py-1.5 px-3 bg-slate-950 hover:bg-slate-800 text-slate-300 rounded border border-slate-700 text-left flex items-center justify-between cursor-pointer transition-[transform,background-color,border-color] duration-150 ease-out active:scale-[0.99] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sky-500/80"
               >
-                <span className="font-semibold text-sky-400">netadmin_uploader</span>
-                <span className="text-[10px] text-sky-300 font-sans px-1.5 py-0.5 rounded bg-sky-950/60 border border-sky-800">
+                <span className="font-semibold text-sky-400 font-mono">netadmin_uploader</span>
+                <span className="text-[11px] text-sky-300 px-1.5 py-0.5 rounded bg-sky-950/60 border border-sky-800 leading-none">
                   Uploader
                 </span>
               </button>
@@ -166,10 +188,10 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
               <button
                 type="button"
                 onClick={() => setDemoRole('auditor_viewer')}
-                className="w-full py-1.5 px-3 bg-slate-950 hover:bg-slate-800 text-slate-300 rounded border border-slate-800 hover:border-slate-700 text-left flex items-center justify-between cursor-pointer transition-colors"
+                className="w-full py-1.5 px-3 bg-slate-950 hover:bg-slate-800 text-slate-300 rounded border border-slate-700 text-left flex items-center justify-between cursor-pointer transition-[transform,background-color,border-color] duration-150 ease-out active:scale-[0.99] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sky-500/80"
               >
-                <span className="font-semibold text-sky-400">auditor_viewer</span>
-                <span className="text-[10px] text-slate-400 font-sans px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700">
+                <span className="font-semibold text-sky-400 font-mono">auditor_viewer</span>
+                <span className="text-[11px] text-slate-400 px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 leading-none">
                   Viewer (Read-Only)
                 </span>
               </button>
@@ -178,10 +200,11 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
         </div>
 
         {/* Security watermark footer */}
-        <div className="text-center font-mono text-[11px] text-slate-600">
+        <div className="text-center font-mono text-xs text-slate-500">
           AIR-GAPPED COMPLIANT • DETERMINISTIC ZERO SUBPROCESS ENGINE
         </div>
       </div>
     </div>
   );
 };
+export default LoginScreen;

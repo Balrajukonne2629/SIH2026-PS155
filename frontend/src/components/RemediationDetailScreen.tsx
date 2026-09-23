@@ -5,6 +5,7 @@ import { UserIdentity } from '../types';
 interface RemediationDetailScreenProps {
   ruleId: string;
   sessionId: string;
+  viewMode?: 'remediation' | 'conflicts';
   onBackToAudit: () => void;
   onAuditFinalized: (finalizeData: any) => void;
   currentUser?: UserIdentity | null;
@@ -13,6 +14,7 @@ interface RemediationDetailScreenProps {
 export const RemediationDetailScreen: React.FC<RemediationDetailScreenProps> = ({
   ruleId,
   sessionId,
+  viewMode = 'remediation',
   onBackToAudit,
   onAuditFinalized,
   currentUser
@@ -78,16 +80,16 @@ export const RemediationDetailScreen: React.FC<RemediationDetailScreenProps> = (
 
   if (isLoading) {
     return (
-      <div className="bg-slate-900 border border-slate-800 rounded p-12 text-center font-mono text-xs text-slate-300 space-y-3">
-        <div className="w-8 h-8 border-2 border-rose-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-        <div>Generating Jinja2 remediation CLI and static conflict AST analysis for <code className="text-rose-300 font-bold">{ruleId}</code>...</div>
+      <div className="bg-slate-900 border border-slate-700 rounded p-12 text-center font-mono text-xs text-slate-300 space-y-3">
+        <div className="w-8 h-8 border-2 border-sky-400 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        <div>Generating Jinja2 remediation CLI and static conflict AST analysis for <code className="text-sky-300 font-bold">{ruleId}</code>...</div>
       </div>
     );
   }
 
   if (error || !data) {
     return (
-      <div className="bg-rose-950/40 border border-rose-800 rounded p-8 text-center font-mono text-xs space-y-3">
+      <div className="bg-rose-950/40 border border-rose-700 rounded p-8 text-center font-mono text-xs space-y-3">
         <div className="text-rose-400 font-bold text-sm">Failed to Load Remediation Details</div>
         <p className="text-rose-200 max-w-lg mx-auto">{error || 'Template not found or session invalid.'}</p>
         <div className="flex justify-center gap-3 pt-2">
@@ -114,7 +116,7 @@ export const RemediationDetailScreen: React.FC<RemediationDetailScreenProps> = (
   return (
     <div className="space-y-6 font-sans">
       {/* Header & Navigation */}
-      <div className="border-b border-slate-800 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="border-b border-slate-700 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <button
             onClick={onBackToAudit}
@@ -123,15 +125,19 @@ export const RemediationDetailScreen: React.FC<RemediationDetailScreenProps> = (
             &larr; Back to Audit Results Matrix
           </button>
           <div className="flex items-center space-x-3">
-            <h1 className="text-xl font-bold text-white">
-              Remediation detail &amp; static conflict analyzer
+            <h1 className="text-xl font-bold text-slate-100">
+              {viewMode === 'conflicts'
+                ? 'Pre-Deployment Static AST Conflict Analysis'
+                : 'Remediation detail & static conflict analyzer'}
             </h1>
             <span className="text-[11px] font-mono text-slate-500">
-              Module 4 — Jinja2 / Conflict AST
+              {viewMode === 'conflicts' ? 'Module 4 — Static AST Safety' : 'Module 4 — Jinja2 / Conflict AST'}
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Parameterized CLI patch generator, domain explanation, and pre-deployment static dependency conflict checks.
+            {viewMode === 'conflicts'
+              ? 'Pre-deployment dependency tree verification, VRF containment checks, and routing protocol impact audit.'
+              : 'Parameterized CLI patch generator, domain explanation, and pre-deployment static dependency conflict checks.'}
           </p>
         </div>
 
@@ -145,10 +151,10 @@ export const RemediationDetailScreen: React.FC<RemediationDetailScreenProps> = (
           <button
             onClick={handleFinalize}
             disabled={isFinalizing || currentUser?.role === 'viewer'}
-            className={`px-5 py-2.5 rounded text-xs font-mono font-bold uppercase tracking-wider transition-colors shadow-sm flex items-center gap-2 border cursor-pointer ${
+            className={`px-5 py-2.5 rounded text-xs font-medium transition-colors shadow-sm flex items-center gap-2 border cursor-pointer ${
               isFinalizing || currentUser?.role === 'viewer'
                 ? 'bg-slate-800 text-slate-500 border-slate-700 cursor-not-allowed'
-                : 'bg-emerald-600 hover:bg-emerald-500 text-slate-950 border-emerald-400'
+                : 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500'
             }`}
           >
             {isFinalizing ? (
@@ -174,20 +180,20 @@ export const RemediationDetailScreen: React.FC<RemediationDetailScreenProps> = (
         </div>
       )}
 
-      {/* Failed Control Header Card */}
-      <div className="bg-slate-900 border border-slate-800 rounded p-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+      {/* Control Summary Badge Header */}
+      <div className="bg-slate-900 border border-slate-700 rounded p-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-700 pb-4">
           <div>
             <div className="flex items-center space-x-3">
               <span className="font-mono text-lg font-bold text-sky-400">
                 {ruleId}
               </span>
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-bold bg-[#fee2e2] text-[#991b1b] border border-rose-600">
+              <span className="badge-fail inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-bold">
                 FAIL
               </span>
             </div>
             <h2 className="text-sm font-semibold text-slate-200 mt-1">
-              Active Control Remediation Staging
+              {viewMode === 'conflicts' ? 'Target Control Pre-Deployment Safety Assessment' : 'Active Control Remediation Staging'}
             </h2>
           </div>
 
@@ -209,21 +215,116 @@ export const RemediationDetailScreen: React.FC<RemediationDetailScreenProps> = (
             <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
               AI Model Manager &amp; AST Conflict Engine
             </span>
-
           </div>
-          <div className="bg-slate-950 border border-slate-800 rounded p-4 text-xs text-slate-300 leading-relaxed font-sans border-l-4 border-l-rose-500">
+          <div className="bg-slate-950 border border-slate-700 rounded p-4 text-xs text-slate-300 leading-relaxed font-sans border-l-4 border-l-rose-500">
             {data.why_it_failed}
           </div>
         </div>
       </div>
 
-      {/* Section 2: Generated Remediation CLI Command */}
-      <div className="bg-slate-900 border border-slate-800 rounded p-5 space-y-3">
+      {/* When viewMode === 'conflicts', prioritize Static Conflict Analysis FIRST */}
+      {viewMode === 'conflicts' && (
+        <div className="bg-slate-900 border border-slate-700 rounded p-5 space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-700 pb-3">
+            <div className="flex items-center space-x-2">
+              <span className="w-2 h-2 rounded-full bg-sky-400"></span>
+              <h3 className="text-xs font-bold text-slate-200">
+                Pre-Deployment Static Dependency & Conflict Matrix
+              </h3>
+            </div>
+            <span className="font-mono text-xs text-slate-400">
+              {hasConflicts
+                ? `${conflicts.length} Potential Side-Effects Flagged`
+                : '0 Potential Conflicts (Verified Clean)'}
+            </span>
+          </div>
+
+          {hasConflicts ? (
+            <div className="space-y-3">
+              {conflicts.map((conflict: any) => {
+                const isHigh = conflict.severity === 'HIGH';
+                return (
+                  <div
+                    key={conflict.conflict_id}
+                    className={`rounded border p-4 ${
+                      isHigh
+                        ? 'bg-rose-950/20 border-rose-800/80'
+                        : 'bg-amber-950/20 border-amber-800/80'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center space-x-2">
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
+                            isHigh
+                              ? 'bg-rose-950 text-rose-300 border border-rose-700'
+                              : 'bg-amber-950 text-amber-300 border border-amber-700'
+                          }`}
+                        >
+                          {conflict.severity} SEVERITY
+                        </span>
+                        <h4 className="text-xs font-bold text-slate-200">
+                          {conflict.title}
+                        </h4>
+                      </div>
+                      <code className="text-[11px] font-mono text-slate-400">
+                        ID: {conflict.conflict_id}
+                      </code>
+                    </div>
+
+                    <p className="text-xs text-slate-300 mb-3 leading-relaxed">
+                      {conflict.description}
+                    </p>
+
+                    <div className="bg-slate-950/80 p-2.5 rounded border border-slate-700 font-mono text-xs">
+                      <span className="text-sky-400 block text-[10px] uppercase font-bold mb-0.5">
+                        Required Mitigation Pre-requisite:
+                      </span>
+                      <span className="text-slate-200">{conflict.mitigation}</span>
+                    </div>
+
+                    {conflict.affected_components?.length > 0 && (
+                      <div className="mt-2 flex items-center gap-1.5 text-[11px] font-mono text-slate-400">
+                        <span>Affected components:</span>
+                        {conflict.affected_components.map((comp: string, idx: number) => (
+                          <span
+                            key={idx}
+                            className="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-slate-300"
+                          >
+                            {comp}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="bg-emerald-950/20 border border-emerald-800/80 rounded p-6 text-center space-y-2">
+              <div className="w-10 h-10 rounded-full bg-emerald-950 border border-emerald-700 text-emerald-400 mx-auto flex items-center justify-center">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h4 className="text-sm font-bold text-emerald-300 font-mono">
+                NO CONFLICTS DETECTED
+              </h4>
+              <p className="text-xs text-slate-400 max-w-lg mx-auto">
+                Static AST inspection indicates this command can be safely staged without disrupting existing VRFs, active routing protocols, or management plane access.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Generated Remediation CLI Command */}
+      <div className="bg-slate-900 border border-slate-700 rounded p-5 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-200">
-              Generated Remediation CLI Commands
+            <h3 className="text-xs font-semibold text-slate-200">
+              {viewMode === 'conflicts' ? 'Target Remediation CLI Snippet' : 'Generated Remediation CLI Commands'}
             </h3>
           </div>
           <button
@@ -249,7 +350,7 @@ export const RemediationDetailScreen: React.FC<RemediationDetailScreenProps> = (
         </div>
 
         {/* Code Box */}
-        <div className="bg-slate-950 border border-slate-800 rounded p-4 font-mono text-xs text-emerald-300 overflow-x-auto leading-relaxed select-all">
+        <div className="bg-slate-950 border border-slate-700 rounded p-4 font-mono text-xs text-emerald-300 overflow-x-auto leading-relaxed select-all">
           <pre>{data.remediation_cmd}</pre>
         </div>
 
@@ -271,99 +372,101 @@ export const RemediationDetailScreen: React.FC<RemediationDetailScreenProps> = (
         </div>
       </div>
 
-      {/* Section 3: Real Static Conflict Check Results */}
-      <div className="bg-slate-900 border border-slate-800 rounded p-5 space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-          <div className="flex items-center space-x-2">
-            <span className="w-2 h-2 rounded-full bg-sky-400"></span>
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-200">
-              Pre-Deployment Static Conflict Analysis
-            </h3>
-          </div>
-          <span className="font-mono text-xs text-slate-400">
-            {hasConflicts
-              ? `${conflicts.length} Potential Side-Effects Flagged`
-              : '0 Potential Conflicts'}
-          </span>
-        </div>
-
-        {hasConflicts ? (
-          <div className="space-y-3">
-            {conflicts.map((conflict: any) => {
-              const isHigh = conflict.severity === 'HIGH';
-              return (
-                <div
-                  key={conflict.conflict_id}
-                  className={`rounded border p-4 ${
-                    isHigh
-                      ? 'bg-rose-950/20 border-rose-800/80'
-                      : 'bg-amber-950/20 border-amber-800/80'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center space-x-2">
-                      <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
-                          isHigh
-                            ? 'bg-rose-950 text-rose-300 border border-rose-700'
-                            : 'bg-amber-950 text-amber-300 border border-amber-700'
-                        }`}
-                      >
-                        {conflict.severity} SEVERITY
-                      </span>
-                      <h4 className="text-xs font-bold text-slate-200">
-                        {conflict.title}
-                      </h4>
-                    </div>
-                    <code className="text-[11px] font-mono text-slate-400">
-                      ID: {conflict.conflict_id}
-                    </code>
-                  </div>
-
-                  <p className="text-xs text-slate-300 mb-3 leading-relaxed">
-                    {conflict.description}
-                  </p>
-
-                  <div className="bg-slate-950/80 p-2.5 rounded border border-slate-800 font-mono text-xs">
-                    <span className="text-sky-400 block text-[10px] uppercase font-bold mb-0.5">
-                      Required Mitigation Pre-requisite:
-                    </span>
-                    <span className="text-slate-200">{conflict.mitigation}</span>
-                  </div>
-
-                  {conflict.affected_components?.length > 0 && (
-                    <div className="mt-2 flex items-center gap-1.5 text-[11px] font-mono text-slate-400">
-                      <span>Affected components:</span>
-                      {conflict.affected_components.map((comp: string, idx: number) => (
-                        <span
-                          key={idx}
-                          className="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-slate-300"
-                        >
-                          {comp}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="bg-emerald-950/20 border border-emerald-800/80 rounded p-6 text-center space-y-2">
-            <div className="w-10 h-10 rounded-full bg-emerald-950 border border-emerald-700 text-emerald-400 mx-auto flex items-center justify-center">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-              </svg>
+      {/* When viewMode === 'remediation', show Static Conflict Check Results below */}
+      {viewMode !== 'conflicts' && (
+        <div className="bg-slate-900 border border-slate-700 rounded p-5 space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-700 pb-3">
+            <div className="flex items-center space-x-2">
+              <span className="w-2 h-2 rounded-full bg-sky-400"></span>
+              <h3 className="text-xs font-semibold text-slate-200">
+                Pre-Deployment Static Conflict Analysis
+              </h3>
             </div>
-            <h4 className="text-sm font-bold text-emerald-300 font-mono">
-              NO CONFLICTS DETECTED
-            </h4>
-            <p className="text-xs text-slate-400 max-w-lg mx-auto">
-              Static AST inspection indicates this command can be safely staged without disrupting existing VRFs, active routing protocols, or management plane access.
-            </p>
+            <span className="font-mono text-xs text-slate-400">
+              {hasConflicts
+                ? `${conflicts.length} Potential Side-Effects Flagged`
+                : '0 Potential Conflicts (Clean AST)'}
+            </span>
           </div>
-        )}
-      </div>
+
+          {hasConflicts ? (
+            <div className="space-y-3">
+              {conflicts.map((conflict: any) => {
+                const isHigh = conflict.severity === 'HIGH';
+                return (
+                  <div
+                    key={conflict.conflict_id}
+                    className={`rounded border p-4 ${
+                      isHigh
+                        ? 'bg-rose-950/20 border-rose-800/80'
+                        : 'bg-amber-950/20 border-amber-800/80'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center space-x-2">
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
+                            isHigh
+                              ? 'bg-rose-950 text-rose-300 border border-rose-700'
+                              : 'bg-amber-950 text-amber-300 border border-amber-700'
+                          }`}
+                        >
+                          {conflict.severity} SEVERITY
+                        </span>
+                        <h4 className="text-xs font-bold text-slate-200">
+                          {conflict.title}
+                        </h4>
+                      </div>
+                      <code className="text-[11px] font-mono text-slate-400">
+                        ID: {conflict.conflict_id}
+                      </code>
+                    </div>
+
+                    <p className="text-xs text-slate-300 mb-3 leading-relaxed">
+                      {conflict.description}
+                    </p>
+
+                    <div className="bg-slate-950/80 p-2.5 rounded border border-slate-700 font-mono text-xs">
+                      <span className="text-sky-400 block text-[10px] uppercase font-bold mb-0.5">
+                        Required Mitigation Pre-requisite:
+                      </span>
+                      <span className="text-slate-200">{conflict.mitigation}</span>
+                    </div>
+
+                    {conflict.affected_components?.length > 0 && (
+                      <div className="mt-2 flex items-center gap-1.5 text-[11px] font-mono text-slate-400">
+                        <span>Affected components:</span>
+                        {conflict.affected_components.map((comp: string, idx: number) => (
+                          <span
+                            key={idx}
+                            className="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-slate-300"
+                          >
+                            {comp}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="bg-emerald-950/20 border border-emerald-800/80 rounded p-6 text-center space-y-2">
+              <div className="w-10 h-10 rounded-full bg-emerald-950 border border-emerald-700 text-emerald-400 mx-auto flex items-center justify-center">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h4 className="text-sm font-bold text-emerald-300 font-mono">
+                NO CONFLICTS DETECTED
+              </h4>
+              <p className="text-xs text-slate-400 max-w-lg mx-auto">
+                Static AST inspection indicates this command can be safely staged without disrupting existing VRFs, active routing protocols, or management plane access.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

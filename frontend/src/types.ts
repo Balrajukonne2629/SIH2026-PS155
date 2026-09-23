@@ -56,6 +56,7 @@ export interface RemediationDetail {
 
 export interface AuditLedgerItem {
   entry_id: string;
+  session_id?: string;
   timestamp: string;
   device_hostname: string;
   config_file_hash: string;
@@ -116,7 +117,44 @@ export interface LoginResponse {
   user: UserIdentity;
 }
 
-export type ScreenId = 'upload' | 'results' | 'ai_review' | 'remediation' | 'audit_log' | 'model_ops';
+export type GlobalScreenId = 'dashboard' | 'upload' | 'audits' | 'review_queue' | 'reports' | 'system';
+export type ScreenId = GlobalScreenId; // alias for backward compatibility
+
+export type AuditWorkspaceTab =
+  | 'overview'
+  | 'results'
+  | 'evidence'
+  | 'ai_review'
+  | 'remediation'
+  | 'conflicts'
+  | 'report';
+
+export interface AuditWorkspaceState {
+  sessionId: string;
+  activeTab: AuditWorkspaceTab;
+  unmappedLine?: string;
+  ruleId?: string;
+}
+
+export type SystemTab = 'runtime' | 'trusted_rules' | 'integrity';
+
+export type AuditWorkflowStatus = 'in_progress' | 'submitted' | 'finalized';
+
+export interface AuditSessionSummary {
+  session_id: string;
+  filename?: string | null;
+  config_file_hash?: string | null;
+  created_at?: string | null;
+  owner_user_id?: string | null;
+  workflow_status: AuditWorkflowStatus;
+  device_hostname?: string;
+  vendor?: string;
+  total_rules?: number;
+  passed_rules?: number;
+  failed_rules?: number;
+  unknown_rules?: number;
+  compliance_score?: number;
+}
 
 export type ModelMode = 'auto' | 'fast' | 'quality' | 'override' | 'deterministic_only';
 

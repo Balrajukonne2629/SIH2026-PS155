@@ -189,9 +189,9 @@ export const UploadScreen: React.FC<UploadScreenProps> = ({
   return (
     <div className="space-y-8 font-sans">
       {/* Screen Title Bar */}
-      <div className="border-b border-slate-800 pb-4 flex items-center justify-between">
+      <div className="border-b border-slate-700 pb-4 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">
+          <h1 className="text-2xl font-bold text-slate-100">
             Configuration Ingestion & Intake
           </h1>
           <p className="text-xs text-slate-400 mt-1">
@@ -230,7 +230,7 @@ export const UploadScreen: React.FC<UploadScreenProps> = ({
             onDrop={handleDrop}
             className={`border-2 border-dashed rounded p-8 text-center transition-all ${
               dragActive
-                ? 'border-[#00FF41] bg-[#00FF41]/5'
+                ? 'border-sky-500 bg-sky-500/10'
                 : 'border-slate-700 bg-slate-900/60 hover:border-slate-600'
             }`}
           >
@@ -259,14 +259,14 @@ export const UploadScreen: React.FC<UploadScreenProps> = ({
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="px-4 py-2 bg-[#FF3333] hover:bg-[#cc0000] text-black rounded text-xs font-bold transition-colors cursor-pointer border border-[#FF3333]/80"
+                className="btn-primary"
               >
                 Browse Local File
               </button>
               <button
                 type="button"
                 onClick={handleLoadSample}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-xs font-mono transition-colors border border-slate-700 cursor-pointer"
+                className="btn-secondary font-mono"
               >
                 Load Canonical Test Config (EDGE-RTR-01)
               </button>
@@ -279,15 +279,15 @@ export const UploadScreen: React.FC<UploadScreenProps> = ({
 
           {/* Active File Stage Inspection Card */}
           {selectedFileName && (
-            <div className="bg-slate-900 border border-slate-800 rounded p-4">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
+            <div className="bg-slate-900 border border-slate-700 rounded p-4">
+              <div className="flex items-center justify-between border-b border-slate-700 pb-3 mb-3">
                 <div className="flex items-center space-x-2">
                   <span className="w-2 h-2 rounded-full bg-sky-400"></span>
                   <span className="text-xs font-semibold text-slate-300">
                     Staged configuration payload
                   </span>
                 </div>
-                <span className="font-mono text-[11px] text-emerald-400 bg-emerald-950/60 border border-emerald-800 px-2 py-0.5 rounded">
+                <span className="badge-pass text-[11px]">
                   READY FOR AUDIT
                 </span>
               </div>
@@ -322,10 +322,10 @@ export const UploadScreen: React.FC<UploadScreenProps> = ({
                   type="button"
                   disabled={isUploading || currentUser?.role === 'viewer'}
                   onClick={handleExecuteAudit}
-                  className={`px-6 py-2.5 rounded text-xs font-bold uppercase tracking-wider transition-colors shadow-sm flex items-center gap-2 border cursor-pointer ${
+                  className={`px-6 py-2.5 rounded text-xs font-bold uppercase tracking-wider transition-[transform,background-color,border-color] duration-150 ease-out shadow-sm flex items-center gap-2 border cursor-pointer ${
                     isUploading || currentUser?.role === 'viewer'
                       ? 'bg-slate-800 text-slate-500 border-slate-700 cursor-not-allowed'
-                      : 'bg-[#FF3333] hover:bg-[#cc0000] text-black border-[#FF3333]/80'
+                      : 'bg-sky-600 hover:bg-sky-500 text-white border-sky-500 active:scale-[0.98]'
                   }`}
                 >
                   {isUploading ? (
@@ -349,7 +349,7 @@ export const UploadScreen: React.FC<UploadScreenProps> = ({
 
         {/* Right Column: Ingestion Protocol & Validation Policy */}
         <div className="lg:col-span-4 space-y-4">
-          <div className="bg-slate-900 border border-slate-800 rounded p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded p-4">
             <h4 className="text-xs font-bold text-slate-200 mb-3 flex items-center gap-2">
               <span className="w-1.5 h-1.5 bg-sky-400 rounded-sm"></span>
               CSM Audit Protocol Verification
@@ -377,7 +377,7 @@ export const UploadScreen: React.FC<UploadScreenProps> = ({
               </div>
             </div>
 
-            <div className="mt-4 pt-3 border-t border-slate-800">
+            <div className="mt-4 pt-3 border-t border-slate-700">
               <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
                 <span>PARSER RUNTIME</span>
                 <span className="text-emerald-400">OFFLINE / LOCAL</span>
@@ -392,8 +392,8 @@ export const UploadScreen: React.FC<UploadScreenProps> = ({
       </div>
 
       {/* Recent Audits Table Section (Fetched live from GET /api/ledger) */}
-      <div className="bg-slate-900 border border-slate-800 rounded">
-        <div className="px-5 py-3.5 border-b border-slate-800 flex items-center justify-between">
+      <div className="bg-slate-900 border border-slate-700 rounded">
+        <div className="px-5 py-3.5 border-b border-slate-700 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <span className="w-2 h-2 rounded-full bg-slate-400"></span>
             <h3 className="text-xs font-bold text-slate-200">
@@ -435,7 +435,7 @@ export const UploadScreen: React.FC<UploadScreenProps> = ({
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-800 text-left">
+            <table className="min-w-full divide-y divide-slate-700 text-left">
               <thead className="bg-slate-950 font-mono text-[11px] text-slate-400 uppercase tracking-wider">
                 <tr>
                   <th className="py-2.5 px-4 font-semibold">Entry ID / Sequence</th>
@@ -447,7 +447,7 @@ export const UploadScreen: React.FC<UploadScreenProps> = ({
                   <th className="py-2.5 px-4 font-semibold text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60 font-sans text-xs">
+              <tbody className="divide-y divide-slate-700/60 font-sans text-xs">
                 {ledgerEntries.map((entry, idx) => {
                   const results = entry.audit_results || {};
                   const passCount = Object.values(results).filter((v) => v === 'Pass').length;

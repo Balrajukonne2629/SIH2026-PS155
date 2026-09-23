@@ -129,7 +129,7 @@ export const AiModelManagerScreen: React.FC<AiModelManagerScreenProps> = ({
   return (
     <div className="space-y-6 font-sans pb-12">
       {/* Top Breadcrumb & Screen Header */}
-      <div className="border-b border-slate-800 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="border-b border-slate-700 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 font-mono text-xs text-sky-400 mb-1">
             <Radio className="w-3.5 h-3.5 animate-pulse text-emerald-400" />
@@ -140,7 +140,7 @@ export const AiModelManagerScreen: React.FC<AiModelManagerScreenProps> = ({
             <span>Air-gapped local inference</span>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-xl font-bold text-white flex items-center gap-2">
+            <h1 className="text-xl font-bold text-slate-100 flex items-center gap-2">
               <Sliders className="w-5 h-5 text-sky-400" />
               AI Model Manager &amp; Hardware Runtime
             </h1>
@@ -193,7 +193,7 @@ export const AiModelManagerScreen: React.FC<AiModelManagerScreenProps> = ({
         <div
           className={`rounded-lg border p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors ${
             status.ollama_alive
-              ? 'bg-slate-900/90 border-slate-800'
+              ? 'bg-slate-900/90 border-slate-700'
               : 'bg-amber-950/30 border-amber-800/80'
           }`}
         >
@@ -213,7 +213,7 @@ export const AiModelManagerScreen: React.FC<AiModelManagerScreenProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-bold text-sm text-white">
+                <span className="font-bold text-sm text-slate-100">
                   {status.ollama_alive
                     ? 'Local Ollama Daemon Online'
                     : 'Local Ollama Daemon Offline / Loopback Unreachable'}
@@ -261,7 +261,7 @@ export const AiModelManagerScreen: React.FC<AiModelManagerScreenProps> = ({
       {/* Operational Telemetry Strip — 2-column layout, no repeated icon-box pattern */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Left: Mode + Model (stacked, primary info) */}
-        <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 space-y-3">
+        <div className="bg-slate-900 border border-slate-700 rounded-lg p-4 space-y-3">
           <div className="flex items-start justify-between">
             <div>
               <div className="text-[10px] font-mono text-slate-500 uppercase tracking-wider mb-1">Operating mode</div>
@@ -284,11 +284,11 @@ export const AiModelManagerScreen: React.FC<AiModelManagerScreenProps> = ({
             <Activity className="w-4 h-4 text-sky-400 shrink-0 mt-0.5" />
           </div>
 
-          <div className="border-t border-slate-800 pt-3">
+          <div className="border-t border-slate-700 pt-3">
             <div className="text-[10px] font-mono text-slate-500 uppercase tracking-wider mb-1">
               {status?.ollama_alive ? 'Active inference model' : 'Active execution path'}
             </div>
-            <div className="text-sm font-bold font-mono text-white truncate" title={status?.effective_model}>
+            <div className="text-sm font-bold font-mono text-slate-100 truncate" title={status?.effective_model}>
               {loading ? 'Probing...' : !status?.ollama_alive ? 'Deterministic Fallback Engine' : status?.effective_model || 'deterministic_only'}
             </div>
             <div className="flex items-center justify-between mt-1 text-[10px] font-mono">
@@ -301,11 +301,11 @@ export const AiModelManagerScreen: React.FC<AiModelManagerScreenProps> = ({
         </div>
 
         {/* Right: Hardware vitals (memory bar + acceleration inline) */}
-        <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 space-y-3">
+        <div className="bg-slate-900 border border-slate-700 rounded-lg p-4 space-y-3">
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="text-[10px] font-mono text-slate-500 uppercase tracking-wider mb-1">Host memory</div>
-              <div className="flex items-baseline gap-1.5 text-sm font-bold font-mono text-white">
+              <div className="flex items-baseline gap-1.5 text-sm font-bold font-mono text-slate-100">
                 <span>{availRam.toFixed(1)} GB</span>
                 <span className="text-xs text-slate-400 font-normal">avail / {totalRam.toFixed(1)} GB total</span>
               </div>
@@ -325,9 +325,9 @@ export const AiModelManagerScreen: React.FC<AiModelManagerScreenProps> = ({
             <HardDrive className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5 ml-3" />
           </div>
 
-          <div className="border-t border-slate-800 pt-3">
+          <div className="border-t border-slate-700 pt-3">
             <div className="text-[10px] font-mono text-slate-500 uppercase tracking-wider mb-1">Acceleration</div>
-            <div className="text-sm font-bold font-mono text-white flex items-center gap-2">
+            <div className="text-sm font-bold font-mono text-slate-100 flex items-center gap-2">
               {status?.hardware_profile?.has_gpu ? (
                 <span className="text-emerald-400 flex items-center gap-1">
                   <Zap className="w-4 h-4" /> Dedicated GPU
@@ -347,11 +347,11 @@ export const AiModelManagerScreen: React.FC<AiModelManagerScreenProps> = ({
       </div>
 
       {/* Interactive Control Panel & Mode Switcher */}
-      <div className="bg-slate-900 border border-slate-800 rounded-lg p-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+      <div className="bg-slate-900 border border-slate-700 rounded-lg p-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-700 pb-3">
           <div className="flex items-center gap-2">
             <Sliders className="w-4 h-4 text-sky-400" />
-            <h2 className="text-sm font-bold text-white">
+            <h2 className="text-sm font-bold text-slate-100">
               Runtime operational mode switcher
             </h2>
           </div>
@@ -376,8 +376,8 @@ export const AiModelManagerScreen: React.FC<AiModelManagerScreenProps> = ({
             <div>
               <span className="font-bold text-amber-300 uppercase">OPERATOR ACCESS POLICY: </span>
               Modifying inference modes or forcing manual overrides requires the{' '}
-              <strong className="text-white">Reviewer</strong> role with{' '}
-              <strong className="text-white">is_authorized_approver: true</strong> clearance.
+              <strong className="text-slate-100">Reviewer</strong> role with{' '}
+              <strong className="text-slate-100">is_authorized_approver: true</strong> clearance.
               Viewers and standard Uploaders may inspect live telemetry but cannot alter runtime configuration.
             </div>
           </div>
@@ -394,7 +394,7 @@ export const AiModelManagerScreen: React.FC<AiModelManagerScreenProps> = ({
               className={`p-3.5 rounded-lg border text-left transition-all cursor-pointer disabled:cursor-not-allowed ${
                 selectedMode === 'auto'
                   ? 'bg-sky-950/60 border-sky-500 ring-1 ring-sky-500'
-                  : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 text-slate-300'
+                  : 'bg-slate-950/60 border-slate-700 hover:border-slate-600 text-slate-300'
               }`}
             >
               <div className="flex items-center justify-between mb-1.5">
@@ -417,7 +417,7 @@ export const AiModelManagerScreen: React.FC<AiModelManagerScreenProps> = ({
               className={`p-3.5 rounded-lg border text-left transition-all cursor-pointer disabled:cursor-not-allowed ${
                 selectedMode === 'fast'
                   ? 'bg-indigo-950/60 border-indigo-500 ring-1 ring-indigo-500'
-                  : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 text-slate-300'
+                  : 'bg-slate-950/60 border-slate-700 hover:border-slate-600 text-slate-300'
               }`}
             >
               <div className="flex items-center justify-between mb-1.5">
@@ -440,7 +440,7 @@ export const AiModelManagerScreen: React.FC<AiModelManagerScreenProps> = ({
               className={`p-3.5 rounded-lg border text-left transition-all cursor-pointer disabled:cursor-not-allowed ${
                 selectedMode === 'quality'
                   ? 'bg-teal-950/60 border-teal-500 ring-1 ring-teal-500'
-                  : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 text-slate-300'
+                  : 'bg-slate-950/60 border-slate-700 hover:border-slate-600 text-slate-300'
               }`}
             >
               <div className="flex items-center justify-between mb-1.5">
@@ -463,7 +463,7 @@ export const AiModelManagerScreen: React.FC<AiModelManagerScreenProps> = ({
               className={`p-3.5 rounded-lg border text-left transition-all cursor-pointer disabled:cursor-not-allowed ${
                 selectedMode === 'override'
                   ? 'bg-amber-950/60 border-amber-500 ring-1 ring-amber-500'
-                  : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 text-slate-300'
+                  : 'bg-slate-950/60 border-slate-700 hover:border-slate-600 text-slate-300'
               }`}
             >
               <div className="flex items-center justify-between mb-1.5">
@@ -492,7 +492,7 @@ export const AiModelManagerScreen: React.FC<AiModelManagerScreenProps> = ({
                   disabled={!isReviewerApprover || isUpdating}
                   value={selectedOverrideModel}
                   onChange={(e) => setSelectedOverrideModel(e.target.value)}
-                  className="bg-slate-900 border border-slate-700 rounded px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-amber-500 cursor-pointer w-full sm:w-80"
+                  className="bg-slate-900 border border-slate-700 rounded px-3 py-2 text-xs font-mono text-slate-100 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 cursor-pointer w-full sm:w-80"
                 >
                   {(status?.available_models || ['llama3.2:1b', 'qwen2.5:7b-instruct-q4_K_M', 'deterministic_only']).map((m) => (
                     <option key={m} value={m}>
@@ -512,7 +512,7 @@ export const AiModelManagerScreen: React.FC<AiModelManagerScreenProps> = ({
                     </span>
                   )}
                   {selectedOverrideModel.includes('qwen') && (
-                    <span className="text-purple-400">
+                    <span className="text-teal-400">
                       Instruction 7.6B: Deep multi-clause conflict justification.
                     </span>
                   )}
@@ -566,11 +566,11 @@ export const AiModelManagerScreen: React.FC<AiModelManagerScreenProps> = ({
       </div>
 
       {/* Workload Intelligence & Routing Matrix */}
-      <div className="bg-slate-900 border border-slate-800 rounded-lg p-5 space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+      <div className="bg-slate-900 border border-slate-700 rounded-lg p-5 space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-700 pb-3">
           <div className="flex items-center gap-2">
             <Layers className="w-4 h-4 text-sky-400" />
-            <h2 className="text-sm font-bold text-white">
+            <h2 className="text-sm font-bold text-slate-100">
               Workload routing &amp; latency guardrail matrix
             </h2>
           </div>
@@ -581,22 +581,21 @@ export const AiModelManagerScreen: React.FC<AiModelManagerScreenProps> = ({
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs font-mono">
-            <thead>
-              <tr className="border-b border-slate-800 text-slate-400 uppercase text-[10px] bg-slate-950/40">
+            <thead className="table-header border-b border-slate-700">
+              <tr>
                 <th className="py-2.5 px-3">Workload Subsystem</th>
                 <th className="py-2.5 px-3">Active Routing</th>
                 <th className="py-2.5 px-3">Primary Model</th>
                 <th className="py-2.5 px-3">Parameter Scale</th>
                 <th className="py-2.5 px-3">Bounded Timeout</th>
                 <th className="py-2.5 px-3">Benchmark Baseline Latency (Audit)</th>
-
                 <th className="py-2.5 px-3">Authority Level</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 text-slate-300">
+            <tbody className="divide-y divide-slate-700/60 text-slate-300">
               {/* Row 1: Line Mapping */}
               <tr className="hover:bg-slate-800/30 transition-colors">
-                <td className="py-3 px-3 font-semibold text-white">
+                <td className="py-3 px-3 font-semibold text-slate-100">
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
                     <span>Unmapped Line Mapping</span>
@@ -623,19 +622,19 @@ export const AiModelManagerScreen: React.FC<AiModelManagerScreenProps> = ({
 
               {/* Row 2: Remediation Conflict Analysis */}
               <tr className="hover:bg-slate-800/30 transition-colors">
-                <td className="py-3 px-3 font-semibold text-white">
+                <td className="py-3 px-3 font-semibold text-slate-100">
                   <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-purple-400"></span>
+                    <span className="w-2 h-2 rounded-full bg-teal-400"></span>
                     <span>Remediation Conflict Reasoning</span>
                   </div>
                   <div className="text-[10px] text-slate-500 font-normal">CSM Step 4 CLI Side-Effect Proof</div>
                 </td>
                 <td className="py-3 px-3">
-                  <span className="px-2 py-0.5 rounded text-[10px] bg-purple-950 text-purple-300 border border-purple-800">
+                  <span className="px-2 py-0.5 rounded text-[10px] bg-teal-950 text-teal-300 border border-teal-800">
                     {status?.mode === 'fast' ? 'Fast Forced' : 'Deep Reasoning'}
                   </span>
                 </td>
-                <td className="py-3 px-3 text-purple-400 font-bold">
+                <td className="py-3 px-3 text-teal-400 font-bold">
                   {status?.mode === 'fast' ? 'llama3.2:1b' : 'qwen2.5:7b-instruct'}
                 </td>
                 <td className="py-3 px-3">{status?.mode === 'fast' ? '1.3 Billion' : '7.6 Billion'}</td>
@@ -650,7 +649,7 @@ export const AiModelManagerScreen: React.FC<AiModelManagerScreenProps> = ({
 
               {/* Row 3: Deterministic Compliance Engine */}
               <tr className="hover:bg-slate-800/30 transition-colors bg-slate-950/20">
-                <td className="py-3 px-3 font-semibold text-white">
+                <td className="py-3 px-3 font-semibold text-slate-100">
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-sky-400"></span>
                     <span>Deterministic Compliance Engine</span>
@@ -678,11 +677,11 @@ export const AiModelManagerScreen: React.FC<AiModelManagerScreenProps> = ({
       </div>
 
       {/* Hardware Probe Diagnostics Inspector */}
-      <div className="bg-slate-900 border border-slate-800 rounded-lg p-5 space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+      <div className="bg-slate-900 border border-slate-700 rounded-lg p-5 space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-700 pb-3">
           <div className="flex items-center gap-2">
             <Cpu className="w-4 h-4 text-emerald-400" />
-            <h2 className="text-sm font-bold text-white">
+            <h2 className="text-sm font-bold text-slate-100">
               Host hardware diagnostics &amp; environment
             </h2>
           </div>
@@ -697,28 +696,28 @@ export const AiModelManagerScreen: React.FC<AiModelManagerScreenProps> = ({
         {/* 2-column: RAM+CPU left, Acceleration right */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono text-xs">
           {/* Left: Memory + Processor combined */}
-          <div className="bg-slate-950 border border-slate-800/80 rounded p-4 space-y-2">
+          <div className="bg-slate-950 border border-slate-700 rounded p-4 space-y-2">
             <div className="text-slate-400 font-bold text-[11px] flex items-center justify-between mb-2">
               <span>RAM &amp; PROCESSOR</span>
               <HardDrive className="w-3.5 h-3.5 text-slate-500" />
             </div>
-            <div className="flex justify-between py-1 border-b border-slate-900">
+            <div className="flex justify-between py-1 border-b border-slate-700">
               <span className="text-slate-500">Total RAM:</span>
-              <span className="text-white font-semibold">{totalRam.toFixed(2)} GB</span>
+              <span className="text-slate-100 font-semibold">{totalRam.toFixed(2)} GB</span>
             </div>
-            <div className="flex justify-between py-1 border-b border-slate-900">
+            <div className="flex justify-between py-1 border-b border-slate-700">
               <span className="text-slate-500">Available headroom:</span>
               <span className="text-emerald-400 font-semibold">{availRam.toFixed(2)} GB</span>
             </div>
-            <div className="flex justify-between py-1 border-b border-slate-900">
+            <div className="flex justify-between py-1 border-b border-slate-700">
               <span className="text-slate-500">Model memory ceiling:</span>
               <span className="text-sky-400 font-semibold">&lt; 8.0 GB configured</span>
             </div>
-            <div className="flex justify-between py-1 border-b border-slate-900">
+            <div className="flex justify-between py-1 border-b border-slate-700">
               <span className="text-slate-500">Physical cores:</span>
-              <span className="text-white font-semibold">{status?.hardware_profile?.cpu_cores ?? 'N/A'}</span>
+              <span className="text-slate-100 font-semibold">{status?.hardware_profile?.cpu_cores ?? 'N/A'}</span>
             </div>
-            <div className="flex justify-between py-1 border-b border-slate-900">
+            <div className="flex justify-between py-1 border-b border-slate-700">
               <span className="text-slate-500">Logical threads:</span>
               <span className="text-sky-400 font-semibold">{status?.hardware_profile?.cpu_threads ?? 'N/A'}</span>
             </div>
@@ -729,28 +728,28 @@ export const AiModelManagerScreen: React.FC<AiModelManagerScreenProps> = ({
           </div>
 
           {/* Right: Acceleration */}
-          <div className="bg-slate-950 border border-slate-800/80 rounded p-4 space-y-2">
+          <div className="bg-slate-950 border border-slate-700 rounded p-4 space-y-2">
             <div className="text-slate-400 font-bold text-[11px] flex items-center justify-between mb-2">
               <span>ACCELERATION SUBSYSTEM</span>
               <Zap className="w-3.5 h-3.5 text-slate-500" />
             </div>
-            <div className="flex justify-between py-1 border-b border-slate-900">
+            <div className="flex justify-between py-1 border-b border-slate-700">
               <span className="text-slate-500">Acceleration mode:</span>
-              <span className="text-white font-semibold">
+              <span className="text-slate-100 font-semibold">
                 {status?.hardware_profile?.has_gpu ? 'Dedicated / CUDA' : 'CPU AVX2 quantized'}
               </span>
             </div>
-            <div className="flex justify-between py-1 border-b border-slate-900">
+            <div className="flex justify-between py-1 border-b border-slate-700">
               <span className="text-slate-500">Dedicated VRAM:</span>
               <span className="text-slate-300 font-semibold">
                 {status?.hardware_profile?.vram_gb ? `${status.hardware_profile.vram_gb} GB` : 'Shared system RAM'}
               </span>
             </div>
-            <div className="flex justify-between py-1 border-b border-slate-900">
+            <div className="flex justify-between py-1 border-b border-slate-700">
               <span className="text-slate-500">Loopback IPC target:</span>
               <span className="text-emerald-400 font-semibold">&lt; 2 ms</span>
             </div>
-            <div className="flex justify-between py-1 border-b border-slate-900">
+            <div className="flex justify-between py-1 border-b border-slate-700">
               <span className="text-slate-500">Egress:</span>
               <span className="text-emerald-400 font-semibold">AIR-GAPPED (0 KB)</span>
             </div>
@@ -763,14 +762,14 @@ export const AiModelManagerScreen: React.FC<AiModelManagerScreenProps> = ({
       </div>
 
       {/* Security Principles & Air-Gap Compliance Assurance Card */}
-      <div className="bg-slate-950 border border-slate-800 rounded-lg p-5 font-mono text-xs">
+      <div className="bg-slate-950 border border-slate-700 rounded-lg p-5 font-mono text-xs">
         <div className="flex items-center gap-2 text-slate-300 font-bold mb-3">
           <Shield className="w-4 h-4 text-sky-400" />
           <span>Air-gapped compliance assurances &amp; NTRO boundary rules</span>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-slate-400">
-          <div className="border border-slate-800/80 rounded p-3 bg-slate-900/30">
-            <div className="text-white font-semibold mb-1 flex items-center gap-1.5">
+          <div className="border border-slate-700 rounded p-3 bg-slate-900/30">
+            <div className="text-slate-100 font-semibold mb-1 flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
               Zero External Ingestion
             </div>
@@ -778,8 +777,8 @@ export const AiModelManagerScreen: React.FC<AiModelManagerScreenProps> = ({
               Inference runs strictly via local loopback. No configuration snippets or IP addresses ever traverse external networks.
             </p>
           </div>
-          <div className="border border-slate-800/80 rounded p-3 bg-slate-900/30">
-            <div className="text-white font-semibold mb-1 flex items-center gap-1.5">
+          <div className="border border-slate-700 rounded p-3 bg-slate-900/30">
+            <div className="text-slate-100 font-semibold mb-1 flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-sky-400"></span>
               Deterministic Rule Authority
             </div>
@@ -787,8 +786,8 @@ export const AiModelManagerScreen: React.FC<AiModelManagerScreenProps> = ({
               AI suggestions require human reviewer approval before mapping. AI has 0% authority over Pass/Fail audit decisions.
             </p>
           </div>
-          <div className="border border-slate-800/80 rounded p-3 bg-slate-900/30">
-            <div className="text-white font-semibold mb-1 flex items-center gap-1.5">
+          <div className="border border-slate-700 rounded p-3 bg-slate-900/30">
+            <div className="text-slate-100 font-semibold mb-1 flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
               Zero Device Push Capability
             </div>
@@ -799,7 +798,7 @@ export const AiModelManagerScreen: React.FC<AiModelManagerScreenProps> = ({
         </div>
 
         {onNavigateToReview && (
-          <div className="mt-4 pt-3 border-t border-slate-900 flex justify-end">
+          <div className="mt-4 pt-3 border-t border-slate-700 flex justify-end">
             <button
               onClick={onNavigateToReview}
               className="text-sky-400 hover:text-sky-300 flex items-center gap-1 cursor-pointer transition-colors text-xs"

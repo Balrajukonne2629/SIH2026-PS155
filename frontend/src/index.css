@@ -1,44 +1,162 @@
-/* NTRO-Compliance-Auditor — Design System Tokens (MASTER.md) */
-@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700&display=swap');
-
+/* NTRO PS26155 — Enterprise Cybersecurity Design System Tokens (v3.0 Carbon/Graphite) */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  :root {
-    /* Color tokens — MASTER.md §Color Palette */
-    --color-primary:          #00FF41;
-    --color-on-primary:       #0F172A;
-    --color-secondary:        #0D0D0D;
-    --color-on-secondary:     #FFFFFF;
-    --color-accent:           #FF3333; /* CTA buttons ONLY — not for FAIL state */
-    --color-on-accent:        #000000;
-    --color-background:       #000000;
-    --color-foreground:       #E0E0E0;
-    --color-card:             #0C130E;
-    --color-card-foreground:  #E0E0E0;
-    --color-muted:            #181818;
-    --color-muted-foreground: #94A3B8;
-    --color-border:           #1F1F1F;
-    --color-destructive:      #EF4444; /* FAIL/error state — distinct from accent */
-    --color-on-destructive:   #000000;
-    --color-ring:             #00FF41;
+  /* DARK THEME: CARBON / GRAPHITE ENTERPRISE SECURITY UI (Default) */
+  :root,
+  [data-theme="dark"],
+  .dark {
+    /* Application Canvas & Layered Surfaces */
+    --bg-app:                 #0B0D0F; /* Deep carbon background */
+    --bg-surface:             #111417; /* Primary surface / panels */
+    --bg-surface-raised:      #171A1E; /* Raised cards / secondary containers */
+    --bg-surface-elevated:    #1D2126; /* Modals / dropdowns / popovers */
+    --bg-surface-hover:       #22272E; /* Hovered item surface */
+    --bg-input:               #0E1013; /* Recessed input background */
 
-    /* Spacing tokens — MASTER.md §Spacing Variables */
-    --space-xs:  0.25rem;  /* 4px  */
-    --space-sm:  0.5rem;   /* 8px  */
-    --space-md:  1rem;     /* 16px */
-    --space-lg:  1.5rem;   /* 24px */
-    --space-xl:  2rem;     /* 32px */
-    --space-2xl: 3rem;     /* 48px */
-    --space-3xl: 4rem;     /* 64px */
+    /* Subtle Neutral Graphite Borders */
+    --border-subtle:          #1C2026; /* Hairline dividers */
+    --border-default:         #282D33; /* Standard panel / card border */
+    --border-strong:          #383F47; /* Emphasized header borders */
+    --focus-ring:             #0284C7; /* Authoritative restrained blue ring */
 
-    /* Shadow tokens — MASTER.md §Shadow Depths */
+    /* High-Legibility Neutral Text Hierarchy */
+    --text-primary:           #E8EAED; /* Warm/neutral off-white */
+    --text-secondary:         #B2B8C0; /* Muted cool-neutral gray */
+    --text-muted:             #7D858F; /* Helper / footnote gray */
+    --text-disabled:          #525963; /* Disabled text */
+
+    /* Single Restrained Accent */
+    --accent-primary:         #0284C7; /* Restrained slate blue */
+    --accent-primary-hover:   #0369A1;
+    --accent-subtle:          rgba(2, 132, 199, 0.12);
+
+    /* Semantic Audit Status (Pass, Fail, Unknown, Info, Processing) */
+    --status-pass:            #34D399; /* Emerald 400 */
+    --status-pass-bg:         #064E3B; /* Emerald 950 */
+    --status-pass-border:     #059669; /* Emerald 600 */
+
+    --status-fail:            #F87171; /* Red 400 */
+    --status-fail-bg:         #450A0A; /* Red 950 */
+    --status-fail-border:     #DC2626; /* Red 600 */
+
+    --status-unknown:         #FBBF24; /* Amber 400 */
+    --status-unknown-bg:      #451A03; /* Amber 950 */
+    --status-unknown-border:  #D97706; /* Amber 600 */
+
+    --status-info:            #38BDF8; /* Sky 400 */
+    --status-info-bg:         #082F49; /* Sky 950 */
+    --status-info-border:     #0284C7; /* Sky 600 */
+
+    --status-processing:      #9DA5B0;
+    --status-processing-bg:   #1A1F26;
+    --status-processing-border: #383F47;
+
+    /* Tailwind Slate Palette mapped to Carbon / Graphite RGB channels */
+    --color-slate-950:        11 13 15;     /* #0B0D0F */
+    --color-slate-900:        17 20 23;     /* #111417 */
+    --color-slate-800:        23 26 30;     /* #171A1E */
+    --color-slate-700:        40 45 51;     /* #282D33 */
+    --color-slate-600:        56 63 71;     /* #383F47 */
+    --color-slate-500:        125 133 143;  /* #7D858F */
+    --color-slate-400:        178 184 192;  /* #B2B8C0 */
+    --color-slate-300:        203 209 216;  /* #CBD1D8 */
+    --color-slate-200:        225 228 232;  /* #E1E4E8 */
+    --color-slate-100:        232 234 237;  /* #E8EAED */
+    --color-slate-50:         246 247 249;  /* #F6F7F9 */
+
+    /* Spacing tokens */
+    --space-2xs: 0.125rem;
+    --space-xs:  0.25rem;
+    --space-sm:  0.5rem;
+    --space-md:  0.75rem;
+    --space-lg:  1.0rem;
+    --space-xl:  1.5rem;
+    --space-2xl: 2.0rem;
+
+    /* Shadow tokens */
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.35);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.45);
+    --shadow-lg: 0 10px 24px rgba(0,0,0,0.55);
+    --shadow-xl: 0 16px 36px rgba(0,0,0,0.65);
+
+    /* Motion Tokens (Emil Kowalski Design Engineering) */
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+    --duration-fast: 150ms;
+    --duration-normal: 200ms;
+  }
+
+
+  /* LIGHT THEME: CLEAN NEUTRAL ENTERPRISE */
+  [data-theme="light"],
+  .light {
+    /* Application Canvas & Layered Surfaces */
+    --bg-app:                 #F0F4F8; /* Subtle cool blue-tinted application background */
+    --bg-surface:             #FFFFFF; /* Pure clean white panels */
+    --bg-surface-raised:      #F8FAFC; /* Subtly raised white/gray cards */
+    --bg-surface-elevated:    #FFFFFF; /* Modals / dropdowns */
+    --bg-surface-hover:       #F1F5F9; /* Hover state */
+    --bg-input:               #F0F4F8; /* Recessed/clean input background */
+
+    /* Subtle Slate Borders */
+    --border-subtle:          #E2E8F0;
+    --border-default:         #CBD5E1;
+    --border-strong:          #94A3B8;
+    --focus-ring:             #0284C7;
+
+    /* High-Contrast Graphite Text Hierarchy */
+    --text-primary:           #0F172A; /* Slate 900 dark graphite text */
+    --text-secondary:         #475569; /* Slate 600 cool neutral gray */
+    --text-muted:             #64748B; /* Slate 500 muted helper gray */
+    --text-disabled:          #94A3B8;
+
+    /* Single Restrained Accent */
+    --accent-primary:         #0284C7;
+    --accent-primary-hover:   #0369A1;
+    --accent-subtle:          rgba(2, 132, 199, 0.08);
+
+    /* Semantic Audit Status (Pass, Fail, Unknown, Info, Processing) */
+    --status-pass:            #059669; /* Emerald 600 */
+    --status-pass-bg:         #ECFDF5; /* Emerald 50 */
+    --status-pass-border:     #A7F3D0; /* Emerald 200 */
+
+    --status-fail:            #DC2626; /* Red 600 */
+    --status-fail-bg:         #FEF2F2; /* Red 50 */
+    --status-fail-border:     #FECACA; /* Red 200 */
+
+    --status-unknown:         #D97706; /* Amber 600 */
+    --status-unknown-bg:      #FFFBEB; /* Amber 50 */
+    --status-unknown-border:  #FDE68A; /* Amber 200 */
+
+    --status-info:            #0284C7; /* Sky 600 */
+    --status-info-bg:         #F0F9FF; /* Sky 50 */
+    --status-info-border:     #BAE6FD; /* Sky 200 */
+
+    --status-processing:      #475569;
+    --status-processing-bg:   #F1F5F9;
+    --status-processing-border: #CBD5E1;
+
+    /* Tailwind Slate Palette mapped to Neutral Light RGB channels */
+    --color-slate-950:        240 244 248;  /* #F0F4F8 - Canvas (cool blue-tinted) */
+    --color-slate-900:        255 255 255;  /* #FFFFFF - Surface */
+    --color-slate-800:        248 250 252;  /* #F8FAFC - Raised Surface */
+    --color-slate-700:        226 232 240;  /* #E2E8F0 - Subtle Border */
+    --color-slate-600:        203 213 225;  /* #CBD5E1 - Divider / Border Strong */
+    --color-slate-500:        100 116 139;  /* #64748B - Muted Text */
+    --color-slate-400:        71 85 105;    /* #475569 - Secondary Text */
+    --color-slate-300:        51 65 85;     /* #334155 - Body Text */
+    --color-slate-200:        30 41 59;     /* #1E293B - Deep Contrast */
+    --color-slate-100:        15 23 42;     /* #0F172A - Primary Graphite Text */
+    --color-slate-50:         2 6 23;       /* #020617 - Deepest Contrast */
+
+    /* Light Theme Shadows */
     --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
-    --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
-    --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
-    --shadow-xl: 0 20px 25px rgba(0,0,0,0.15);
+    --shadow-md: 0 4px 10px rgba(0,0,0,0.06);
+    --shadow-lg: 0 8px 20px rgba(0,0,0,0.08);
+    --shadow-xl: 0 14px 28px rgba(0,0,0,0.10);
   }
 
   html {
@@ -46,14 +164,243 @@
   }
 
   body {
-    background-color: #0b0f19;
-    color: #f8fafc;
-    /* MASTER.md: Body Font — Fira Sans (was Plus Jakarta Sans) */
-    font-family: 'Fira Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--bg-app);
+    color: var(--text-primary);
+    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  /* MASTER.md: Heading Font — Fira Code for monospace/code contexts */
+  /* Reserved strictly for CLI snippets, hashes, rule IDs, session IDs */
   code, pre, .font-mono {
-    font-family: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-family: 'IBM Plex Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Monaco, monospace;
   }
 }
+
+/* Light Theme overrides for explicit Tailwind status colors */
+[data-theme="light"] .bg-emerald-950,
+.light .bg-emerald-950,
+[data-theme="light"] .bg-emerald-950\/80,
+.light .bg-emerald-950\/80,
+[data-theme="light"] .bg-emerald-950\/60,
+.light .bg-emerald-950\/60,
+[data-theme="light"] .bg-emerald-950\/40,
+.light .bg-emerald-950\/40,
+[data-theme="light"] .bg-emerald-900,
+.light .bg-emerald-900 {
+  background-color: var(--status-pass-bg) !important;
+}
+[data-theme="light"] .text-emerald-300,
+.light .text-emerald-300,
+[data-theme="light"] .text-emerald-400,
+.light .text-emerald-400,
+[data-theme="light"] .text-emerald-200,
+.light .text-emerald-200 {
+  color: var(--status-pass) !important;
+}
+[data-theme="light"] .border-emerald-800,
+.light .border-emerald-800,
+[data-theme="light"] .border-emerald-700,
+.light .border-emerald-700,
+[data-theme="light"] .border-emerald-600,
+.light .border-emerald-600 {
+  border-color: var(--status-pass-border) !important;
+}
+
+[data-theme="light"] .bg-rose-950,
+.light .bg-rose-950,
+[data-theme="light"] .bg-rose-950\/80,
+.light .bg-rose-950\/80,
+[data-theme="light"] .bg-rose-950\/60,
+.light .bg-rose-950\/60,
+[data-theme="light"] .bg-rose-950\/50,
+.light .bg-rose-950\/50,
+[data-theme="light"] .bg-rose-950\/40,
+.light .bg-rose-950\/40,
+[data-theme="light"] .bg-rose-950\/30,
+.light .bg-rose-950\/30,
+[data-theme="light"] .bg-rose-900,
+.light .bg-rose-900 {
+  background-color: var(--status-fail-bg) !important;
+}
+[data-theme="light"] .text-rose-300,
+.light .text-rose-300,
+[data-theme="light"] .text-rose-400,
+.light .text-rose-400,
+[data-theme="light"] .text-rose-200,
+.light .text-rose-200 {
+  color: var(--status-fail) !important;
+}
+[data-theme="light"] .border-rose-800,
+.light .border-rose-800,
+[data-theme="light"] .border-rose-800\/80,
+.light .border-rose-800\/80,
+[data-theme="light"] .border-rose-800\/70,
+.light .border-rose-800\/70,
+[data-theme="light"] .border-rose-700,
+.light .border-rose-700,
+[data-theme="light"] .border-rose-600,
+.light .border-rose-600 {
+  border-color: var(--status-fail-border) !important;
+}
+
+[data-theme="light"] .bg-amber-950,
+.light .bg-amber-950,
+[data-theme="light"] .bg-amber-950\/80,
+.light .bg-amber-950\/80,
+[data-theme="light"] .bg-amber-950\/70,
+.light .bg-amber-950\/70,
+[data-theme="light"] .bg-amber-950\/60,
+.light .bg-amber-950\/60,
+[data-theme="light"] .bg-amber-950\/50,
+.light .bg-amber-950\/50,
+[data-theme="light"] .bg-amber-950\/40,
+.light .bg-amber-950\/40,
+[data-theme="light"] .bg-amber-950\/30,
+.light .bg-amber-950\/30,
+[data-theme="light"] .bg-amber-900,
+.light .bg-amber-900 {
+  background-color: var(--status-unknown-bg) !important;
+}
+[data-theme="light"] .text-amber-300,
+.light .text-amber-300,
+[data-theme="light"] .text-amber-400,
+.light .text-amber-400,
+[data-theme="light"] .text-amber-200,
+.light .text-amber-200 {
+  color: var(--status-unknown) !important;
+}
+[data-theme="light"] .border-amber-800,
+.light .border-amber-800,
+[data-theme="light"] .border-amber-800\/80,
+.light .border-amber-800\/80,
+[data-theme="light"] .border-amber-800\/70,
+.light .border-amber-800\/70,
+[data-theme="light"] .border-amber-700,
+.light .border-amber-700,
+[data-theme="light"] .border-amber-600,
+.light .border-amber-600 {
+  border-color: var(--status-unknown-border) !important;
+}
+
+[data-theme="light"] .bg-sky-950,
+.light .bg-sky-950,
+[data-theme="light"] .bg-sky-950\/80,
+.light .bg-sky-950\/80,
+[data-theme="light"] .bg-sky-950\/60,
+.light .bg-sky-950\/60,
+[data-theme="light"] .bg-sky-950\/40,
+.light .bg-sky-950\/40,
+[data-theme="light"] .bg-sky-900,
+.light .bg-sky-900 {
+  background-color: var(--status-info-bg) !important;
+}
+[data-theme="light"] .text-sky-300,
+.light .text-sky-300,
+[data-theme="light"] .text-sky-400,
+.light .text-sky-400 {
+  color: var(--status-info) !important;
+}
+[data-theme="light"] .border-sky-800,
+.light .border-sky-800,
+[data-theme="light"] .border-sky-700,
+.light .border-sky-700 {
+  border-color: var(--status-info-border) !important;
+}
+
+/* Fallback safety guard: prevent disappearing borders in light mode */
+[data-theme="light"] .border-slate-800,
+.light .border-slate-800 {
+  border-color: var(--border-default) !important;
+}
+
+/* Reusable Component Primitives */
+@layer components {
+  /* Button Hierarchy with Emil Kowalski Micro-Interactions */
+  .btn-primary {
+    @apply px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded text-xs font-semibold transition-[transform,background-color,border-color,box-shadow] duration-150 ease-out active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/80 focus-visible:ring-offset-1 border border-sky-500 cursor-pointer shadow-sm flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-100 rounded text-xs font-medium transition-[transform,background-color,border-color,box-shadow] duration-150 ease-out active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/80 focus-visible:ring-offset-1 border border-slate-700 cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
+  }
+
+  .btn-ghost {
+    @apply px-3 py-1.5 bg-transparent hover:bg-slate-800/60 text-slate-400 hover:text-slate-100 rounded text-xs font-medium transition-[transform,background-color,color] duration-150 ease-out active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/80 cursor-pointer flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
+  }
+
+  .btn-destructive {
+    @apply px-4 py-2 bg-rose-950 hover:bg-rose-900 text-rose-300 rounded text-xs font-semibold transition-[transform,background-color,border-color,box-shadow] duration-150 ease-out active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500/80 focus-visible:ring-offset-1 border border-rose-800 cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
+  }
+
+  /* Status Badges */
+  .badge-pass {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-emerald-950 text-emerald-300 border border-emerald-700;
+  }
+
+  .badge-fail {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-rose-950 text-rose-300 border border-rose-700;
+  }
+
+  .badge-unknown {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-amber-950 text-amber-300 border border-amber-700;
+  }
+
+  .badge-pending {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-slate-800 text-slate-300 border border-slate-700;
+  }
+
+  /* Surface Panels */
+  .panel-base {
+    @apply bg-slate-900 border border-slate-700 rounded p-5 transition-[border-color,background-color] duration-150;
+  }
+
+  .card-base {
+    @apply bg-slate-900 border border-slate-700 rounded p-4 transition-[border-color,background-color] duration-150;
+  }
+
+  /* Dense Table Header */
+  .table-header {
+    @apply bg-slate-950 font-sans text-xs font-semibold text-slate-400 uppercase tracking-wider;
+  }
+
+  /* Form Inputs */
+  .input-base {
+    @apply bg-slate-950 border border-slate-700 rounded px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   SUBTLE REVEAL & ACCESSIBLE REDUCED-MOTION UTILITIES
+───────────────────────────────────────────────────────────── */
+@keyframes subtleFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-reveal {
+  animation: subtleFadeIn 180ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+/* Strict prefers-reduced-motion override for WCAG AAA accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-reveal {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+

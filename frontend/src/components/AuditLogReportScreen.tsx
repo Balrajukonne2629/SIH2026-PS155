@@ -141,12 +141,12 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
   return (
     <div className="space-y-6 font-sans">
       {/* Header & Verification Controls */}
-      <div className="bg-slate-900 border border-slate-800 rounded p-5">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+      <div className="bg-slate-900 border border-slate-700 rounded p-5">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-700 pb-4">
           <div>
             <div className="flex items-center space-x-3">
               <span className="inline-block w-2.5 h-2.5 rounded-full bg-sky-500"></span>
-              <h1 className="text-xl font-bold text-white">
+              <h1 className="text-xl font-bold text-slate-100">
                 Cryptographic audit ledger &amp; compliance reports
               </h1>
               <span className="text-[11px] font-mono text-slate-500">
@@ -162,7 +162,7 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
           <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={loadLedger}
-              className="px-3 py-1.5 rounded text-xs font-mono bg-slate-800 text-slate-300 hover:text-white border border-slate-700 transition-colors cursor-pointer"
+              className="px-3 py-1.5 rounded text-xs font-mono bg-slate-800 text-slate-300 hover:text-slate-100 border border-slate-700 transition-colors cursor-pointer"
             >
               ↻ Reload Ledger
             </button>
@@ -170,10 +170,10 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
             <button
               onClick={handleVerifyChain}
               disabled={isVerifyingChain || entries.length === 0}
-              className={`px-4 py-2 rounded text-xs font-mono font-bold uppercase tracking-wider transition-colors shadow-sm flex items-center gap-2 border cursor-pointer ${
+              className={`px-4 py-2 rounded text-xs font-medium transition-colors shadow-sm flex items-center gap-2 border cursor-pointer ${
                 isVerifyingChain
                   ? 'bg-slate-800 text-slate-400 border-slate-700 cursor-not-allowed'
-                  : 'bg-sky-600 hover:bg-sky-500 text-white border-sky-400'
+                  : 'bg-sky-600 hover:bg-sky-500 text-white border-sky-500'
               }`}
             >
               {isVerifyingChain ? (
@@ -245,7 +245,7 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
 
       {/* Main Ledger Content */}
       {isLoading ? (
-        <div className="bg-slate-900 border border-slate-800 rounded p-12 text-center font-mono text-xs text-slate-300 space-y-3">
+        <div className="bg-slate-900 border border-slate-700 rounded p-12 text-center font-mono text-xs text-slate-300 space-y-3">
           <div className="w-8 h-8 border-2 border-sky-400 border-t-transparent rounded-full animate-spin mx-auto"></div>
           <div>Reading cryptographic ledger from backend (<code className="text-sky-300">audit_log.jsonl</code>)...</div>
         </div>
@@ -261,7 +261,7 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
           </button>
         </div>
       ) : entries.length === 0 ? (
-        <div className="bg-slate-900 border border-slate-800 rounded p-12 text-center space-y-3">
+        <div className="bg-slate-900 border border-slate-700 rounded p-12 text-center space-y-3">
           <div className="w-12 h-12 rounded bg-slate-800 border border-slate-700 text-slate-400 mx-auto flex items-center justify-center">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -297,7 +297,7 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
                   </div>
                 )}
 
-                <div className="bg-slate-900 border border-slate-800 hover:border-slate-700 rounded transition-all z-10 relative">
+                <div className="bg-slate-900 border border-slate-700 hover:border-slate-600 rounded transition-all z-10 relative">
                   {/* Entry Summary Bar */}
                   <div className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-start md:items-center space-x-3">
@@ -313,35 +313,46 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
 
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="font-mono text-xs font-bold text-slate-100">
+                          <span
+                            className="font-mono text-xs font-bold text-slate-100 truncate max-w-[140px] sm:max-w-[220px] inline-block align-middle select-all cursor-pointer hover:underline"
+                            title={`Audit ID: ${entry.entry_id}`}
+                          >
                             {entry.entry_id}
                           </span>
                           {isGenesis && (
-                            <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-slate-800 text-slate-400 border border-slate-700">
+                            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-400 border border-slate-700 leading-none">
                               GENESIS BLOCK
                             </span>
                           )}
                           {hasCanonical ? (
-                            <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-sky-950 text-sky-400 border border-sky-800">
+                            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-sky-950 text-sky-400 border border-sky-800 leading-none">
                               CANONICAL
                             </span>
                           ) : (
-                            <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-slate-800 text-slate-400 border border-slate-700">
+                            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-400 border border-slate-700 leading-none">
                               LEGACY
                             </span>
                           )}
                         </div>
                         <div className="flex items-center gap-3 text-xs text-slate-400 mt-1 font-mono">
-                          <span>DEVICE: <strong className="text-slate-200">{entry.device_hostname}</strong></span>
+                          <span>
+                            DEVICE:{' '}
+                            <strong
+                              className="text-slate-200 truncate max-w-[150px] inline-block align-middle"
+                              title={entry.device_hostname}
+                            >
+                              {entry.device_hostname}
+                            </strong>
+                          </span>
                           <span className="text-slate-600">•</span>
-                          <span className="text-slate-300" title={`Canonical UTC: ${entry.timestamp}`}>{formatToIST(entry.timestamp)}</span>
+                          <span className="text-slate-300 tabular-nums" title={`Canonical UTC: ${entry.timestamp}`}>{formatToIST(entry.timestamp)}</span>
                         </div>
                       </div>
                     </div>
 
                     {/* Badges & Actions */}
                     <div className="flex flex-wrap items-center gap-2.5">
-                      <div className="flex items-center space-x-1.5 font-mono text-xs mr-1">
+                      <div className="flex items-center space-x-1.5 font-mono text-xs mr-1 tabular-nums">
                         <span className="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 font-bold border border-emerald-700">
                           {passCount} PASS
                         </span>
@@ -356,7 +367,7 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
                       <button
                         onClick={() => handleVerifyPdf(entry.entry_id)}
                         disabled={isVerifyingPdf}
-                        className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-xs font-mono border border-slate-700 transition-colors cursor-pointer"
+                        className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-xs font-mono border border-slate-700 transition-[transform,background-color] duration-150 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sky-500 cursor-pointer"
                         title="Cryptographically verify PDF hash against ledger"
                       >
                         {isVerifyingPdf ? 'Verifying...' : 'Verify PDF'}
@@ -374,7 +385,7 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
                                   [entry.entry_id]: e.target.value as 'pdf' | 'docx',
                                 }))
                               }
-                              className="text-xs font-mono bg-slate-800 border border-slate-700 text-slate-200 rounded px-2 py-1.5 cursor-pointer"
+                              className="text-xs font-mono bg-slate-800 border border-slate-700 text-slate-200 rounded px-2 py-1.5 cursor-pointer focus:outline-none focus:ring-1 focus:ring-sky-500"
                               aria-label="Export Format"
                             >
                               <option value="pdf">PDF</option>
@@ -384,10 +395,10 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
                             <button
                               onClick={() => handleExport(entry.entry_id)}
                               disabled={isExportingMap[entry.entry_id]}
-                              className={`px-3 py-1.5 rounded text-xs font-mono font-semibold transition-colors border flex items-center gap-1.5 cursor-pointer ${
+                              className={`px-3 py-1.5 rounded text-xs font-mono font-semibold transition-[transform,background-color,border-color] duration-150 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/80 border flex items-center gap-1.5 shadow-xs cursor-pointer ${
                                 isExportingMap[entry.entry_id]
                                   ? 'bg-slate-800 text-slate-500 border-slate-700 cursor-not-allowed'
-                                  : 'bg-sky-950/80 hover:bg-sky-900 text-sky-300 border-sky-800'
+                                  : 'bg-sky-600 hover:bg-sky-500 text-white border-sky-500'
                               }`}
                               title={`Export canonical report as ${(exportFormatMap[entry.entry_id] || 'pdf').toUpperCase()}`}
                             >
@@ -407,19 +418,11 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
                             </button>
                           </div>
 
-                          <button
-                            onClick={() => toggleExpand(entry.entry_id)}
-                            className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs font-mono transition-colors border border-slate-700 cursor-pointer"
-                            title="View canonical report details"
-                          >
-                            {isExpanded ? 'Hide Report' : 'View Report'}
-                          </button>
-
                           {/* Edit Report button for Reviewer / Uploader */}
                           {canEdit && (
                             <button
                               onClick={() => handleOpenEdit(entry.entry_id)}
-                              className="px-3 py-1.5 bg-amber-950/80 hover:bg-amber-900 text-amber-300 rounded text-xs font-mono font-semibold transition-colors border border-amber-800 flex items-center gap-1.5 cursor-pointer"
+                              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-300 hover:text-amber-200 rounded text-xs font-mono font-semibold transition-[transform,background-color,border-color] duration-150 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/80 border border-slate-700 flex items-center gap-1.5 cursor-pointer shadow-xs"
                               title="Open canonical report editor"
                             >
                               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -428,6 +431,28 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
                               <span>Edit Report</span>
                             </button>
                           )}
+
+                          {/* Single Unified View/Hide Toggle Button */}
+                          <button
+                            onClick={() => toggleExpand(entry.entry_id)}
+                            className={`px-2.5 py-1.5 rounded text-xs font-mono font-medium transition-[transform,background-color] duration-150 active:scale-[0.98] border flex items-center gap-1.5 cursor-pointer ${
+                              isExpanded
+                                ? 'bg-slate-800 text-sky-400 border-sky-700'
+                                : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700'
+                            }`}
+                            title={isExpanded ? 'Collapse canonical report details' : 'Expand canonical report details'}
+                            aria-expanded={isExpanded}
+                          >
+                            <span>{isExpanded ? 'Hide Details' : 'View Report'}</span>
+                            <svg
+                              className={`w-3.5 h-3.5 transition-transform duration-150 ${isExpanded ? 'rotate-180' : ''}`}
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </button>
                         </>
                       ) : (
                         <div className="flex items-center gap-2">
@@ -436,21 +461,6 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
                           </span>
                         </div>
                       )}
-
-                      <button
-                        onClick={() => toggleExpand(entry.entry_id)}
-                        className="p-1.5 text-slate-400 hover:text-white rounded bg-slate-800 border border-slate-700 cursor-pointer"
-                        title={isExpanded ? 'Collapse entry' : 'Expand entry'}
-                      >
-                        <svg
-                          className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </button>
                     </div>
                   </div>
 
@@ -487,7 +497,7 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
 
                   {/* Expanded Cryptographic Detail Panel */}
                   {isExpanded && (
-                    <div className="bg-slate-950 border-t border-slate-800 p-4 space-y-3 font-mono text-xs">
+                    <div className="bg-slate-950 border-t border-slate-700 p-4 space-y-3 font-mono text-xs">
                       <div className="flex items-center space-x-2 text-slate-400 font-bold uppercase text-[11px]">
                         <svg className="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
@@ -496,7 +506,7 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div className="bg-slate-900/80 p-2.5 rounded border border-slate-800">
+                        <div className="bg-slate-900/80 p-2.5 rounded border border-slate-700">
                           <span className="text-[10px] text-slate-500 uppercase block mb-1">
                             Previous Entry Hash (prevEntryHash):
                           </span>
@@ -505,7 +515,7 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
                           </div>
                         </div>
 
-                        <div className="bg-slate-900/80 p-2.5 rounded border border-slate-800">
+                        <div className="bg-slate-900/80 p-2.5 rounded border border-slate-700">
                           <span className="text-[10px] text-slate-500 uppercase block mb-1">
                             Current Entry Hash (entryHash):
                           </span>
@@ -515,7 +525,7 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
                         </div>
                       </div>
 
-                      <div className="flex flex-wrap items-center justify-between text-[11px] text-slate-400 pt-2 border-t border-slate-800/80 gap-2">
+                      <div className="flex flex-wrap items-center justify-between text-[11px] text-slate-400 pt-2 border-t border-slate-700 gap-2">
                         <div>
                           <span>CONFIG SHA-256: </span>
                           <code className="text-sky-300">{(entry.config_file_hash || '').substring(0, 24)}...</code>
@@ -538,7 +548,7 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
                           initialEditMode={editOpenMap[entry.entry_id]}
                         />
                       ) : (
-                        <div className="mt-3 p-3 bg-slate-900/60 rounded border border-slate-800 text-slate-400 font-mono text-xs space-y-1">
+                        <div className="mt-3 p-3 bg-slate-900/60 rounded border border-slate-700 text-slate-400 font-mono text-xs space-y-1">
                           <div className="font-bold text-slate-300 flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-slate-500 inline-block"></span>
                             Historical Audit Record (Legacy)

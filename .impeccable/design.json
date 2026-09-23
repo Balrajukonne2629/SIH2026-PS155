@@ -1,0 +1,224 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-23T14:10:00.000Z",
+  "title": "Design System: NTRO Compliance Auditor",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Restrained Sky Blue",
+        "canonical": "#0284c7",
+        "tonalRamp": ["#082f49", "#0c4a6e", "#075985", "#0369a1", "#0284c7", "#38bdf8", "#7dd3fc", "#bae6fd"]
+      },
+      "canvas-dark": {
+        "role": "neutral",
+        "displayName": "Carbon Canvas",
+        "canonical": "#0b0d0f",
+        "tonalRamp": ["#000000", "#0b0d0f", "#111417", "#171a1e", "#1d2126", "#282d33", "#383f47", "#525963"]
+      },
+      "surface-dark": {
+        "role": "neutral",
+        "displayName": "Graphite Surface",
+        "canonical": "#111417",
+        "tonalRamp": ["#0b0d0f", "#111417", "#171a1e", "#1d2126", "#22272e", "#282d33", "#383f47", "#7d858f"]
+      },
+      "status-pass": {
+        "role": "primary",
+        "displayName": "Certified Pass Emerald",
+        "canonical": "#34d399",
+        "tonalRamp": ["#064e3b", "#065f46", "#047857", "#059669", "#10b981", "#34d399", "#6ee7b7", "#a7f3d0"]
+      },
+      "status-fail": {
+        "role": "tertiary",
+        "displayName": "Violation Fail Rose",
+        "canonical": "#f87171",
+        "tonalRamp": ["#450a0a", "#7f1d1d", "#991b1b", "#b91c1c", "#dc2626", "#f87171", "#fca5a5", "#fecaca"]
+      },
+      "status-unknown": {
+        "role": "secondary",
+        "displayName": "Unresolved Unknown Amber",
+        "canonical": "#fbbf24",
+        "tonalRamp": ["#451a03", "#78350f", "#92400e", "#b45309", "#d97706", "#f59e0b", "#fbbf24", "#fde68a"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display Page Title",
+        "purpose": "Primary screen headings and console brand identifiers."
+      },
+      "headline": {
+        "displayName": "Section Headline (H2)",
+        "purpose": "Major section division and table section headers."
+      },
+      "title": {
+        "displayName": "Widget Title (H3)",
+        "purpose": "Card titles, KPI headers, and sub-widget banners."
+      },
+      "body": {
+        "displayName": "Standard Body Text",
+        "purpose": "Observations, rule descriptions, and operator prose."
+      },
+      "label": {
+        "displayName": "Technical Monospace",
+        "purpose": "Hashes, CLI commands, IP addresses, rule IDs, and tabular figures."
+      }
+    },
+    "shadows": [
+      {
+        "name": "ambient-low",
+        "value": "0 1px 2px rgba(0,0,0,0.35)",
+        "purpose": "Subtle card and resting button definition in dark mode."
+      },
+      {
+        "name": "elevated-panel",
+        "value": "0 4px 12px rgba(0,0,0,0.45)",
+        "purpose": "Hovered cards, popovers, and active triage boxes."
+      },
+      {
+        "name": "modal-deep",
+        "value": "0 10px 24px rgba(0,0,0,0.55)",
+        "purpose": "Modal dialogs and SVG chart hover tooltips."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.23, 1, 0.32, 1)",
+        "purpose": "Standard tactile easing for button clicks and tab reveals."
+      },
+      {
+        "name": "duration-fast",
+        "value": "150ms",
+        "purpose": "Micro-interaction duration for scale and background transitions."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" },
+      { "name": "2xl", "value": "1600px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Action Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Forward progression and primary workflow execution button.",
+      "html": "<button class=\"ds-btn-primary\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M5 12h14M12 5l7 7-7 7\"/></svg> Execute Deterministic Audit</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 16px; background-color: #0284c7; color: #ffffff; border: 1px solid #0284c7; border-radius: 4px; font-family: 'IBM Plex Sans', -apple-system, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; transition: background-color 150ms cubic-bezier(0.23, 1, 0.32, 1), transform 150ms; } .ds-btn-primary:hover { background-color: #0369a1; border-color: #0369a1; } .ds-btn-primary:active { transform: scale(0.98); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.8); }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Filter, reset, refresh, or auxiliary navigation button.",
+      "html": "<button class=\"ds-btn-secondary\">Refresh Session</button>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 16px; background-color: #171a1e; color: #e8eaed; border: 1px solid #282d33; border-radius: 4px; font-family: 'IBM Plex Sans', -apple-system, sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; transition: background-color 150ms, border-color 150ms, transform 150ms; } .ds-btn-secondary:hover { background-color: #22272e; border-color: #383f47; color: #ffffff; } .ds-btn-secondary:active { transform: scale(0.98); }"
+    },
+    {
+      "name": "Compliant Pass Badge",
+      "kind": "chip",
+      "refersTo": "badge-pass",
+      "description": "Certified compliant policy control badge.",
+      "html": "<span class=\"ds-badge-pass\">PASS</span>",
+      "css": ".ds-badge-pass { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: 0.05em; background-color: #064e3b; color: #34d399; border: 1px solid #059669; text-transform: uppercase; }"
+    },
+    {
+      "name": "Violation Fail Badge",
+      "kind": "chip",
+      "refersTo": "badge-fail",
+      "description": "Baseline security policy violation badge requiring remediation.",
+      "html": "<span class=\"ds-badge-fail\">FAIL</span>",
+      "css": ".ds-badge-fail { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: 0.05em; background-color: #450a0a; color: #f87171; border: 1px solid #dc2626; text-transform: uppercase; }"
+    },
+    {
+      "name": "Unresolved Unknown Badge",
+      "kind": "chip",
+      "refersTo": "badge-unknown",
+      "description": "Missing evidence or unmapped syntax badge awaiting review.",
+      "html": "<span class=\"ds-badge-unknown\">UNKNOWN</span>",
+      "css": ".ds-badge-unknown { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: 0.05em; background-color: #451a03; color: #fbbf24; border: 1px solid #d97706; text-transform: uppercase; }"
+    },
+    {
+      "name": "Search & Filter Input",
+      "kind": "input",
+      "refersTo": "input-text",
+      "description": "Dense tabular search and command entry input.",
+      "html": "<input type=\"text\" class=\"ds-input\" placeholder=\"Filter by device hostname or rule ID...\" />",
+      "css": ".ds-input { width: 100%; max-width: 320px; padding: 8px 12px; background-color: #0b0d0f; border: 1px solid #282d33; border-radius: 4px; color: #e8eaed; font-family: 'IBM Plex Sans', -apple-system, sans-serif; font-size: 12px; outline: none; transition: border-color 150ms, box-shadow 150ms; } .ds-input:focus { border-color: #0284c7; box-shadow: 0 0 0 1px #0284c7; } .ds-input::placeholder { color: #7d858f; }"
+    },
+    {
+      "name": "KPI Status Card",
+      "kind": "card",
+      "refersTo": "card-base",
+      "description": "High-density statistical summary card for SOC monitoring.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-header\"><span class=\"ds-card-title\">Cumulative Pass Rate</span><span class=\"ds-card-meta\">12 evaluated</span></div><div class=\"ds-card-value\">100.0%</div><div class=\"ds-card-progress\"><div class=\"ds-card-bar\" style=\"width: 100%\"></div></div></div>",
+      "css": ".ds-card { background-color: #111417; border: 1px solid #282d33; border-radius: 4px; padding: 16px; font-family: 'IBM Plex Sans', -apple-system, sans-serif; } .ds-card-header { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #b2b8c0; text-transform: uppercase; letter-spacing: 0.05em; } .ds-card-meta { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #7d858f; } .ds-card-value { font-family: 'IBM Plex Mono', monospace; font-size: 24px; font-weight: 700; color: #e8eaed; margin-top: 8px; font-variant-numeric: tabular-nums; } .ds-card-progress { width: 100%; height: 4px; background-color: #171a1e; border-radius: 9999px; margin-top: 12px; overflow: hidden; } .ds-card-bar { height: 100%; background-color: #10b981; border-radius: 9999px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Air-Gapped Sentinel",
+    "overview": "The NTRO Compliance Auditor interface is a high-density, mission-critical cybersecurity console engineered for sovereign technical infrastructure and classified network environments. Its visual aesthetic is rooted in industrial rigor, data density, and absolute factual clarity: zero sci-fi glowing neon accents, zero decorative purple AI flourishes, and zero remote external asset dependencies. The application is built to run entirely offline inside an air-gapped security perimeter.\n\nVisual hierarchy is maintained through subtle tonal layering on deep carbon and graphite surfaces (#0B0D0F, #111417, #171A1E) in Dark Mode, and clean, cool-neutral off-white card surfaces (#F0F4F8, #FFFFFF, #F8FAFC) in Light Mode. A single restrained sky-blue accent (#0284C7) commands user focus strictly for interactive navigation tabs, focus indicators, and forward progression buttons. Every visual token emphasizes non-repudiation, deterministic verification, and auditable cryptographic integrity.",
+    "keyCharacteristics": [
+      "Zero Remote Dependencies: Local fonts, icons, and stylesheets; completely air-gapped.",
+      "Dual-Theme Parity: Full WCAG contrast parity between Carbon/Graphite dark mode and Clean Neutral light mode.",
+      "Deterministic Status Integrity: Strict semantic colors (Emerald = Pass, Rose = Fail, Amber = Unknown).",
+      "Data-Dense Operational Layout: Compact table rows and two-line IST timestamps for continuous SOC oversight."
+    ],
+    "rules": [
+      {
+        "name": "The Rarity of Accent Rule",
+        "body": "The primary sky blue accent (#0284C7) is used on ≤10% of any given screen. Its rarity directs instant cognitive attention to navigation and primary action.",
+        "section": "colors"
+      },
+      {
+        "name": "The Red is Only for Fail Rule",
+        "body": "Red is strictly prohibited for navigation, general branding, or forward primary action buttons. Red indicates a security policy failure, destructive action, or backend probe failure.",
+        "section": "colors"
+      },
+      {
+        "name": "The No-Purple AI Rule",
+        "body": "AI suggestions are advisory subsystems. They must never use playful purple or magenta styling; AI proposals use neutral slate, cautionary amber, or restrained sky blue.",
+        "section": "colors"
+      },
+      {
+        "name": "The Strict Monospace Boundary Rule",
+        "body": "Monospace (IBM Plex Mono) is strictly reserved for machine evidence: hashes, CLI commands, rule IDs, IP addresses, session IDs, and JSON payloads. All UI labels, table column headers, and prose remain sans-serif.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Numbers Rule",
+        "body": "Any numeric metric, timestamp, ratio, or percentage rendered in tables or KPI cards must specify tabular-nums to prevent horizontal jitter during updates.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tonal Layering First Rule",
+        "body": "Depth is established by stepping surface luminosity (--bg-app → --bg-surface → --bg-surface-raised → --bg-surface-elevated), bounded by crisp 1px borders (#282D33). Shadows are secondary and ambient.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Subtle Micro-Interaction Rule",
+        "body": "Interactive buttons and clickable rows use subtle scale compression (active:scale-[0.98]) with 150ms cubic-bezier transition curves for tactile responsiveness without sluggishness.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do maintain strict air-gapped independence: all fonts, icons, and stylesheets must originate from local bundles.",
+      "Do preserve the semantic meaning of status colors: Emerald is certified compliant, Rose is a non-compliant violation, Amber is missing/unmapped evidence.",
+      "Do map all theme colors through CSS custom properties or mapped Tailwind utilities so that Dark and Light themes render with equal fidelity.",
+      "Do format all audit timestamps in Indian Standard Time (IST, UTC+05:30) using the two-line format (dateStr + timeStr) in dense tables.",
+      "Do wrap machine evidence (rule IDs, hashes, CLI commands, IP addresses) in monospace font (IBM Plex Mono).",
+      "Do respect role-based access control (RBAC): Viewers have read-only visibility; Uploaders can ingest and audit; Reviewers manage trusted rules, models, and ledger sealing."
+    ],
+    "donts": [
+      "Don't use red (#FF3333 or #DC2626) for forward progression buttons, browse buttons, or general navigation. Red is strictly reserved for failures and destructive actions.",
+      "Don't hardcode raw hex values (e.g. bg-[#0c1f17], bg-[#220d0f], bg-[#241a08]) inside components; use semantic token classes or CSS custom properties.",
+      "Don't use neon purple, magenta, or sci-fi cyberpunk visual tropes for AI suggestions; treat AI as an advisory subsystem.",
+      "Don't load external fonts via @import url('https://fonts.googleapis.com/...') or external CDN scripts.",
+      "Don't coerce UNKNOWN compliance results into PASS or FAIL. Unmapped lines and missing blocks are first-class audit verdicts.",
+      "Don't bypass human-in-the-loop verification (§19): AI suggestions cannot write directly to the trusted rule library without authorized reviewer sign-off."
+    ]
+  }
+}

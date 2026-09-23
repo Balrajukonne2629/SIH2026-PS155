@@ -183,7 +183,7 @@ export const AiSuggestionReviewScreen: React.FC<AiSuggestionReviewScreenProps> =
   return (
     <div className="space-y-6 font-sans">
       {/* Top Header & Breadcrumbs */}
-      <div className="border-b border-slate-800 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="border-b border-slate-700 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <button
             onClick={onBackToAudit}
@@ -192,7 +192,7 @@ export const AiSuggestionReviewScreen: React.FC<AiSuggestionReviewScreenProps> =
             &larr; Back to Audit Results Matrix
           </button>
           <div className="flex items-center space-x-3">
-            <h1 className="text-xl font-bold text-white">
+            <h1 className="text-xl font-bold text-slate-100">
               Trusted rule library &amp; human review
             </h1>
             <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-emerald-950 text-emerald-300 border border-emerald-800 font-semibold">
@@ -205,33 +205,33 @@ export const AiSuggestionReviewScreen: React.FC<AiSuggestionReviewScreenProps> =
         </div>
 
         {/* Tab Selector */}
-        <div className="flex items-center bg-slate-900 border border-slate-800 p-1 rounded font-mono text-xs">
+        <div className="flex items-center bg-slate-900 border border-slate-700 p-1 rounded font-sans text-xs">
           <button
             onClick={() => setActiveTab('active_review')}
-            className={`px-3 py-1.5 rounded cursor-pointer transition-colors ${
+            className={`px-3 py-1.5 rounded cursor-pointer transition-colors font-medium ${
               activeTab === 'active_review'
-                ? 'bg-[#00FF41] text-black font-bold'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-sky-600 text-white shadow-sm border border-sky-500'
+                : 'text-slate-400 hover:text-slate-100'
             }`}
           >
             Active Review
           </button>
           <button
             onClick={() => setActiveTab('trusted_library')}
-            className={`px-3 py-1.5 rounded cursor-pointer transition-colors ${
+            className={`px-3 py-1.5 rounded cursor-pointer transition-colors font-medium ${
               activeTab === 'trusted_library'
-                ? 'bg-[#00FF41] text-black font-bold'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-sky-600 text-white shadow-sm border border-sky-500'
+                : 'text-slate-400 hover:text-slate-100'
             }`}
           >
             Trusted Rules Library
           </button>
           <button
             onClick={() => setActiveTab('queue')}
-            className={`px-3 py-1.5 rounded cursor-pointer transition-colors ${
+            className={`px-3 py-1.5 rounded cursor-pointer transition-colors font-medium ${
               activeTab === 'queue'
-                ? 'bg-[#00FF41] text-black font-bold'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-sky-600 text-white shadow-sm border border-sky-500'
+                : 'text-slate-400 hover:text-slate-100'
             }`}
           >
             Suggestions Queue
@@ -247,28 +247,28 @@ export const AiSuggestionReviewScreen: React.FC<AiSuggestionReviewScreenProps> =
           </svg>
         </div>
         <div>
-          <span className="font-bold uppercase tracking-wider text-amber-300 font-mono">
+          <span className="font-semibold uppercase tracking-wider text-amber-300 font-sans">
             Mandatory Security Boundary (§3B Invariant):
           </span>
           <p className="text-amber-200/80 mt-0.5 leading-relaxed">
-            AI suggestions NEVER directly decide compliance or write to the Trusted Rule Library. Only an authorized reviewer (<code className="font-mono text-amber-200 bg-amber-950 px-1 py-0.2 rounded border border-amber-800">is_authorized_approver: true</code>) can promote or correct an interpretation into a trusted deterministic rule.
+            AI suggestions NEVER directly decide compliance or write to the Trusted Rule Library. Only an authorized reviewer (<code className="font-mono text-amber-200 bg-amber-950 px-1.5 py-0.5 rounded border border-amber-800 leading-none">is_authorized_approver: true</code>) can promote or correct an interpretation into a trusted deterministic rule.
           </p>
         </div>
       </div>
 
       {/* Vendor Filter Bar (for Library & Queue views) */}
       {(activeTab === 'trusted_library' || activeTab === 'queue') && (
-        <div className="flex items-center justify-between bg-slate-900 border border-slate-800 rounded px-4 py-2.5 font-mono text-xs">
+        <div className="flex items-center justify-between bg-slate-900 border border-slate-700 rounded px-4 py-2.5 font-sans text-xs">
           <div className="flex items-center space-x-2">
-            <span className="text-slate-400 uppercase">Vendor Filter:</span>
+            <span className="text-slate-400 uppercase font-medium">Vendor Filter:</span>
             {(['all', 'cisco', 'juniper'] as VendorFilter[]).map((vf) => (
               <button
                 key={vf}
                 onClick={() => setVendorFilter(vf)}
-                className={`px-2.5 py-1 rounded border uppercase text-[11px] cursor-pointer transition-colors ${
+                className={`px-2.5 py-1 rounded border uppercase text-xs cursor-pointer transition-[transform,background-color,border-color,color] duration-150 ease-out active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/80 font-medium ${
                   vendorFilter === vf
-                    ? 'bg-[#00FF41] text-black border-[#00FF41]/60 font-bold'
-                    : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'
+                    ? 'bg-sky-600 text-white border-sky-500 shadow-sm'
+                    : 'bg-slate-800 text-slate-400 border border-slate-700 hover:text-slate-100 hover:bg-slate-700'
                 }`}
               >
                 {vf === 'all' ? 'All Vendors' : vf}
@@ -285,9 +285,25 @@ export const AiSuggestionReviewScreen: React.FC<AiSuggestionReviewScreenProps> =
       {activeTab === 'active_review' && (
         <div className="space-y-6">
           {isLoadingSuggestion ? (
-            <div className="bg-slate-900 border border-slate-800 rounded p-12 text-center font-mono text-xs text-slate-300 space-y-3">
-              <div className="w-8 h-8 border-2 border-amber-400 border-t-transparent rounded-full animate-spin mx-auto"></div>
-              <div>Running semantic similarity & AI rationale generation for: <code className="text-amber-300 font-bold">{currentLine}</code> ({currentVendor})...</div>
+            <div className="bg-slate-900 border border-slate-700 rounded-lg p-6 space-y-4 animate-pulse">
+              <div className="flex justify-between items-center pb-4 border-b border-slate-700">
+                <div className="h-4 bg-slate-800 rounded w-48"></div>
+                <div className="h-6 bg-slate-800 rounded w-36"></div>
+              </div>
+              <div className="space-y-2">
+                <div className="h-3 bg-slate-800 rounded w-32"></div>
+                <div className="h-10 bg-slate-950 border border-slate-700 rounded w-full flex items-center px-3">
+                  <div className="h-4 bg-slate-800 rounded w-3/4"></div>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                <div className="h-24 bg-slate-950 border border-slate-700 rounded"></div>
+                <div className="h-24 bg-slate-950 border border-slate-700 rounded"></div>
+              </div>
+              <div className="flex items-center gap-2 pt-2 text-xs font-mono text-slate-400">
+                <div className="w-3.5 h-3.5 border-2 border-sky-400 border-t-transparent rounded-full animate-spin"></div>
+                <span>Evaluating semantic similarity &amp; rule rationale...</span>
+              </div>
             </div>
           ) : suggestionError || !suggestionData ? (
             <div className="bg-rose-950/40 border border-rose-800 rounded p-8 text-center font-mono text-xs space-y-3">
@@ -295,21 +311,21 @@ export const AiSuggestionReviewScreen: React.FC<AiSuggestionReviewScreenProps> =
               <p className="text-rose-200 max-w-lg mx-auto">{suggestionError || 'Unable to generate suggestion.'}</p>
               <button
                 onClick={() => loadAiSuggestion(currentLine, currentVendor)}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded border border-slate-700 cursor-pointer font-bold"
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded border border-slate-700 cursor-pointer font-bold transition-[transform,background-color] duration-150 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
               >
                 ↻ Retry Inference
               </button>
             </div>
           ) : (
             <div
-              className={`bg-slate-900 rounded p-6 border-2 ${
+              className={`bg-slate-900 rounded-lg p-5 border transition-colors duration-150 shadow-xs ${
                 submitSuccess
                   ? 'border-slate-700'
-                  : 'border-dashed border-amber-600/90 shadow-lg shadow-amber-950/20'
+                  : 'border-slate-700'
               }`}
             >
               {/* Status Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-5 border-b border-slate-800 gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-5 border-b border-slate-700 gap-2">
                 <div className="flex items-center space-x-3">
                   <span className="font-mono text-xs text-slate-500 uppercase">Suggestion ID:</span>
                   <span className="font-mono text-xs text-sky-400 font-semibold">{suggestionId}</span>
@@ -321,7 +337,7 @@ export const AiSuggestionReviewScreen: React.FC<AiSuggestionReviewScreenProps> =
                 <div>
                   {!submitSuccess ? (
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-amber-950 text-amber-300 border border-amber-700">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1.5 animate-pulse"></span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1.5"></span>
                       STATUS: PENDING HUMAN REVIEW
                     </span>
                   ) : submitSuccess.status === 'rejected' ? (
@@ -356,17 +372,17 @@ export const AiSuggestionReviewScreen: React.FC<AiSuggestionReviewScreenProps> =
                   </label>
                   <span className="text-[11px] font-mono text-slate-500">Unmapped Input Evidence</span>
                 </div>
-                <div className="bg-slate-950 border border-slate-800 rounded p-3 font-mono text-sm text-amber-300 flex items-center justify-between select-all">
+                <div className="bg-slate-950 border border-slate-700 rounded p-3 font-mono text-sm text-amber-300 flex items-center justify-between select-all">
                   <code>{currentLine}</code>
-                  <span className="text-[10px] text-slate-500 font-mono px-2 py-0.5 bg-slate-900 rounded border border-slate-800 uppercase">
+                  <span className="text-[10px] text-slate-500 font-mono px-2 py-0.5 bg-slate-900 rounded border border-slate-700 uppercase">
                     {currentVendor}
                   </span>
                 </div>
               </div>
 
               {/* AI suggestion body */}
-              <div className="bg-slate-950/70 border border-slate-800 rounded p-5 space-y-5 mb-6">
-                <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
+              <div className="bg-slate-950/70 border border-slate-700 rounded p-5 space-y-5 mb-6">
+                <div className="flex items-center justify-between border-b border-slate-700 pb-3">
                   <div className="flex items-center space-x-2">
                     <span className="w-2 h-2 rounded-full bg-amber-400"></span>
                     <span className="text-xs font-mono font-bold uppercase text-slate-200">
@@ -403,13 +419,13 @@ export const AiSuggestionReviewScreen: React.FC<AiSuggestionReviewScreenProps> =
                     </div>
                     <div>
                       <span className="text-slate-500 block text-[10px] uppercase">CSM Field Checked</span>
-                      <code className="text-sky-400 font-bold bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">
+                      <code className="text-sky-400 font-bold bg-slate-900 px-1.5 py-0.5 rounded border border-slate-700">
                         {editField}
                       </code>
                     </div>
                     <div>
                       <span className="text-slate-500 block text-[10px] uppercase">Condition</span>
-                      <code className="text-amber-300 font-bold bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">
+                      <code className="text-amber-300 font-bold bg-slate-900 px-1.5 py-0.5 rounded border border-slate-700">
                         {editCondition}
                       </code>
                     </div>
@@ -419,7 +435,7 @@ export const AiSuggestionReviewScreen: React.FC<AiSuggestionReviewScreenProps> =
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-4 pt-2 border-t border-slate-800">
+                  <div className="space-y-4 pt-2 border-t border-slate-700">
                     <div className="text-xs font-mono text-sky-400 font-bold">
                       CORRECT RULE DEFINITION (HUMAN AUDIT OVERRIDE):
                     </div>
@@ -431,7 +447,7 @@ export const AiSuggestionReviewScreen: React.FC<AiSuggestionReviewScreenProps> =
                         type="text"
                         value={editTitle}
                         onChange={(e) => setEditTitle(e.target.value)}
-                        className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-xs text-slate-200 font-mono focus:border-sky-500 focus:outline-none"
+                        className="w-full input-base font-mono"
                       />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -443,7 +459,7 @@ export const AiSuggestionReviewScreen: React.FC<AiSuggestionReviewScreenProps> =
                           type="text"
                           value={editField}
                           onChange={(e) => setEditField(e.target.value)}
-                          className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-xs text-slate-200 font-mono focus:border-sky-500 focus:outline-none"
+                          className="w-full input-base font-mono"
                         />
                       </div>
                       <div>
@@ -454,7 +470,7 @@ export const AiSuggestionReviewScreen: React.FC<AiSuggestionReviewScreenProps> =
                           type="text"
                           value={editCondition}
                           onChange={(e) => setEditCondition(e.target.value)}
-                          className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-xs text-slate-200 font-mono focus:border-sky-500 focus:outline-none"
+                          className="w-full input-base font-mono"
                         />
                       </div>
                     </div>
@@ -462,18 +478,18 @@ export const AiSuggestionReviewScreen: React.FC<AiSuggestionReviewScreenProps> =
                 )}
 
                 {/* Explanation */}
-                <div className="pt-2 border-t border-slate-800/80">
+                <div className="pt-2 border-t border-slate-700">
                   <span className="text-slate-400 block text-xs font-mono uppercase mb-1">
                     AI Inference Explanation:
                   </span>
-                  <p className="text-xs text-slate-300 leading-relaxed font-sans bg-slate-900/60 p-3 rounded border border-slate-800">
+                  <p className="text-xs text-slate-300 leading-relaxed font-sans bg-slate-900/60 p-3 rounded border border-slate-700">
                     {suggestionData.rationale}
                   </p>
                 </div>
 
                 {/* Framework Hints */}
                 {frameworkHints.length > 0 && (
-                  <div className="pt-2 border-t border-slate-800/80">
+                  <div className="pt-2 border-t border-slate-700">
                     <span className="text-slate-400 block text-xs font-mono uppercase mb-2">
                       Inferred Framework References:
                     </span>
@@ -494,10 +510,10 @@ export const AiSuggestionReviewScreen: React.FC<AiSuggestionReviewScreenProps> =
 
               {/* Reviewer Accountability Card */}
               <div className="space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-slate-950 rounded border border-slate-800">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-slate-950 rounded border border-slate-700">
                   <div className="flex items-center space-x-3 text-xs font-mono">
                     <span className="text-slate-400 uppercase font-semibold">Authoritative Approver:</span>
-                    <span className="text-sky-400 font-bold bg-slate-900 px-2.5 py-1 rounded border border-slate-800">
+                    <span className="text-sky-400 font-bold bg-slate-900 px-2.5 py-1 rounded border border-slate-700">
                       {currentUser?.username || 'SecOps Reviewer'}
                     </span>
                     <span className="text-[10px] text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-800">
@@ -527,7 +543,7 @@ export const AiSuggestionReviewScreen: React.FC<AiSuggestionReviewScreenProps> =
                       type="button"
                       disabled={isSubmitting || !currentUser?.is_authorized_approver}
                       onClick={() => handleDecision('reject')}
-                      className="px-4 py-2 bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-800 rounded text-xs font-mono font-bold uppercase transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="btn-destructive font-mono"
                     >
                       {isSubmitting ? 'Submitting...' : 'Reject (Do Not Trust)'}
                     </button>
@@ -537,7 +553,7 @@ export const AiSuggestionReviewScreen: React.FC<AiSuggestionReviewScreenProps> =
                         type="button"
                         disabled={isSubmitting || !currentUser?.is_authorized_approver}
                         onClick={() => setIsEditing(true)}
-                        className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded text-xs font-mono font-bold uppercase transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="btn-secondary font-mono"
                       >
                         Correct Details...
                       </button>
@@ -546,7 +562,7 @@ export const AiSuggestionReviewScreen: React.FC<AiSuggestionReviewScreenProps> =
                         type="button"
                         disabled={isSubmitting || !currentUser?.is_authorized_approver}
                         onClick={() => handleDecision('approve_with_correction')}
-                        className="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white border border-sky-400 rounded text-xs font-mono font-bold uppercase transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="btn-primary font-mono"
                       >
                         {isSubmitting ? 'Submitting...' : 'Approve with Correction'}
                       </button>
@@ -557,7 +573,7 @@ export const AiSuggestionReviewScreen: React.FC<AiSuggestionReviewScreenProps> =
                         type="button"
                         disabled={isSubmitting || !currentUser?.is_authorized_approver}
                         onClick={() => handleDecision('approve')}
-                        className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-slate-950 border border-emerald-400 rounded text-xs font-mono font-bold uppercase transition-colors cursor-pointer shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-500 rounded text-xs font-mono font-bold uppercase transition-[transform,background-color,border-color,box-shadow] duration-150 ease-out active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/80 cursor-pointer shadow-xs disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
                       >
                         {isSubmitting ? 'Submitting...' : 'Approve as Trusted Rule'}
                       </button>
@@ -609,10 +625,10 @@ export const AiSuggestionReviewScreen: React.FC<AiSuggestionReviewScreenProps> =
             </div>
           )}
 
-          <div className="bg-slate-900 border border-slate-800 rounded p-5">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 mb-4 border-b border-slate-800 gap-3">
+          <div className="bg-slate-900 border border-slate-700 rounded p-5">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 mb-4 border-b border-slate-700 gap-3">
               <div>
-                <h2 className="text-sm font-bold font-mono text-white flex items-center gap-2">
+                <h2 className="text-sm font-bold font-mono text-slate-100 flex items-center gap-2">
                   <span>Deterministic Trusted Rules</span>
                   <span className="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800 text-[10px]">
                     {trustedRules.length} Approved Mappings
@@ -636,13 +652,13 @@ export const AiSuggestionReviewScreen: React.FC<AiSuggestionReviewScreenProps> =
               </div>
             ) : trustedRules.length === 0 ? (
               <div className="text-center py-10 font-mono text-xs text-slate-400 space-y-2">
-                <div>No trusted rule mappings found for vendor: <strong className="text-white uppercase">{vendorFilter}</strong></div>
+                <div>No trusted rule mappings found for vendor: <strong className="text-slate-100 uppercase">{vendorFilter}</strong></div>
                 <p className="text-slate-500">Approve AI suggestions to add deterministic rules to this library.</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left font-mono text-xs">
-                  <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] border-b border-slate-800">
+                  <thead className="table-header border-b border-slate-700">
                     <tr>
                       <th className="py-2.5 px-3">Vendor</th>
                       <th className="py-2.5 px-3">Rule ID</th>
@@ -653,7 +669,7 @@ export const AiSuggestionReviewScreen: React.FC<AiSuggestionReviewScreenProps> =
                       <th className="py-2.5 px-3 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800">
+                  <tbody className="divide-y divide-slate-700/60">
                     {trustedRules.map((rule) => {
                       const isHuman = rule.version_info?.source === 'human_corrected';
                       const approvedBy = rule.version_info?.approved_by || 'Unknown';
@@ -670,7 +686,7 @@ export const AiSuggestionReviewScreen: React.FC<AiSuggestionReviewScreenProps> =
                               {rule.vendor || 'cisco'}
                             </span>
                           </td>
-                          <td className="py-3 px-3 font-semibold text-white">
+                          <td className="py-3 px-3 font-semibold text-slate-100">
                             <div>{rule.vendor_rule_id}</div>
                             {rule.common_rule_id && (
                               <div className="text-[10px] text-slate-500">{rule.common_rule_id}</div>
@@ -681,7 +697,7 @@ export const AiSuggestionReviewScreen: React.FC<AiSuggestionReviewScreenProps> =
                             <code className="text-[11px] text-sky-400">{rule.csmFieldChecked}</code>
                           </td>
                           <td className="py-3 px-3">
-                            <code className="text-amber-300 bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800">
+                            <code className="text-amber-300 bg-slate-950 px-1.5 py-0.5 rounded border border-slate-700">
                               {rule.condition}
                             </code>
                           </td>
@@ -726,10 +742,10 @@ export const AiSuggestionReviewScreen: React.FC<AiSuggestionReviewScreenProps> =
 
       {/* TAB 3: SUGGESTIONS QUEUE */}
       {activeTab === 'queue' && (
-        <div className="bg-slate-900 border border-slate-800 rounded p-5 space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="bg-slate-900 border border-slate-700 rounded p-5 space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-700">
             <div>
-              <h2 className="text-sm font-bold font-mono text-white">
+              <h2 className="text-sm font-bold font-mono text-slate-100">
                 AI interpretation queue &amp; historical decisions
               </h2>
               <p className="text-xs text-slate-400 mt-0.5">
@@ -751,7 +767,7 @@ export const AiSuggestionReviewScreen: React.FC<AiSuggestionReviewScreenProps> =
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left font-mono text-xs">
-                <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] border-b border-slate-800">
+                <thead className="table-header border-b border-slate-700">
                   <tr>
                     <th className="py-2.5 px-3">Vendor</th>
                     <th className="py-2.5 px-3">Status</th>
@@ -761,7 +777,7 @@ export const AiSuggestionReviewScreen: React.FC<AiSuggestionReviewScreenProps> =
                     <th className="py-2.5 px-3 text-right">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800">
+                <tbody className="divide-y divide-slate-700/60">
                   {queueItems.map((item) => {
                     const status = item.status || 'pending';
                     const isPending = status === 'pending';

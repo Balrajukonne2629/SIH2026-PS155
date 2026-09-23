@@ -144,7 +144,7 @@ export const ReportWorkflowPanel: React.FC<Props> = ({ reportId, currentUser, in
   return (
     <div className="mt-3 border border-slate-700 rounded bg-slate-950">
       {/* Panel header */}
-      <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-slate-800">
+      <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-slate-700">
         <span className="text-[11px] font-mono font-bold uppercase text-slate-400 mr-2">
           Canonical Report
         </span>
@@ -156,10 +156,10 @@ export const ReportWorkflowPanel: React.FC<Props> = ({ reportId, currentUser, in
         {canEdit && (
           <button
             onClick={editMode ? () => { setEditMode(false); setEditError(null); setEditSuccess(null); } : handleOpenEdit}
-            className={`ml-auto px-3 py-1.5 rounded text-xs font-mono font-semibold border transition-colors cursor-pointer ${
+            className={`ml-auto px-3 py-1.5 rounded text-xs font-mono font-semibold border transition-[transform,background-color,border-color,color] duration-150 ease-out active:scale-[0.98] cursor-pointer ${
               editMode
-                ? 'bg-slate-800 text-slate-300 border-slate-600 hover:text-white'
-                : 'bg-amber-900/60 hover:bg-amber-800/80 text-amber-300 border-amber-700'
+                ? 'bg-slate-800 text-slate-300 border-slate-700 hover:text-white'
+                : 'bg-slate-800 hover:bg-slate-700 text-amber-300 hover:text-amber-200 border-slate-700'
             }`}
           >
             {editMode ? '✕ Close Editor' : '✎ Edit Report'}
@@ -171,7 +171,7 @@ export const ReportWorkflowPanel: React.FC<Props> = ({ reportId, currentUser, in
           <select
             value={exportFormat}
             onChange={(e) => setExportFormat(e.target.value as 'pdf' | 'docx')}
-            className="text-xs font-mono bg-slate-800 border border-slate-700 text-slate-200 rounded px-2 py-1.5 cursor-pointer"
+            className="text-xs font-mono bg-slate-800 border border-slate-700 text-slate-200 rounded px-2 py-1.5 cursor-pointer focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
           >
             <option value="pdf">PDF</option>
             <option value="docx">DOCX</option>
@@ -179,10 +179,10 @@ export const ReportWorkflowPanel: React.FC<Props> = ({ reportId, currentUser, in
           <button
             onClick={handleExport}
             disabled={exporting}
-            className={`px-3 py-1.5 rounded text-xs font-mono font-semibold border transition-colors flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded text-xs font-mono font-semibold border transition-[transform,background-color,border-color] duration-150 ease-out active:scale-[0.98] flex items-center gap-1.5 shadow-xs ${
               exporting
                 ? 'bg-slate-800 text-slate-500 border-slate-700 cursor-not-allowed'
-                : 'bg-sky-900/60 hover:bg-sky-800 text-sky-300 border-sky-700 cursor-pointer'
+                : 'bg-sky-600 hover:bg-sky-500 text-white border-sky-500 cursor-pointer'
             }`}
           >
             {exporting ? (
@@ -252,7 +252,7 @@ export const ReportWorkflowPanel: React.FC<Props> = ({ reportId, currentUser, in
                   value={editValue}
                   onChange={(e) => setEditValue(e.target.value)}
                   rows={5}
-                  className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-xs font-mono text-slate-100 focus:outline-none focus:border-amber-600 resize-y"
+                  className="w-full input-base font-mono resize-y"
                   placeholder={`Enter ${EDITABLE_FIELDS.find(f => f.key === selectedField)?.label}…`}
                 />
               </div>
@@ -279,10 +279,10 @@ export const ReportWorkflowPanel: React.FC<Props> = ({ reportId, currentUser, in
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className={`px-4 py-2 rounded text-xs font-mono font-bold border transition-colors ${
+                  className={`px-4 py-2 rounded text-xs font-mono font-bold border transition-[transform,background-color,border-color] duration-150 ease-out active:scale-[0.98] shadow-xs ${
                     saving
                       ? 'bg-slate-800 text-slate-500 border-slate-700 cursor-not-allowed'
-                      : 'bg-emerald-800/70 hover:bg-emerald-700/80 text-emerald-200 border-emerald-700 cursor-pointer'
+                      : 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500 cursor-pointer'
                   }`}
                 >
                   {saving ? 'Saving…' : '↳ Save Edit'}

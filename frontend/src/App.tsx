@@ -1,28 +1,55 @@
 import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
+import { DashboardScreen } from './components/DashboardScreen';
 import { UploadScreen } from './components/UploadScreen';
-import { AuditResultsScreen } from './components/AuditResultsScreen';
+import { AuditsScreen } from './components/AuditsScreen';
 import { AiSuggestionReviewScreen } from './components/AiSuggestionReviewScreen';
-import { RemediationDetailScreen } from './components/RemediationDetailScreen';
 import { AuditLogReportScreen } from './components/AuditLogReportScreen';
-import { AiModelManagerScreen } from './components/AiModelManagerScreen';
+import { SystemScreen } from './components/SystemScreen';
+import { AuditWorkspace } from './components/AuditWorkspace';
 import { LoginScreen } from './components/LoginScreen';
-import { UserIdentity, ScreenId } from './types';
-import { getAccessToken, getCurrentUser, clearAccessToken, onUnauthorized, getModelStatus } from './api';
+import { ReviewerDashboard } from './components/ReviewerDashboard';
+import { UserIdentity, GlobalScreenId, AuditWorkspaceState, AuditWorkspaceTab } from './types';
+import { getAccessToken, getCurrentUser, clearAccessToken, onUnauthorized, getModelStatus, getAuditResults } from './api';
 
 export const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<UserIdentity | null>(null);
   const [authLoading, setAuthLoading] = useState<boolean>(true);
 
-  const [currentScreen, setCurrentScreen] = useState<ScreenId>('upload');
+  // Real Light + Dark Theme state with persistence
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    const saved = localStorage.getItem('ntro_theme');
+    if (saved === 'light' || saved === 'dark') return saved;
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+      return 'light';
+    }
+    return 'dark';
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.classList.remove('dark', 'light');
+    document.documentElement.classList.add(theme);
+    localStorage.setItem('ntro_theme', theme);
+  }, [theme]);
+
+  const handleToggleTheme = () => {
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  };
+
+  // Global Navigation State (separate from AuditWorkspaceState)
+  const [currentScreen, setCurrentScreen] = useState<GlobalScreenId>('dashboard');
+
+  // Contextual Audit Workspace State (null when in global navigation)
+  const [auditWorkspace, setAuditWorkspace] = useState<AuditWorkspaceState | null>(null);
+  const [lastWorkspaceTab, setLastWorkspaceTab] = useState<AuditWorkspaceTab>('overview');
 
   // Live model runtime status for top classification bar
   const [liveModelMode, setLiveModelMode] = useState<string>('auto');
   const [liveOllamaAlive, setLiveOllamaAlive] = useState<boolean>(true);
 
-  // Real active session state (Prop-drilled across screens)
+  // Active session and cached results
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
-
   const [cachedResults, setCachedResults] = useState<any>(null);
   const [activeUnmappedLine, setActiveUnmappedLine] = useState<string>('service call-home');
   const [activeRemediationRuleId, setActiveRemediationRuleId] = useState<string>('CISCO-NTP-001');
@@ -39,7 +66,11 @@ export const App: React.FC = () => {
       }
       try {
         const user = await getCurrentUser();
-        if (isMounted) setCurrentUser(user);
+        if (isMounted) {
+          setCurrentUser(user);
+          // Set role-appropriate default landing screen
+          setCurrentScreen('dashboard');
+        }
         try {
           const modelStat = await getModelStatus();
           if (isMounted) {
@@ -59,13 +90,13 @@ export const App: React.FC = () => {
 
     initAuth();
 
-
     // Centralized 401 handler: immediately resets auth state without page reload
     const unsubscribe = onUnauthorized(() => {
       if (isMounted) {
         setCurrentUser(null);
         setActiveSessionId(null);
         setCachedResults(null);
+        setAuditWorkspace(null);
       }
     });
 
@@ -75,9 +106,33 @@ export const App: React.FC = () => {
     };
   }, []);
 
-  // Screen transition handlers
+  // Role-enforced global navigation handler
+  const handleNavigate = (screen: GlobalScreenId) => {
+    const role = currentUser?.role;
+
+    // RBAC validation on navigation
+    if (role === 'viewer') {
+      if (screen !== 'dashboard' && screen !== 'audits' && screen !== 'reports') {
+        setCurrentScreen('dashboard');
+        setAuditWorkspace(null);
+        return;
+      }
+    } else if (role === 'uploader') {
+      if (screen === 'review_queue' || screen === 'system') {
+        setCurrentScreen('dashboard');
+        setAuditWorkspace(null);
+        return;
+      }
+    }
+
+    setAuditWorkspace(null);
+    setCurrentScreen(screen);
+  };
+
   const handleLoginSuccess = (user: UserIdentity) => {
     setCurrentUser(user);
+    setCurrentScreen('dashboard');
+    setAuditWorkspace(null);
     getModelStatus()
       .then((stat) => {
         setLiveModelMode(stat.mode);
@@ -86,39 +141,67 @@ export const App: React.FC = () => {
       .catch(() => {});
   };
 
-
   const handleLogout = () => {
     clearAccessToken();
     setCurrentUser(null);
     setActiveSessionId(null);
     setCachedResults(null);
-    setCurrentScreen('upload');
+    setAuditWorkspace(null);
+    setCurrentScreen('dashboard');
   };
 
+  // Upload completes -> opens contextual Audit Workspace on Results
   const handleAuditStarted = (sessionId: string, initialResults: any) => {
     setActiveSessionId(sessionId);
     setCachedResults(initialResults);
-    setCurrentScreen('results');
+    setLastWorkspaceTab('results');
+    setAuditWorkspace({
+      sessionId,
+      activeTab: 'results',
+      unmappedLine: activeUnmappedLine,
+      ruleId: activeRemediationRuleId
+    });
   };
 
-  const handleReviewAi = (unmappedLine: string) => {
-    setActiveUnmappedLine(unmappedLine || 'service call-home');
-    setCurrentScreen('ai_review');
+  // Open existing or recent audit from Dashboard or Audits table
+  const handleOpenAudit = async (sessionId: string, initialTab: AuditWorkspaceTab = 'overview') => {
+    setActiveSessionId(sessionId);
+    setLastWorkspaceTab(initialTab);
+    try {
+      const results = await getAuditResults(sessionId);
+      setCachedResults(results);
+    } catch {
+      // Keep existing cachedResults or allow component to handle error
+    }
+    setAuditWorkspace({
+      sessionId,
+      activeTab: initialTab,
+      unmappedLine: activeUnmappedLine,
+      ruleId: activeRemediationRuleId
+    });
   };
 
-  const handleViewRemediation = (ruleId: string) => {
-    setActiveRemediationRuleId(ruleId);
-    setCurrentScreen('remediation');
+  const handleWorkspaceTabChange = (tab: AuditWorkspaceTab) => {
+    setLastWorkspaceTab(tab);
+    setAuditWorkspace((prev) => {
+      if (!prev) return null;
+      return { ...prev, activeTab: tab };
+    });
+  };
+
+  const handleExitWorkspace = (destination?: GlobalScreenId) => {
+    if (destination) {
+      handleNavigate(destination);
+    } else {
+      setAuditWorkspace(null);
+    }
   };
 
   const handleApprovalCompleted = () => {
-    // Return to results, trigger re-fetch
     setCachedResults(null);
-    setCurrentScreen('results');
-  };
-
-  const handleAuditFinalized = (_finalizeData: any) => {
-    setCurrentScreen('audit_log');
+    if (auditWorkspace) {
+      setAuditWorkspace((prev) => (prev ? { ...prev, activeTab: 'results' } : null));
+    }
   };
 
   const unmappedCount = cachedResults?.unmapped_lines?.length ?? 0;
@@ -135,104 +218,109 @@ export const App: React.FC = () => {
 
   // If unauthenticated, display the login screen
   if (!currentUser) {
-    return <LoginScreen onLoginSuccess={handleLoginSuccess} />;
+    return (
+      <LoginScreen
+        onLoginSuccess={handleLoginSuccess}
+        theme={theme}
+        onToggleTheme={handleToggleTheme}
+      />
+    );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-sky-500 selection:text-white">
+    <div className="min-h-screen bg-app text-content-primary flex flex-col font-sans selection:bg-sky-500 selection:text-white transition-colors duration-150">
       {/* Top SOC Navigation Bar */}
       <Navbar
         currentScreen={currentScreen}
-        onNavigate={(screen) => setCurrentScreen(screen)}
+        onNavigate={handleNavigate}
         unmappedCount={unmappedCount}
         currentUser={currentUser}
         onLogout={handleLogout}
         modelMode={liveModelMode}
         ollamaAlive={liveOllamaAlive}
+        activeSessionId={activeSessionId}
+        isInWorkspace={auditWorkspace !== null}
+        theme={theme}
+        onToggleTheme={handleToggleTheme}
+        onOpenWorkspace={() => {
+          if (activeSessionId) {
+            setAuditWorkspace({
+              sessionId: activeSessionId,
+              activeTab: lastWorkspaceTab,
+              unmappedLine: activeUnmappedLine,
+              ruleId: activeRemediationRuleId
+            });
+          }
+        }}
+        onExitWorkspace={handleExitWorkspace}
       />
 
       {/* Main Screen Content Body */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {currentScreen === 'upload' && (
-          <UploadScreen
-            onAuditStarted={handleAuditStarted}
-            onNavigateToLedger={() => setCurrentScreen('audit_log')}
+      <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Contextual Audit Workspace View */}
+        {auditWorkspace ? (
+          <AuditWorkspace
+            workspaceState={auditWorkspace}
+            onTabChange={handleWorkspaceTabChange}
+            onExitWorkspace={handleExitWorkspace}
             currentUser={currentUser}
+            cachedResults={cachedResults}
+            onSelectRemediationRule={(rId) => {
+              setActiveRemediationRuleId(rId);
+              setAuditWorkspace((prev) => (prev ? { ...prev, ruleId: rId } : null));
+            }}
+            onSelectUnmappedLine={(line) => {
+              setActiveUnmappedLine(line);
+              setAuditWorkspace((prev) => (prev ? { ...prev, unmappedLine: line } : null));
+            }}
+            onAuditFinalized={() => {}}
           />
-        )}
+        ) : (
+          /* Global Navigation Views */
+          <>
+            {currentScreen === 'dashboard' && (
+              <DashboardScreen
+                currentUser={currentUser}
+                onNavigate={handleNavigate}
+                onOpenAudit={handleOpenAudit}
+                unmappedCount={unmappedCount}
+              />
+            )}
 
-        {currentScreen === 'results' && (
-          activeSessionId ? (
-            <AuditResultsScreen
-              sessionId={activeSessionId}
-              initialResults={cachedResults}
-              onReviewAiSuggestions={handleReviewAi}
-              onViewRemediation={handleViewRemediation}
-              onNavigateToLedger={() => setCurrentScreen('audit_log')}
-            />
-          ) : (
-            <div className="bg-slate-900 border border-slate-800 rounded p-10 text-center space-y-3 font-mono text-xs">
-              <div className="text-amber-400 font-bold text-sm">No Active Audit Session</div>
-              <p className="text-slate-400 max-w-md mx-auto">
-                No configuration has been ingested yet in this session.
-              </p>
-              <button
-                onClick={() => setCurrentScreen('upload')}
-                className="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded border border-sky-400 font-bold uppercase tracking-wider cursor-pointer"
-              >
-                Go to Ingestion Screen &rarr;
-              </button>
-            </div>
-          )
-        )}
+            {currentScreen === 'upload' && currentUser.role !== 'viewer' && (
+              <UploadScreen
+                onAuditStarted={handleAuditStarted}
+                onNavigateToLedger={() => handleNavigate('reports')}
+                currentUser={currentUser}
+              />
+            )}
 
-        {currentScreen === 'ai_review' && (
-          <AiSuggestionReviewScreen
-            unmappedLine={activeUnmappedLine}
-            sessionId={activeSessionId || undefined}
-            currentUser={currentUser}
-            onApprovalCompleted={handleApprovalCompleted}
-            onBackToAudit={() => setCurrentScreen('results')}
-          />
-        )}
+            {currentScreen === 'audits' && (
+              <AuditsScreen
+                currentUser={currentUser}
+                onOpenAudit={handleOpenAudit}
+                onNavigateToUpload={currentUser.role !== 'viewer' ? () => handleNavigate('upload') : undefined}
+              />
+            )}
 
-        {currentScreen === 'remediation' && (
-          activeSessionId ? (
-            <RemediationDetailScreen
-              ruleId={activeRemediationRuleId}
-              sessionId={activeSessionId}
-              currentUser={currentUser}
-              onBackToAudit={() => setCurrentScreen('results')}
-              onAuditFinalized={handleAuditFinalized}
-            />
-          ) : (
-            <div className="bg-slate-900 border border-slate-800 rounded p-10 text-center space-y-3 font-mono text-xs">
-              <div className="text-rose-400 font-bold text-sm">Session Required for Remediation</div>
-              <p className="text-slate-400 max-w-md mx-auto">
-                Cannot run static conflict checks without an active parsed configuration session.
-              </p>
-              <button
-                onClick={() => setCurrentScreen('upload')}
-                className="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded border border-sky-400 font-bold uppercase tracking-wider cursor-pointer"
-              >
-                Upload Config First &rarr;
-              </button>
-            </div>
-          )
-        )}
+            {currentScreen === 'review_queue' && currentUser.role === 'reviewer' && (
+              <ReviewerDashboard
+                currentUser={currentUser}
+                onNavigate={handleNavigate}
+                onOpenAudit={handleOpenAudit}
+              />
+            )}
 
-        {currentScreen === 'audit_log' && (
-          <AuditLogReportScreen currentUser={currentUser} />
-        )}
+            {currentScreen === 'reports' && (
+              <AuditLogReportScreen currentUser={currentUser} />
+            )}
 
-        {currentScreen === 'model_ops' && (
-          <AiModelManagerScreen
-            currentUser={currentUser}
-            onNavigateToReview={() => setCurrentScreen('ai_review')}
-          />
+            {currentScreen === 'system' && currentUser.role === 'reviewer' && (
+              <SystemScreen currentUser={currentUser} />
+            )}
+          </>
         )}
       </main>
-
 
       {/* Footer Classification & Compliance Watermark */}
       <footer className="bg-slate-950 border-t border-slate-900 py-3 px-4 text-center font-mono text-[11px] text-slate-500">
