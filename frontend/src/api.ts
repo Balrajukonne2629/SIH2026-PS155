@@ -53,9 +53,11 @@ function notifyUnauthorized(): void {
 
 export class ApiError extends Error {
   status: number;
-  constructor(status: number, message: string) {
+  data?: any;
+  constructor(status: number, message: string, data?: any) {
     super(message);
     this.status = status;
+    this.data = data;
     this.name = 'ApiError';
   }
 }
@@ -77,10 +79,14 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     const res = await fetch(url, reqOptions);
     if (!res.ok) {
       let errorMsg = `HTTP ${res.status} ${res.statusText}`;
+      let errorData: any = null;
       try {
         const body = await res.json();
+        errorData = body;
         if (body.detail) {
           errorMsg = typeof body.detail === 'string' ? body.detail : JSON.stringify(body.detail);
+        } else if (body.message) {
+          errorMsg = typeof body.message === 'string' ? body.message : JSON.stringify(body.message);
         }
       } catch {
         // use default errorMsg
@@ -89,7 +95,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
         clearAccessToken();
         notifyUnauthorized();
       }
-      throw new ApiError(res.status, errorMsg);
+      throw new ApiError(res.status, errorMsg, errorData);
     }
     return (await res.json()) as T;
   } catch (err: any) {

@@ -24,7 +24,9 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
     valid: boolean;
     message: string;
     broken_entry_index?: number;
+    detail?: string;
   } | null>(null);
+  const [showChainDetails, setShowChainDetails] = useState(false);
 
   // --- REPORT WORKSPACE MODAL STATE ---
   const [activeEntry, setActiveEntry] = useState<AuditLedgerItem | null>(null);
@@ -100,11 +102,16 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
   // Global Ledger Action: GET /api/ledger/verify
   const handleVerifyChain = async () => {
     setIsVerifyingChain(true);
+    setShowChainDetails(false);
     try {
       const res = await verifyLedger();
       setChainResult(res);
     } catch (err: any) {
-      setChainResult({ valid: false, message: `Verification check error: ${err.message}` });
+      if (err.data && typeof err.data.valid === 'boolean') {
+        setChainResult(err.data);
+      } else {
+        setChainResult({ valid: false, message: err.message || 'Verification check error' });
+      }
     } finally {
       setIsVerifyingChain(false);
     }
@@ -215,46 +222,58 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
         {chainResult && (
           <div className="mt-4 animate-reveal">
             {chainResult.valid ? (
-              <div className="bg-emerald-950/40 border border-emerald-700 rounded p-4 flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 rounded bg-emerald-900 border border-emerald-600 text-emerald-300 flex items-center justify-center">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-mono font-bold uppercase text-emerald-300">
-                      CHAIN INTEGRITY VERIFIED (NON-REPUDIATION PASSED)
+              <div className="bg-emerald-950/40 border border-emerald-700/80 rounded-lg p-3 sm:p-4 text-xs">
+                <div className="flex flex-wrap items-center justify-between gap-2.5">
+                  <div className="flex items-center space-x-2.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    <h4 className="font-semibold text-emerald-300 tracking-wide uppercase font-mono text-xs">
+                      CHAIN INTEGRITY VERIFIED
                     </h4>
-                    <p className="text-xs text-emerald-400/90 mt-0.5 font-mono">
-                      {chainResult.message}
-                    </p>
+                    <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-emerald-900/80 text-emerald-200 border border-emerald-600">
+                      STATE: VALIDATED (NON-REPUDIATION PASSED)
+                    </span>
                   </div>
+                  <span className="text-[11px] font-mono text-emerald-400/90 font-medium">
+                    {entries.length} ENTRIES VERIFIED
+                  </span>
                 </div>
-                <span className="px-2.5 py-1 rounded bg-emerald-900 text-emerald-200 border border-emerald-600 font-mono text-xs font-bold">
-                  VALIDATED
-                </span>
+                <p className="text-xs text-emerald-300/90 mt-1 font-mono pl-4.5">
+                  {chainResult.message}
+                </p>
               </div>
             ) : (
-              <div className="bg-rose-950/60 border-2 border-rose-600 rounded p-4 flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 rounded bg-rose-900 border border-rose-500 text-rose-300 flex items-center justify-center">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-mono font-bold uppercase text-rose-300">
-                      INTEGRITY DIVERGENCE DETECTED — TAMPER ALERT
+              <div className="bg-rose-950/40 border border-rose-700/80 rounded-lg p-3 sm:p-4 text-xs">
+                <div className="flex flex-wrap items-center justify-between gap-2.5">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-rose-400"></span>
+                    <h4 className="font-semibold text-rose-300 tracking-wide uppercase font-mono text-xs">
+                      INTEGRITY DIVERGENCE
                     </h4>
-                    <p className="text-xs text-rose-300/90 mt-0.5 font-mono">
-                      {chainResult.message}
-                    </p>
+                    <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-rose-900/80 text-rose-200 border border-rose-600">
+                      CHAIN INVALID
+                    </span>
+                    <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-slate-800 text-slate-300 border border-slate-700">
+                      AFFECTED: ENTRY #{chainResult.broken_entry_index ? chainResult.broken_entry_index.toString().padStart(2, '0') : '01'}
+                    </span>
                   </div>
+                  <button
+                    onClick={() => setShowChainDetails(!showChainDetails)}
+                    className="px-2.5 py-1 rounded text-[11px] font-mono font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-slate-100 border border-slate-700 transition-colors cursor-pointer"
+                  >
+                    {showChainDetails ? 'Hide Details ▲' : 'Technical Details ▼'}
+                  </button>
                 </div>
-                <span className="px-2.5 py-1 rounded bg-rose-900 text-rose-200 border border-rose-500 font-mono text-xs font-bold">
-                  TAMPERED
-                </span>
+                <p className="text-xs text-rose-200/90 mt-1.5 font-mono pl-4.5">
+                  {chainResult.message}
+                </p>
+                {showChainDetails && (
+                  <div className="mt-3 pt-2.5 border-t border-rose-900/60 font-mono text-[11px] text-slate-300 space-y-1 bg-slate-950/60 p-2.5 rounded border border-rose-900/40">
+                    <div><span className="text-slate-500">Status Code:</span> <code className="text-rose-400">HTTP 409 Conflict</code></div>
+                    <div><span className="text-slate-500">Broken Entry Index:</span> <code className="text-slate-200">{chainResult.broken_entry_index ?? 1}</code></div>
+                    <div><span className="text-slate-500">Cryptographic Linkage:</span> <code className="text-amber-300">prevEntryHash mismatch at entry #{chainResult.broken_entry_index ?? 1}</code></div>
+                    <div><span className="text-slate-500">Full Diagnostic:</span> <code className="text-slate-300 break-all select-all">{chainResult.detail || chainResult.message}</code></div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -292,7 +311,7 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
         </div>
       ) : (
         /* Connected-Entry Cryptographic Chain Timeline */
-        <div className="relative pl-4 sm:pl-6 space-y-5">
+        <div className="relative pl-4 sm:pl-6 space-y-3.5">
           {/* Continuous Cryptographic Chain Spine */}
           <div className="absolute left-[33px] sm:left-[41px] top-6 bottom-6 w-0.5 bg-slate-700/80 z-0"></div>
 
@@ -323,107 +342,107 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
                 </div>
 
                 {/* Entry Card */}
-                <div className="flex-1 bg-slate-900 border border-slate-700 hover:border-slate-600 rounded-lg p-4 sm:p-5 transition-all shadow-sm">
+                <div className="flex-1 bg-slate-900 border border-slate-700/80 hover:border-slate-600 rounded-lg p-3.5 sm:p-4 transition-all shadow-xs">
                   {/* Primary Row Summary */}
-                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span
-                          className="font-mono text-xs font-bold text-slate-100 select-all cursor-pointer hover:underline"
-                          title={`Audit Entry ID: ${entry.entry_id}`}
-                        >
-                          {entry.entry_id}
-                        </span>
-                        {isGenesis && (
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-400 border border-slate-700 leading-none">
-                            GENESIS BLOCK
-                          </span>
-                        )}
-                        {hasCanonical ? (
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-sky-950 text-sky-400 border border-sky-800 leading-none font-semibold">
-                            CANONICAL
-                          </span>
-                        ) : (
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-400 border border-slate-700 leading-none">
-                            LEGACY
-                          </span>
-                        )}
-                      </div>
+                  {/* 1. Audit Identity */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-[11px] font-mono font-bold text-sky-400 tracking-wide uppercase">
+                      ENTRY #{(index + 1).toString().padStart(2, '0')}
+                    </span>
+                    <span
+                      className="font-mono text-xs font-bold text-slate-100 select-all cursor-pointer hover:underline"
+                      title={`Audit Entry ID: ${entry.entry_id}`}
+                    >
+                      {entry.entry_id}
+                    </span>
+                    {isGenesis && (
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-400 border border-slate-700 leading-none">
+                        GENESIS BLOCK
+                      </span>
+                    )}
+                    {hasCanonical ? (
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-sky-950 text-sky-400 border border-sky-800 leading-none font-semibold">
+                        CANONICAL
+                      </span>
+                    ) : (
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-400 border border-slate-700 leading-none">
+                        LEGACY
+                      </span>
+                    )}
+                  </div>
 
-                      <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400 mt-1.5 font-mono">
-                        <span>
-                          DEVICE:{' '}
-                          <strong className="text-slate-200">
-                            {entry.device_hostname}
-                          </strong>
-                        </span>
-                        <span className="text-slate-600">•</span>
-                        <span className="text-slate-300 tabular-nums" title={`UTC: ${entry.timestamp}`}>
-                          {formatToIST(entry.timestamp)}
-                        </span>
-                      </div>
-                    </div>
+                  {/* 2. Device + Timestamp */}
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400 mt-1 font-mono">
+                    <span>
+                      DEVICE: <strong className="text-slate-200">{entry.device_hostname}</strong>
+                    </span>
+                    <span className="text-slate-600">•</span>
+                    <span className="text-slate-300 tabular-nums" title={`UTC: ${entry.timestamp}`}>
+                      {formatToIST(entry.timestamp)}
+                    </span>
+                  </div>
 
-                    {/* Verdict Badges & Single Primary Row Action */}
-                    <div className="flex flex-wrap items-center gap-3">
-                      <div className="flex items-center space-x-1.5 font-mono text-xs tabular-nums">
-                        <span className="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 font-bold border border-emerald-700">
-                          {passCount} PASS
-                        </span>
-                        <span className="px-2 py-0.5 rounded bg-rose-950 text-rose-300 font-bold border border-rose-700">
-                          {failCount} FAIL
-                        </span>
-                        {unknownCount > 0 && (
-                          <span className="px-2 py-0.5 rounded bg-amber-950 text-amber-300 font-bold border border-amber-700">
-                            {unknownCount} UNKNOWN
-                          </span>
-                        )}
-                      </div>
-
-                      {/* ONE Primary Row Action: View Report */}
-                      <button
-                        onClick={() => handleOpenWorkspace(entry)}
-                        className="px-3.5 py-1.5 rounded text-xs font-mono font-semibold bg-sky-600 hover:bg-sky-500 text-white border border-sky-500 transition-[transform,background-color,border-color] duration-150 active:scale-[0.98] shadow-xs flex items-center gap-1.5 cursor-pointer"
-                        title={`Open report workspace for ${entry.entry_id}`}
-                      >
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                        <span>View Report</span>
-                      </button>
-                    </div>
+                  {/* 3. Compliance Summary */}
+                  <div className="mt-2.5 flex items-center space-x-1.5 font-mono text-xs tabular-nums">
+                    <span className="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 font-bold border border-emerald-700">
+                      {passCount} PASS
+                    </span>
+                    <span className="px-2 py-0.5 rounded bg-rose-950 text-rose-300 font-bold border border-rose-700">
+                      {failCount} FAIL
+                    </span>
+                    {unknownCount > 0 && (
+                      <span className="px-2 py-0.5 rounded bg-amber-950 text-amber-300 font-bold border border-amber-700">
+                        {unknownCount} UNKNOWN
+                      </span>
+                    )}
                   </div>
 
                   {/* Authentic Cryptographic Chain Linkage Sub-bar */}
-                  <div className="mt-3 pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-3 text-[11px] font-mono text-slate-400">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-slate-500">Prev Hash:</span>
-                      <code
-                        className="text-slate-300 select-all cursor-help"
-                        title={`Authentic Previous Block Hash: ${entry.prevEntryHash}`}
-                      >
-                        {entry.prevEntryHash.substring(0, 8)}...{entry.prevEntryHash.substring(56)}
-                      </code>
-                      <span className="text-slate-600">→</span>
-                      <span className="text-slate-500">Node Hash:</span>
-                      <code
-                        className="text-emerald-400 font-semibold select-all cursor-help"
-                        title={`Authentic Entry Hash: ${entry.entryHash}`}
-                      >
-                        {entry.entryHash.substring(0, 8)}...{entry.entryHash.substring(56)}
-                      </code>
+                  {/* 4. Hash Metadata (Left) & 5. View Report (Right) */}
+                  <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    {/* Hash metadata */}
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-mono text-slate-400/90">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-slate-500">Prev:</span>
+                        <code
+                          className="text-slate-300 select-all cursor-help"
+                          title={`Authentic Previous Block Hash: ${entry.prevEntryHash}`}
+                        >
+                          {entry.prevEntryHash.substring(0, 8)}...{entry.prevEntryHash.substring(56)}
+                        </code>
+                        <span className="text-slate-600">→</span>
+                        <span className="text-slate-500">Node:</span>
+                        <code
+                          className="text-emerald-400/90 font-medium select-all cursor-help"
+                          title={`Authentic Entry Hash: ${entry.entryHash}`}
+                        >
+                          {entry.entryHash.substring(0, 8)}...{entry.entryHash.substring(56)}
+                        </code>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-slate-600 hidden md:inline">•</span>
+                        <span className="text-slate-500">Config:</span>
+                        <code
+                          className="text-sky-300/90 select-all cursor-help"
+                          title={`Configuration Hash: ${entry.config_file_hash}`}
+                        >
+                          {(entry.config_file_hash || '').substring(0, 10)}...
+                        </code>
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <span className="text-slate-500">Config:</span>
-                      <code
-                        className="text-sky-300 select-all cursor-help"
-                        title={`Configuration Hash: ${entry.config_file_hash}`}
-                      >
-                        {(entry.config_file_hash || '').substring(0, 10)}...
-                      </code>
-                    </div>
+                    {/* ONE Primary Row Action: View Report */}
+                    <button
+                      onClick={() => handleOpenWorkspace(entry)}
+                      className="px-3.5 py-1.5 rounded-md text-xs font-mono font-semibold bg-sky-600 hover:bg-sky-500 text-white border border-sky-500 transition-[transform,background-color,border-color] duration-150 active:scale-[0.98] shadow-xs flex items-center justify-center gap-1.5 cursor-pointer shrink-0 self-end sm:self-auto"
+                      title={`Open report workspace for ${entry.entry_id}`}
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      <span>View Report</span>
+                    </button>
                   </div>
                 </div>
               </div>
