@@ -442,6 +442,48 @@ def get_authenticated_report(report_id: str, current_user: Dict[str, Any]) -> Di
     return check_report_ownership(raw_report, current_user, report_id)
 
 
+def check_entry_ownership(entry_id: str, current_user: Dict[str, Any]) -> None:
+    """Enforces authorization and anti-enumeration on report endpoints by entry_id.
+    Reviewers and Viewers may access any valid entry.
+    Uploaders may only access entries where the owner_user_id == current_user['sub'].
+    Cross-owner access attempts by uploaders raise HTTP 404 (anti-enumeration).
+    """
+    raw_report = database.get_audit_report_by_entry_id(entry_id)
+
+    conn = database.get_connection()
+    cur = conn.cursor()
+    ledger_row = None
+    try:
+        cur.execute("SELECT owner_user_id FROM audit_ledger WHERE entry_id = ?", (entry_id,))
+        ledger_row = cur.fetchone()
+    finally:
+        conn.close()
+
+    if not raw_report and not ledger_row:
+        raise HTTPException(status_code=404, detail=f"Report '{entry_id}' not found.")
+
+    user_role = current_user.get("role")
+    if user_role == "uploader":
+        owner_user_id = None
+        if raw_report:
+            session_id = raw_report.get("session_id")
+            if session_id:
+                raw_session = database.get_session(session_id)
+                if raw_session:
+                    owner_user_id = raw_session.get("owner_user_id")
+            if not owner_user_id:
+                owner_user_id = raw_report.get("created_by")
+
+        if not owner_user_id and ledger_row:
+            owner_user_id = ledger_row[0]
+
+        if owner_user_id != current_user.get("sub"):
+            raise HTTPException(
+                status_code=404,
+                detail=f"Report '{entry_id}' not found."
+            )
+
+
 # --- Authentication Endpoints ---
 @app.post("/api/auth/login", response_model=LoginResponse)
 
@@ -638,6 +680,22 @@ async def audit_upload(
         raise HTTPException(status_code=500, detail=f"Audit parsing failed: {e}")
 
 
+# --- 1b. GET /api/audit/sessions ---
+@app.get("/api/audit/sessions")
+async def list_audit_sessions(
+    status: Optional[str] = Query(None, description="Optional workflow status filter ('in_progress', 'submitted', 'finalized')"),
+    current_user: Dict[str, Any] = Depends(require_role("viewer", "uploader", "reviewer"))
+):
+    """Returns list of audit session summaries.
+    Viewers and Reviewers see all sessions.
+    Uploaders see only their own sessions (owner_user_id == current_user['sub']).
+    Supports optional status filtering via ?status=...
+    Deterministic ordering: ORDER BY created_at DESC, session_id DESC.
+    """
+    owner_id = current_user["sub"] if current_user.get("role") == "uploader" else None
+    return database.list_sessions(owner_user_id=owner_id, status=status)
+
+
 # --- 2. GET /api/audit/{session_id}/results ---
 @app.get("/api/audit/{session_id}/results")
 async def get_audit_results(
@@ -657,6 +715,7 @@ async def get_audit_results(
         "device_hostname": session["csm"].get("device", {}).get("hostname", "unknown"),
         "platform": session["csm"].get("device", {}).get("platform") or "unknown",
         "config_file_hash": session["config_file_hash"],
+        "workflow_status": session.get("workflow_status") or "in_progress",
         "summary": {
             "total": len(evals),
             "pass": pass_count,
@@ -666,6 +725,33 @@ async def get_audit_results(
         "rule_results": evals,
         "unmapped_lines": session["csm"].get("unmapped_lines", []),
         "csm": session["csm"]
+    }
+
+
+# --- 2b. POST /api/audit/{session_id}/submit ---
+@app.post("/api/audit/{session_id}/submit")
+async def submit_audit_session(
+    session_id: str,
+    current_user: Dict[str, Any] = Depends(require_role("uploader"))
+):
+    """Transitions an in_progress session to submitted.
+    Permitted only for the session's authenticated uploader owner.
+    """
+    session = get_authenticated_session(session_id, current_user)
+    current_status = session.get("workflow_status") or "in_progress"
+
+    if current_status != "in_progress":
+        raise HTTPException(
+            status_code=400,
+            detail=f"Cannot submit session '{session_id}' in state '{current_status}'. Only 'in_progress' sessions can be submitted."
+        )
+
+    database.update_session_workflow_status(session_id, "submitted")
+
+    return {
+        "session_id": session_id,
+        "workflow_status": "submitted",
+        "message": f"Audit session '{session_id}' successfully submitted for review."
     }
 
 
@@ -946,7 +1032,15 @@ async def finalize_audit(
             remediation_summary=req.remediation_summary,
             logfile=LOG_FILE
         )
-        entry_hash = audit_log.append_audit_entry(audit_entry, logfile=LOG_FILE)
+        session_owner = session.get("owner_user_id") or current_user["sub"]
+        entry_hash = audit_log.append_audit_entry(
+            audit_entry,
+            logfile=LOG_FILE,
+            owner_user_id=session_owner
+        )
+
+        # Update audit_sessions.workflow_status to 'finalized'
+        database.update_session_workflow_status(session["session_id"], "finalized")
 
         # Create or get canonical AuditReport (Phase 3D Chunk 3)
         # Note: Must happen AFTER append_audit_entry so authoritative audit_ledger entry exists
@@ -1086,6 +1180,7 @@ async def download_report(
     current_user: Dict[str, Any] = Depends(require_role("viewer", "uploader", "reviewer"))
 ):
     """Serves the generated PDF report for the given entry_id."""
+    check_entry_ownership(entry_id, current_user)
     if not PDF_FILE.exists():
         raise HTTPException(status_code=404, detail="PDF report not found. Finalize audit first.")
 
@@ -1103,6 +1198,7 @@ async def verify_report(
     current_user: Dict[str, Any] = Depends(require_role("viewer", "uploader", "reviewer"))
 ):
     """Validates embedded hash in generated PDF report against SQLite audit_ledger."""
+    check_entry_ownership(entry_id, current_user)
     try:
         valid, msg = report_generator.verify_report_hash(PDF_FILE, LOG_FILE)
         return {

@@ -16,8 +16,8 @@ DEFAULT_LOG_FILE = BASE / "data" / "audit_log.jsonl"
 GENESIS_PREV_HASH = "0" * 64
 
 def compute_entry_hash(entry_data: dict) -> str:
-    """Computes SHA256 over canonical JSON of all entry fields excluding entryHash."""
-    canonical_dict = {k: v for k, v in entry_data.items() if k != "entryHash"}
+    """Computes SHA256 over canonical JSON of all entry fields excluding entryHash and owner_user_id."""
+    canonical_dict = {k: v for k, v in entry_data.items() if k not in ("entryHash", "owner_user_id")}
     canonical_json = json.dumps(canonical_dict, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(canonical_json.encode("utf-8")).hexdigest()
 
@@ -29,6 +29,7 @@ def get_last_entry(logfile: pathlib.Path = DEFAULT_LOG_FILE) -> Optional[dict]:
     row = cur.fetchone()
     conn.close()
     if row:
+        row_keys = row.keys()
         return {
             "entry_id": row["entry_id"],
             "timestamp": row["timestamp"],
@@ -37,7 +38,8 @@ def get_last_entry(logfile: pathlib.Path = DEFAULT_LOG_FILE) -> Optional[dict]:
             "audit_results": json.loads(row["audit_results"]) if row["audit_results"] else {},
             "remediation_summary": json.loads(row["remediation_summary"]) if row["remediation_summary"] is not None else None,
             "prevEntryHash": row["prevEntryHash"],
-            "entryHash": row["entryHash"]
+            "entryHash": row["entryHash"],
+            "owner_user_id": row["owner_user_id"] if "owner_user_id" in row_keys else None
         }
     return None
 
@@ -79,18 +81,20 @@ def create_audit_entry(csm: dict,
     entry_core["entryHash"] = entry_hash
     return entry_core
 
-def append_audit_entry(entry: dict, logfile: pathlib.Path = DEFAULT_LOG_FILE) -> str:
+def append_audit_entry(entry: dict, logfile: pathlib.Path = DEFAULT_LOG_FILE, owner_user_id: Optional[str] = None) -> str:
     """Appends an audit entry into SQLite.
     
     Uses sort_keys=True for JSON columns so that json.loads → json.dumps(sort_keys=True)
     in verify_chain produces the same canonical bytes as compute_entry_hash used at creation.
+    Persists owner_user_id from authoritative server-side session ownership.
     """
     conn = database.get_connection()
     cur = conn.cursor()
+    owner = owner_user_id if owner_user_id is not None else entry.get("owner_user_id")
     cur.execute('''
         INSERT INTO audit_ledger 
-        (entry_id, timestamp, device_hostname, config_file_hash, audit_results, remediation_summary, prevEntryHash, entryHash)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        (entry_id, timestamp, device_hostname, config_file_hash, audit_results, remediation_summary, prevEntryHash, entryHash, owner_user_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', (
         entry.get("entry_id"),
         entry.get("timestamp"),
@@ -99,7 +103,8 @@ def append_audit_entry(entry: dict, logfile: pathlib.Path = DEFAULT_LOG_FILE) ->
         json.dumps(entry.get("audit_results"), sort_keys=True),
         json.dumps(entry.get("remediation_summary"), sort_keys=True),
         entry.get("prevEntryHash"),
-        entry.get("entryHash")
+        entry.get("entryHash"),
+        owner
     ))
     conn.commit()
     conn.close()
