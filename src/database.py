@@ -52,6 +52,22 @@ def migrate_schema_add_ownership(conn: sqlite3.Connection):
         cur.execute("ALTER TABLE audit_ledger ADD COLUMN owner_user_id TEXT DEFAULT NULL")
     conn.commit()
 
+def migrate_schema_add_workflow_status(conn: sqlite3.Connection):
+    """Idempotently and non-destructively adds workflow_status and indices to audit_sessions."""
+    cur = conn.cursor()
+    cur.execute("PRAGMA table_info(audit_sessions)")
+    session_cols = [row[1] for row in cur.fetchall()]
+    if "workflow_status" not in session_cols:
+        cur.execute("ALTER TABLE audit_sessions ADD COLUMN workflow_status TEXT NOT NULL DEFAULT 'in_progress'")
+
+    # Backfill existing rows with workflow_status if NULL or empty
+    cur.execute("UPDATE audit_sessions SET workflow_status = 'in_progress' WHERE workflow_status IS NULL OR workflow_status = ''")
+
+    # Indices
+    cur.execute("CREATE INDEX IF NOT EXISTS idx_audit_sessions_status ON audit_sessions(workflow_status)")
+    cur.execute("CREATE INDEX IF NOT EXISTS idx_audit_sessions_owner ON audit_sessions(owner_user_id)")
+    conn.commit()
+
 def migrate_schema_add_trusted_library_fields(conn: sqlite3.Connection):
     """Idempotently and non-destructively adds vendor, status, created_at, updated_at to trusted_mappings
     and vendor to pending_suggestions. Backfills existing rows with inferred vendor ('cisco'/'juniper')."""
@@ -196,7 +212,8 @@ def initialize_database():
                 raw_config_text TEXT,
                 filename TEXT,
                 config_file_hash TEXT,
-                created_at TEXT
+                created_at TEXT,
+                workflow_status TEXT NOT NULL DEFAULT 'in_progress'
             )
         ''')
         
@@ -255,6 +272,8 @@ def initialize_database():
 
         # Apply schema migrations for ownership
         migrate_schema_add_ownership(conn)
+        # Apply schema migrations for workflow status
+        migrate_schema_add_workflow_status(conn)
         # Apply schema migrations for trusted library
         migrate_schema_add_trusted_library_fields(conn)
         # Apply schema migrations for audit reports
@@ -489,15 +508,26 @@ def list_users() -> List[Dict[str, Any]]:
     finally:
         conn.close()
 
+VALID_WORKFLOW_STATUSES = ("in_progress", "submitted", "finalized")
+
 def save_session(session_data):
     with db_lock:
         conn = get_connection()
         cur = conn.cursor()
         try:
+            wf_status = session_data.get("workflow_status")
+            if not wf_status:
+                cur.execute("SELECT workflow_status FROM audit_sessions WHERE session_id = ?", (session_data["session_id"],))
+                existing = cur.fetchone()
+                if existing and existing[0]:
+                    wf_status = existing[0]
+                else:
+                    wf_status = "in_progress"
+
             cur.execute('''
                 INSERT OR REPLACE INTO audit_sessions 
-                (session_id, csm, evals, raw_config_text, filename, config_file_hash, created_at, owner_user_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                (session_id, csm, evals, raw_config_text, filename, config_file_hash, created_at, owner_user_id, workflow_status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 session_data["session_id"],
                 json.dumps(session_data["csm"]),
@@ -506,7 +536,8 @@ def save_session(session_data):
                 session_data["filename"],
                 session_data["config_file_hash"],
                 session_data["created_at"],
-                session_data.get("owner_user_id")
+                session_data.get("owner_user_id"),
+                wf_status
             ))
             conn.commit()
         finally:
@@ -528,9 +559,106 @@ def get_session(session_id):
             "filename": row["filename"],
             "config_file_hash": row["config_file_hash"],
             "created_at": row["created_at"],
-            "owner_user_id": row["owner_user_id"] if "owner_user_id" in row_keys else None
+            "owner_user_id": row["owner_user_id"] if "owner_user_id" in row_keys else None,
+            "workflow_status": row["workflow_status"] if ("workflow_status" in row_keys and row["workflow_status"]) else "in_progress"
         }
     return None
+
+def _row_to_session_summary(row: sqlite3.Row) -> Dict[str, Any]:
+    row_keys = row.keys()
+    csm = {}
+    if "csm" in row_keys and row["csm"]:
+        try:
+            csm = json.loads(row["csm"]) if isinstance(row["csm"], str) else row["csm"]
+        except Exception:
+            csm = {}
+
+    evals = {}
+    if "evals" in row_keys and row["evals"]:
+        try:
+            evals = json.loads(row["evals"]) if isinstance(row["evals"], str) else row["evals"]
+        except Exception:
+            evals = {}
+
+    device = csm.get("device", {}) if isinstance(csm, dict) else {}
+    device_hostname = device.get("hostname", "unknown") if isinstance(device, dict) else "unknown"
+    vendor = device.get("vendor") or device.get("platform") or "unknown" if isinstance(device, dict) else "unknown"
+
+    pass_count = sum(1 for v in evals.values() if isinstance(v, dict) and v.get("status") == "Pass")
+    fail_count = sum(1 for v in evals.values() if isinstance(v, dict) and v.get("status") == "Fail")
+    unknown_count = sum(1 for v in evals.values() if isinstance(v, dict) and v.get("status") == "Unknown")
+    total_rules = len(evals)
+
+    compliance_score = round((pass_count / total_rules * 100), 2) if total_rules > 0 else 0.0
+
+    return {
+        "session_id": row["session_id"],
+        "filename": row["filename"] if "filename" in row_keys else None,
+        "config_file_hash": row["config_file_hash"] if "config_file_hash" in row_keys else None,
+        "created_at": row["created_at"] if "created_at" in row_keys else None,
+        "owner_user_id": row["owner_user_id"] if "owner_user_id" in row_keys else None,
+        "workflow_status": row["workflow_status"] if ("workflow_status" in row_keys and row["workflow_status"]) else "in_progress",
+        "device_hostname": device_hostname,
+        "vendor": vendor,
+        "total_rules": total_rules,
+        "passed_rules": pass_count,
+        "failed_rules": fail_count,
+        "unknown_rules": unknown_count,
+        "compliance_score": compliance_score,
+    }
+
+def list_sessions(owner_user_id: Optional[str] = None, status: Optional[str] = None) -> List[Dict[str, Any]]:
+    """Lists audit sessions with optional filtering by owner_user_id and/or workflow_status.
+    Returns summaries ordered deterministically by created_at DESC, session_id DESC.
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        query = "SELECT * FROM audit_sessions"
+        conditions = []
+        params = []
+        if owner_user_id is not None:
+            conditions.append("owner_user_id = ?")
+            params.append(owner_user_id)
+        if status is not None:
+            conditions.append("workflow_status = ?")
+            params.append(status.strip().lower())
+
+        if conditions:
+            query += " WHERE " + " AND ".join(conditions)
+
+        query += " ORDER BY created_at DESC, session_id DESC"
+
+        cur.execute(query, tuple(params))
+        rows = cur.fetchall()
+        return [_row_to_session_summary(r) for r in rows]
+    finally:
+        conn.close()
+
+def update_session_workflow_status(session_id: str, new_status: str) -> bool:
+    """Updates the workflow_status of an audit session.
+    Validates that new_status is one of ('in_progress', 'submitted', 'finalized').
+    Returns True if updated, False if session does not exist.
+    """
+    clean_status = (new_status or "").strip().lower()
+    if clean_status not in VALID_WORKFLOW_STATUSES:
+        raise ValueError(f"Invalid workflow_status '{new_status}'. Must be one of {VALID_WORKFLOW_STATUSES}")
+
+    with db_lock:
+        conn = get_connection()
+        cur = conn.cursor()
+        try:
+            cur.execute("SELECT 1 FROM audit_sessions WHERE session_id = ?", (session_id,))
+            if not cur.fetchone():
+                return False
+            cur.execute(
+                "UPDATE audit_sessions SET workflow_status = ? WHERE session_id = ?",
+                (clean_status, session_id)
+            )
+            conn.commit()
+            return True
+        finally:
+            conn.close()
 
 def _row_to_trusted_mapping(row: sqlite3.Row) -> Dict[str, Any]:
     row_keys = row.keys()
