@@ -163,31 +163,41 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
     }
   };
 
+  const canonicalCount = entries.filter((e) => Boolean(e.has_canonical_report || e.report_id || reportIdMap[e.entry_id])).length;
+
   return (
-    <div className="space-y-6 font-sans">
-      {/* Global Header & Verification Controls */}
-      <div className="bg-slate-900 border border-slate-700 rounded p-5">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-700 pb-4">
+    <div className="space-y-5 font-sans">
+      {/* Global Header: Control Center & Persistent Integrity Status */}
+      <div className="bg-slate-900 border border-slate-700/80 rounded-lg p-4 sm:p-5 shadow-xs">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          {/* Title & Subtitle */}
           <div>
-            <div className="flex items-center space-x-3">
-              <span className="inline-block w-2.5 h-2.5 rounded-full bg-sky-500"></span>
-              <h1 className="text-xl font-bold text-slate-100">
-                Cryptographic audit ledger &amp; compliance reports
+            <div className="flex flex-wrap items-center gap-2.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
+              <h1 className="text-lg sm:text-xl font-bold text-slate-100 tracking-tight">
+                Cryptographic Audit Ledger &amp; Reports
               </h1>
-              <span className="text-[11px] font-mono text-slate-500">
-                Module 5 — Non-repudiation
+              <span className="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
+                Module 5 · Non-Repudiation
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-1">
-              Append-only SHA-256 hash-chained compliance registry (<code className="font-mono text-slate-300">audit_log.jsonl</code>) and verified certificates.
+              Append-only SHA-256 hash-chained compliance registry (<code className="font-mono text-slate-300">audit_log.jsonl</code>) &amp; verified reports.
             </p>
           </div>
 
-          {/* Action & Verification Buttons */}
-          <div className="flex flex-wrap items-center gap-3">
+          {/* Ledger Summary & Action Buttons */}
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+            <div className="flex items-center gap-2 font-mono text-xs bg-slate-950/70 border border-slate-800 rounded px-2.5 py-1.5 text-slate-400">
+              <span>Total: <strong className="text-slate-200">{entries.length}</strong></span>
+              <span className="text-slate-600">|</span>
+              <span>Canonical: <strong className="text-sky-300">{canonicalCount}</strong></span>
+            </div>
+
             <button
               onClick={loadLedger}
-              className="px-3 py-1.5 rounded text-xs font-mono bg-slate-800 text-slate-300 hover:text-slate-100 border border-slate-700 transition-colors cursor-pointer"
+              className="px-3 py-1.5 rounded text-xs font-mono bg-slate-800 text-slate-300 hover:text-slate-100 hover:bg-slate-700 border border-slate-700 transition-colors cursor-pointer"
+              title="Reload ledger from server"
             >
               ↻ Reload Ledger
             </button>
@@ -195,7 +205,7 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
             <button
               onClick={handleVerifyChain}
               disabled={isVerifyingChain || entries.length === 0}
-              className={`px-4 py-2 rounded text-xs font-medium transition-colors shadow-sm flex items-center gap-2 border cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded text-xs font-medium transition-colors shadow-xs flex items-center gap-2 border cursor-pointer ${
                 isVerifyingChain
                   ? 'bg-slate-800 text-slate-400 border-slate-700 cursor-not-allowed'
                   : 'bg-sky-600 hover:bg-sky-500 text-white border-sky-500'
@@ -203,12 +213,12 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
             >
               {isVerifyingChain ? (
                 <>
-                  <span className="inline-block w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></span>
-                  <span>Verifying SHA-256 Hashes...</span>
+                  <span className="inline-block w-3.5 h-3.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></span>
+                  <span className="font-mono text-xs">Verifying SHA-256 Hashes...</span>
                 </>
               ) : (
                 <>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                   </svg>
                   <span>Verify Chain Integrity</span>
@@ -218,66 +228,63 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
           </div>
         </div>
 
-        {/* Live Backend Global Verification Result Card */}
-        {chainResult && (
-          <div className="mt-4 animate-reveal">
-            {chainResult.valid ? (
-              <div className="bg-emerald-950/40 border border-emerald-700/80 rounded-lg p-3 sm:p-4 text-xs">
-                <div className="flex flex-wrap items-center justify-between gap-2.5">
-                  <div className="flex items-center space-x-2.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-                    <h4 className="font-semibold text-emerald-300 tracking-wide uppercase font-mono text-xs">
-                      CHAIN INTEGRITY VERIFIED
-                    </h4>
-                    <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-emerald-900/80 text-emerald-200 border border-emerald-600">
-                      STATE: VALIDATED (NON-REPUDIATION PASSED)
-                    </span>
-                  </div>
-                  <span className="text-[11px] font-mono text-emerald-400/90 font-medium">
-                    {entries.length} ENTRIES VERIFIED
+        {/* Persistent Integrity Status Strip */}
+        <div className="mt-3.5 pt-3 border-t border-slate-800/80">
+          {!chainResult ? (
+            <div className="flex items-center justify-between text-xs font-mono text-slate-400">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-slate-500"></span>
+                <span>Chain integrity status: Unverified in current session</span>
+              </div>
+              <span className="text-[11px] text-slate-500 hidden sm:inline">
+                Run &ldquo;Verify Chain Integrity&rdquo; to re-walk SHA-256 parent linkage
+              </span>
+            </div>
+          ) : chainResult.valid ? (
+            <div className="flex items-center justify-between text-xs font-mono text-emerald-300">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span className="font-bold tracking-wide">
+                  Chain integrity verified · {entries.length} entries
+                </span>
+                <span className="text-emerald-400/80 text-[11px] font-normal hidden md:inline">
+                  ({chainResult.message})
+                </span>
+              </div>
+              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-950 text-emerald-300 border border-emerald-700">
+                VALIDATED
+              </span>
+            </div>
+          ) : (
+            <div>
+              <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-rose-400"></span>
+                  <span className="font-bold text-rose-300">
+                    Integrity divergence detected · Entry {chainResult.broken_entry_index ? chainResult.broken_entry_index.toString().padStart(2, '0') : '01'}
+                  </span>
+                  <span className="text-rose-300/80 text-[11px] hidden md:inline">
+                    ({chainResult.message})
                   </span>
                 </div>
-                <p className="text-xs text-emerald-300/90 mt-1 font-mono pl-4.5">
-                  {chainResult.message}
-                </p>
+                <button
+                  onClick={() => setShowChainDetails(!showChainDetails)}
+                  className="px-2.5 py-1 rounded text-[11px] font-mono bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-slate-100 border border-slate-700 transition-colors cursor-pointer"
+                >
+                  {showChainDetails ? 'Hide Details ▲' : 'Technical Details ▼'}
+                </button>
               </div>
-            ) : (
-              <div className="bg-rose-950/40 border border-rose-700/80 rounded-lg p-3 sm:p-4 text-xs">
-                <div className="flex flex-wrap items-center justify-between gap-2.5">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-rose-400"></span>
-                    <h4 className="font-semibold text-rose-300 tracking-wide uppercase font-mono text-xs">
-                      INTEGRITY DIVERGENCE
-                    </h4>
-                    <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-rose-900/80 text-rose-200 border border-rose-600">
-                      CHAIN INVALID
-                    </span>
-                    <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-slate-800 text-slate-300 border border-slate-700">
-                      AFFECTED: ENTRY #{chainResult.broken_entry_index ? chainResult.broken_entry_index.toString().padStart(2, '0') : '01'}
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => setShowChainDetails(!showChainDetails)}
-                    className="px-2.5 py-1 rounded text-[11px] font-mono font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-slate-100 border border-slate-700 transition-colors cursor-pointer"
-                  >
-                    {showChainDetails ? 'Hide Details ▲' : 'Technical Details ▼'}
-                  </button>
+              {showChainDetails && (
+                <div className="mt-2.5 pt-2 border-t border-rose-900/40 font-mono text-[11px] text-slate-300 space-y-1 bg-slate-950/80 p-2.5 rounded border border-rose-900/40 animate-reveal">
+                  <div><span className="text-slate-500">Status Code:</span> <code className="text-rose-400">HTTP 409 Conflict</code></div>
+                  <div><span className="text-slate-500">Broken Entry Index:</span> <code className="text-slate-200">{chainResult.broken_entry_index ?? 1}</code></div>
+                  <div><span className="text-slate-500">Cryptographic Linkage:</span> <code className="text-amber-300">prevEntryHash mismatch at entry #{chainResult.broken_entry_index ?? 1}</code></div>
+                  <div><span className="text-slate-500">Full Diagnostic:</span> <code className="text-slate-300 break-all select-all">{chainResult.detail || chainResult.message}</code></div>
                 </div>
-                <p className="text-xs text-rose-200/90 mt-1.5 font-mono pl-4.5">
-                  {chainResult.message}
-                </p>
-                {showChainDetails && (
-                  <div className="mt-3 pt-2.5 border-t border-rose-900/60 font-mono text-[11px] text-slate-300 space-y-1 bg-slate-950/60 p-2.5 rounded border border-rose-900/40">
-                    <div><span className="text-slate-500">Status Code:</span> <code className="text-rose-400">HTTP 409 Conflict</code></div>
-                    <div><span className="text-slate-500">Broken Entry Index:</span> <code className="text-slate-200">{chainResult.broken_entry_index ?? 1}</code></div>
-                    <div><span className="text-slate-500">Cryptographic Linkage:</span> <code className="text-amber-300">prevEntryHash mismatch at entry #{chainResult.broken_entry_index ?? 1}</code></div>
-                    <div><span className="text-slate-500">Full Diagnostic:</span> <code className="text-slate-300 break-all select-all">{chainResult.detail || chainResult.message}</code></div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Main Ledger Content */}
@@ -311,9 +318,9 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
         </div>
       ) : (
         /* Connected-Entry Cryptographic Chain Timeline */
-        <div className="relative pl-4 sm:pl-6 space-y-3.5">
+        <div className="relative pl-6 sm:pl-8 space-y-3">
           {/* Continuous Cryptographic Chain Spine */}
-          <div className="absolute left-[33px] sm:left-[41px] top-6 bottom-6 w-0.5 bg-slate-700/80 z-0"></div>
+          <div className="absolute left-[19px] sm:left-[23px] top-4 bottom-4 w-0.5 bg-slate-700/60 z-0"></div>
 
           {entries.map((entry, index) => {
             const isGenesis = entry.prevEntryHash === '0000000000000000000000000000000000000000000000000000000000000000';
@@ -327,122 +334,139 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
             return (
               <div
                 key={entry.entry_id}
-                className="relative z-10 flex items-start gap-3 sm:gap-4 animate-reveal"
+                className="relative z-10 flex items-stretch gap-3 sm:gap-3.5 animate-reveal"
               >
-                {/* Cryptographic Node Sequence Badge */}
-                <div
-                  className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-mono text-xs font-bold shrink-0 ring-4 ring-slate-950 shadow-md ${
-                    isGenesis
-                      ? 'bg-slate-800 text-slate-300 border-2 border-slate-600'
-                      : 'bg-sky-950 text-sky-400 border-2 border-sky-600'
-                  }`}
-                  title={isGenesis ? 'Genesis Block (#01)' : `Audit Node #${(index + 1).toString().padStart(2, '0')}`}
-                >
-                  #{(index + 1).toString().padStart(2, '0')}
+                {/* Cryptographic Node Sequence Badge (Timeline Node) */}
+                <div className="flex flex-col items-center justify-center shrink-0 w-7 sm:w-8">
+                  <div
+                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-mono text-[11px] sm:text-xs font-bold shrink-0 ring-4 ring-slate-950 shadow-xs z-10 ${
+                      isGenesis
+                        ? 'bg-slate-800 text-slate-300 border border-slate-600'
+                        : 'bg-sky-950 text-sky-400 border border-sky-600'
+                    }`}
+                    title={isGenesis ? 'Genesis Block (#01)' : `Node #${(index + 1).toString().padStart(2, '0')}`}
+                  >
+                    #{(index + 1).toString().padStart(2, '0')}
+                  </div>
                 </div>
 
-                {/* Entry Card */}
-                <div className="flex-1 bg-slate-900 border border-slate-700/80 hover:border-slate-600 rounded-lg p-3.5 sm:p-4 transition-all shadow-xs">
+                {/* Audit Information Grid (Card) */}
+                <div className="flex-1 min-w-0 bg-slate-900 border border-slate-700/80 hover:border-slate-600 rounded-lg p-3 sm:p-3.5 transition-all shadow-xs">
                   {/* Primary Row Summary */}
-                  {/* 1. Audit Identity */}
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-[11px] font-mono font-bold text-sky-400 tracking-wide uppercase">
-                      ENTRY #{(index + 1).toString().padStart(2, '0')}
-                    </span>
-                    <span
-                      className="font-mono text-xs font-bold text-slate-100 select-all cursor-pointer hover:underline"
-                      title={`Audit Entry ID: ${entry.entry_id}`}
-                    >
-                      {entry.entry_id}
-                    </span>
-                    {isGenesis && (
-                      <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-400 border border-slate-700 leading-none">
-                        GENESIS BLOCK
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-2.5 sm:gap-3 items-center">
+                    {/* 1. Audit Identity & Status Classification */}
+                    <div className="lg:col-span-4 flex items-center gap-2 min-w-0">
+                      <span
+                        className="font-mono text-xs sm:text-sm font-bold text-slate-100 truncate select-all cursor-pointer hover:underline"
+                        title={`Audit Entry ID: ${entry.entry_id}`}
+                      >
+                        {entry.entry_id}
                       </span>
-                    )}
-                    {hasCanonical ? (
-                      <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-sky-950 text-sky-400 border border-sky-800 leading-none font-semibold">
-                        CANONICAL
-                      </span>
-                    ) : (
-                      <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-400 border border-slate-700 leading-none">
-                        LEGACY
-                      </span>
-                    )}
-                  </div>
+                      {isGenesis && (
+                        <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold bg-slate-800 text-slate-400 border border-slate-700 shrink-0">
+                          GENESIS
+                        </span>
+                      )}
+                      {hasCanonical ? (
+                        <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-sky-950 text-sky-400 border border-sky-800 shrink-0">
+                          CANONICAL
+                        </span>
+                      ) : (
+                        <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-medium bg-slate-800 text-slate-400 border border-slate-700 shrink-0">
+                          LEGACY
+                        </span>
+                      )}
+                    </div>
 
-                  {/* 2. Device + Timestamp */}
-                  <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400 mt-1 font-mono">
-                    <span>
-                      DEVICE: <strong className="text-slate-200">{entry.device_hostname}</strong>
-                    </span>
-                    <span className="text-slate-600">•</span>
-                    <span className="text-slate-300 tabular-nums" title={`UTC: ${entry.timestamp}`}>
-                      {formatToIST(entry.timestamp)}
-                    </span>
-                  </div>
-
-                  {/* 3. Compliance Summary */}
-                  <div className="mt-2.5 flex items-center space-x-1.5 font-mono text-xs tabular-nums">
-                    <span className="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 font-bold border border-emerald-700">
-                      {passCount} PASS
-                    </span>
-                    <span className="px-2 py-0.5 rounded bg-rose-950 text-rose-300 font-bold border border-rose-700">
-                      {failCount} FAIL
-                    </span>
-                    {unknownCount > 0 && (
-                      <span className="px-2 py-0.5 rounded bg-amber-950 text-amber-300 font-bold border border-amber-700">
-                        {unknownCount} UNKNOWN
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Authentic Cryptographic Chain Linkage Sub-bar */}
-                  {/* 4. Hash Metadata (Left) & 5. View Report (Right) */}
-                  <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    {/* Hash metadata */}
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-mono text-slate-400/90">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-slate-500">Prev:</span>
-                        <code
-                          className="text-slate-300 select-all cursor-help"
-                          title={`Authentic Previous Block Hash: ${entry.prevEntryHash}`}
-                        >
-                          {entry.prevEntryHash.substring(0, 8)}...{entry.prevEntryHash.substring(56)}
-                        </code>
-                        <span className="text-slate-600">→</span>
-                        <span className="text-slate-500">Node:</span>
-                        <code
-                          className="text-emerald-400/90 font-medium select-all cursor-help"
-                          title={`Authentic Entry Hash: ${entry.entryHash}`}
-                        >
-                          {entry.entryHash.substring(0, 8)}...{entry.entryHash.substring(56)}
-                        </code>
+                    {/* 2. Device + Timestamp */}
+                    <div className="lg:col-span-3 flex flex-col justify-center min-w-0 font-mono text-xs">
+                      <div className="text-slate-200 truncate font-medium flex items-center gap-1.5">
+                        <span className="text-slate-500 text-[10px] uppercase tracking-wider">HOST:</span>
+                        <span className="truncate">{entry.device_hostname}</span>
                       </div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-slate-600 hidden md:inline">•</span>
-                        <span className="text-slate-500">Config:</span>
-                        <code
-                          className="text-sky-300/90 select-all cursor-help"
-                          title={`Configuration Hash: ${entry.config_file_hash}`}
-                        >
-                          {(entry.config_file_hash || '').substring(0, 10)}...
-                        </code>
+                      <div className="text-[11px] text-slate-400 tabular-nums truncate" title={`UTC: ${entry.timestamp}`}>
+                        {formatToIST(entry.timestamp)}
                       </div>
                     </div>
 
-                    {/* ONE Primary Row Action: View Report */}
-                    <button
-                      onClick={() => handleOpenWorkspace(entry)}
-                      className="px-3.5 py-1.5 rounded-md text-xs font-mono font-semibold bg-sky-600 hover:bg-sky-500 text-white border border-sky-500 transition-[transform,background-color,border-color] duration-150 active:scale-[0.98] shadow-xs flex items-center justify-center gap-1.5 cursor-pointer shrink-0 self-end sm:self-auto"
-                      title={`Open report workspace for ${entry.entry_id}`}
-                    >
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                      <span>View Report</span>
-                    </button>
+                    {/* 3. Compliance Verdict & Counts */}
+                    <div className="lg:col-span-3 flex items-center gap-2 font-mono text-xs tabular-nums">
+                      <span
+                        className={`px-2 py-0.5 rounded text-[11px] font-bold border shrink-0 ${
+                          failCount > 0
+                            ? 'bg-rose-950/80 text-rose-300 border-rose-700'
+                            : unknownCount > 0
+                            ? 'bg-amber-950/80 text-amber-300 border-amber-700'
+                            : 'bg-emerald-950/80 text-emerald-300 border-emerald-700'
+                        }`}
+                      >
+                        {failCount > 0 ? 'NON-COMPLIANT' : unknownCount > 0 ? 'ATTENTION' : 'COMPLIANT'}
+                      </span>
+                      <div className="flex items-center gap-1 text-[11px] text-slate-400">
+                        <span className={passCount > 0 ? 'text-emerald-400 font-medium' : 'text-slate-500'}>
+                          {passCount}P
+                        </span>
+                        <span className="text-slate-600">/</span>
+                        <span className={failCount > 0 ? 'text-rose-400 font-medium' : 'text-slate-500'}>
+                          {failCount}F
+                        </span>
+                        {unknownCount > 0 && (
+                          <>
+                            <span className="text-slate-600">/</span>
+                            <span className="text-amber-400 font-medium">{unknownCount}U</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* 4. Primary Action: View Report */}
+                    <div className="lg:col-span-2 flex justify-start lg:justify-end">
+                      <button
+                        onClick={() => handleOpenWorkspace(entry)}
+                        className="px-3 py-1.5 rounded text-xs font-mono font-semibold bg-sky-600 hover:bg-sky-500 text-white border border-sky-500 transition-all active:scale-[0.98] shadow-xs flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
+                        title={`Open report workspace for ${entry.entry_id}`}
+                      >
+                        <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        <span>View Report</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Authentic Cryptographic Chain Linkage Sub-bar */}
+                  <div className="mt-2.5 pt-2 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-[11px] font-mono text-slate-400">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                      <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">PROVENANCE:</span>
+                      <span className="text-slate-500">prev</span>
+                      <code
+                        className="text-slate-400 select-all cursor-help hover:text-slate-200"
+                        title={`Authentic Previous Block Hash: ${entry.prevEntryHash}`}
+                      >
+                        {entry.prevEntryHash.substring(0, 8)}...{entry.prevEntryHash.substring(56)}
+                      </code>
+                      <span className="text-slate-600">→</span>
+                      <span className="text-slate-500">node</span>
+                      <code
+                        className="text-emerald-400 font-medium select-all cursor-help hover:text-emerald-300"
+                        title={`Authentic Entry Hash: ${entry.entryHash}`}
+                      >
+                        {entry.entryHash.substring(0, 8)}...{entry.entryHash.substring(56)}
+                      </code>
+                      <span className="text-slate-600">·</span>
+                      <span className="text-slate-500">config</span>
+                      <code
+                        className="text-sky-300/90 select-all cursor-help hover:text-sky-200"
+                        title={`Configuration Hash: ${entry.config_file_hash}`}
+                      >
+                        {(entry.config_file_hash || '').substring(0, 10)}...
+                      </code>
+                    </div>
+
+                    <span className="text-[10px] text-slate-500 shrink-0 hidden sm:inline">
+                      SHA-256 Hash Chain
+                    </span>
                   </div>
                 </div>
               </div>
