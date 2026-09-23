@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getLedger, verifyLedger, verifyReport, exportCanonicalReportBlob } from '../api';
 import { ReportWorkflowPanel } from './ReportWorkflowPanel';
 import { formatToIST } from '../utils';
-import type { UserIdentity } from '../types';
+import type { UserIdentity, AuditLedgerItem } from '../types';
 
 interface Props {
   currentUser: UserIdentity;
@@ -11,30 +11,27 @@ interface Props {
 export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
   const canEdit = currentUser.role === 'reviewer' || currentUser.role === 'uploader';
 
-  const [entries, setEntries] = useState<any[]>([]);
+  const [entries, setEntries] = useState<AuditLedgerItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [expandedEntries, setExpandedEntries] = useState<Record<string, boolean>>({});
-
   // Cache canonical report_id per entry_id
   const [reportIdMap, setReportIdMap] = useState<Record<string, string | null>>({});
-  // Track format selection per entry ('pdf' | 'docx')
-  const [exportFormatMap, setExportFormatMap] = useState<Record<string, 'pdf' | 'docx'>>({});
-  // Track export in progress per entry
-  const [isExportingMap, setIsExportingMap] = useState<Record<string, boolean>>({});
-  // Track export error per entry
-  const [exportErrorMap, setExportErrorMap] = useState<Record<string, string | null>>({});
-  // Track whether edit mode is requested when expanded
-  const [editOpenMap, setEditOpenMap] = useState<Record<string, boolean>>({});
 
-  // Chain Verification State
+  // Global Chain Verification State
   const [isVerifyingChain, setIsVerifyingChain] = useState(false);
   const [chainResult, setChainResult] = useState<{
     valid: boolean;
     message: string;
     broken_entry_index?: number;
   } | null>(null);
+
+  // --- REPORT WORKSPACE MODAL STATE ---
+  const [activeEntry, setActiveEntry] = useState<AuditLedgerItem | null>(null);
+  const [workspaceEditMode, setWorkspaceEditMode] = useState(false);
+  const [workspaceExportFormat, setWorkspaceExportFormat] = useState<'pdf' | 'docx'>('pdf');
+  const [isWorkspaceExporting, setIsWorkspaceExporting] = useState(false);
+  const [workspaceExportError, setWorkspaceExportError] = useState<string | null>(null);
 
   // Per-entry PDF Verification State
   const [verifyingPdfMap, setVerifyingPdfMap] = useState<Record<string, boolean>>({});
@@ -44,6 +41,29 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
     loadLedger();
   }, []);
 
+  // Keyboard shortcut: close workspace modal on Escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && activeEntry) {
+        handleCloseWorkspace();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeEntry]);
+
+  // Lock background scroll when modal is active
+  useEffect(() => {
+    if (activeEntry) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [activeEntry]);
+
   const loadLedger = async () => {
     setIsLoading(true);
     setError(null);
@@ -51,10 +71,7 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
       const data = await getLedger();
       setEntries(data || []);
       if (data && data.length > 0) {
-        // Auto-expand latest entry if present
-        const latestId = data[data.length - 1].entry_id;
-        setExpandedEntries({ [latestId]: true });
-        // Synchronously cache canonical report_ids directly from ledger response (O(1), zero extra HTTP calls)
+        // Cache canonical report_ids directly from ledger response (O(1), zero extra HTTP calls)
         const initialReportMap: Record<string, string | null> = {};
         for (const item of data) {
           initialReportMap[item.entry_id] = item.report_id || null;
@@ -68,45 +85,19 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
     }
   };
 
-  const toggleExpand = (id: string) => {
-    setExpandedEntries((prev) => ({ ...prev, [id]: !prev[id] }));
+  const handleOpenWorkspace = (entry: AuditLedgerItem) => {
+    setActiveEntry(entry);
+    setWorkspaceEditMode(false);
+    setWorkspaceExportError(null);
   };
 
-  const handleOpenEdit = (id: string) => {
-    setExpandedEntries((prev) => ({ ...prev, [id]: true }));
-    setEditOpenMap((prev) => ({ ...prev, [id]: true }));
+  const handleCloseWorkspace = () => {
+    setActiveEntry(null);
+    setWorkspaceEditMode(false);
+    setWorkspaceExportError(null);
   };
 
-  // Authenticated canonical export using exportCanonicalReportBlob (PDF or DOCX)
-  const handleExport = async (entryId: string) => {
-    const format = exportFormatMap[entryId] || 'pdf';
-    setIsExportingMap((prev) => ({ ...prev, [entryId]: true }));
-    setExportErrorMap((prev) => ({ ...prev, [entryId]: null }));
-
-    try {
-      const rId = reportIdMap[entryId];
-      if (!rId) {
-        throw new Error(`Canonical report unavailable for legacy entry '${entryId}'.`);
-      }
-
-      const blob = await exportCanonicalReportBlob(rId, format);
-      const filename = `audit_report_${rId}.${format}`;
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    } catch (err: any) {
-      setExportErrorMap((prev) => ({ ...prev, [entryId]: err.message }));
-    } finally {
-      setIsExportingMap((prev) => ({ ...prev, [entryId]: false }));
-    }
-  };
-
-  // Real backend check: GET /api/ledger/verify
+  // Global Ledger Action: GET /api/ledger/verify
   const handleVerifyChain = async () => {
     setIsVerifyingChain(true);
     try {
@@ -119,7 +110,7 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
     }
   };
 
-  // Real backend check: GET /api/report/{entry_id}/verify
+  // Dedicated Report Action: GET /api/report/{entry_id}/verify
   const handleVerifyPdf = async (entryId: string) => {
     setVerifyingPdfMap((prev) => ({ ...prev, [entryId]: true }));
     try {
@@ -138,9 +129,36 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
     }
   };
 
+  // Dedicated Report Action: Authenticated canonical export (PDF or DOCX)
+  const handleExportCanonical = async (entryId: string, reportId: string | null) => {
+    if (!reportId) {
+      setWorkspaceExportError(`Canonical report unavailable for legacy record '${entryId}'.`);
+      return;
+    }
+
+    setIsWorkspaceExporting(true);
+    setWorkspaceExportError(null);
+    try {
+      const blob = await exportCanonicalReportBlob(reportId, workspaceExportFormat);
+      const filename = `audit_report_${reportId}.${workspaceExportFormat}`;
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      setWorkspaceExportError(err.message);
+    } finally {
+      setIsWorkspaceExporting(false);
+    }
+  };
+
   return (
     <div className="space-y-6 font-sans">
-      {/* Header & Verification Controls */}
+      {/* Global Header & Verification Controls */}
       <div className="bg-slate-900 border border-slate-700 rounded p-5">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-700 pb-4">
           <div>
@@ -154,7 +172,7 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-1">
-              Append-only SHA-256 hash-chained compliance registry (<code className="font-mono text-slate-300">audit_log.jsonl</code>) and generated PDF certificates.
+              Append-only SHA-256 hash-chained compliance registry (<code className="font-mono text-slate-300">audit_log.jsonl</code>) and verified certificates.
             </p>
           </div>
 
@@ -193,9 +211,9 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
           </div>
         </div>
 
-        {/* Live Backend Verification Result Card */}
+        {/* Live Backend Global Verification Result Card */}
         {chainResult && (
-          <div className="mt-4">
+          <div className="mt-4 animate-reveal">
             {chainResult.valid ? (
               <div className="bg-emerald-950/40 border border-emerald-700 rounded p-4 flex items-center justify-between">
                 <div className="flex items-center space-x-3">
@@ -269,303 +287,452 @@ export const AuditLogReportScreen: React.FC<Props> = ({ currentUser }) => {
           </div>
           <h4 className="text-base font-bold text-slate-200">Audit Ledger Is Currently Empty</h4>
           <p className="text-xs text-slate-400 max-w-md mx-auto">
-            No compliance audits have been finalized yet. To create an entry in the cryptographic ledger, upload a config in Screen 1 and complete the review loop.
+            No compliance audits have been finalized yet. To create an entry in the cryptographic ledger, upload a config and complete the review loop.
           </p>
         </div>
       ) : (
-        /* Chronological Hash-Chained Timeline */
-        <div className="space-y-4">
+        /* Connected-Entry Cryptographic Chain Timeline */
+        <div className="relative pl-4 sm:pl-6 space-y-5">
+          {/* Continuous Cryptographic Chain Spine */}
+          <div className="absolute left-[33px] sm:left-[41px] top-6 bottom-6 w-0.5 bg-slate-700/80 z-0"></div>
+
           {entries.map((entry, index) => {
-            const isExpanded = expandedEntries[entry.entry_id] || false;
             const isGenesis = entry.prevEntryHash === '0000000000000000000000000000000000000000000000000000000000000000';
             const results = entry.audit_results || {};
             const passCount = Object.values(results).filter((v) => v === 'Pass').length;
             const failCount = Object.values(results).filter((v) => v === 'Fail').length;
             const unknownCount = Object.values(results).filter((v) => v === 'Unknown').length;
 
-            const pdfVerification = pdfVerifyResults[entry.entry_id];
-            const isVerifyingPdf = verifyingPdfMap[entry.entry_id];
             const hasCanonical = Boolean(entry.has_canonical_report || entry.report_id || reportIdMap[entry.entry_id]);
-            const canonicalReportId = entry.report_id || reportIdMap[entry.entry_id];
 
             return (
-              <div key={entry.entry_id} className="relative">
-                {/* Vertical Chain Visual Link */}
-                {index < entries.length - 1 && (
-                  <div className="absolute left-8 top-full h-4 w-0.5 bg-slate-700 z-0 flex items-center justify-center">
-                    <div className="w-2.5 h-2.5 rounded-full bg-sky-500/80 border border-slate-900"></div>
-                  </div>
-                )}
+              <div
+                key={entry.entry_id}
+                className="relative z-10 flex items-start gap-3 sm:gap-4 animate-reveal"
+              >
+                {/* Cryptographic Node Sequence Badge */}
+                <div
+                  className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-mono text-xs font-bold shrink-0 ring-4 ring-slate-950 shadow-md ${
+                    isGenesis
+                      ? 'bg-slate-800 text-slate-300 border-2 border-slate-600'
+                      : 'bg-sky-950 text-sky-400 border-2 border-sky-600'
+                  }`}
+                  title={isGenesis ? 'Genesis Block (#01)' : `Audit Node #${(index + 1).toString().padStart(2, '0')}`}
+                >
+                  #{(index + 1).toString().padStart(2, '0')}
+                </div>
 
-                <div className="bg-slate-900 border border-slate-700 hover:border-slate-600 rounded transition-all z-10 relative">
-                  {/* Entry Summary Bar */}
-                  <div className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex items-start md:items-center space-x-3">
-                      <div
-                        className={`w-9 h-9 rounded flex items-center justify-center font-mono text-xs font-bold shrink-0 ${
-                          isGenesis
-                            ? 'bg-slate-800 text-slate-300 border border-slate-700'
-                            : 'bg-sky-950 text-sky-400 border border-sky-800'
-                        }`}
-                      >
-                        #{(index + 1).toString().padStart(2, '0')}
+                {/* Entry Card */}
+                <div className="flex-1 bg-slate-900 border border-slate-700 hover:border-slate-600 rounded-lg p-4 sm:p-5 transition-all shadow-sm">
+                  {/* Primary Row Summary */}
+                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span
+                          className="font-mono text-xs font-bold text-slate-100 select-all cursor-pointer hover:underline"
+                          title={`Audit Entry ID: ${entry.entry_id}`}
+                        >
+                          {entry.entry_id}
+                        </span>
+                        {isGenesis && (
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-400 border border-slate-700 leading-none">
+                            GENESIS BLOCK
+                          </span>
+                        )}
+                        {hasCanonical ? (
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-sky-950 text-sky-400 border border-sky-800 leading-none font-semibold">
+                            CANONICAL
+                          </span>
+                        ) : (
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-400 border border-slate-700 leading-none">
+                            LEGACY
+                          </span>
+                        )}
                       </div>
 
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span
-                            className="font-mono text-xs font-bold text-slate-100 truncate max-w-[140px] sm:max-w-[220px] inline-block align-middle select-all cursor-pointer hover:underline"
-                            title={`Audit ID: ${entry.entry_id}`}
-                          >
-                            {entry.entry_id}
-                          </span>
-                          {isGenesis && (
-                            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-400 border border-slate-700 leading-none">
-                              GENESIS BLOCK
-                            </span>
-                          )}
-                          {hasCanonical ? (
-                            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-sky-950 text-sky-400 border border-sky-800 leading-none">
-                              CANONICAL
-                            </span>
-                          ) : (
-                            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-400 border border-slate-700 leading-none">
-                              LEGACY
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-3 text-xs text-slate-400 mt-1 font-mono">
-                          <span>
-                            DEVICE:{' '}
-                            <strong
-                              className="text-slate-200 truncate max-w-[150px] inline-block align-middle"
-                              title={entry.device_hostname}
-                            >
-                              {entry.device_hostname}
-                            </strong>
-                          </span>
-                          <span className="text-slate-600">•</span>
-                          <span className="text-slate-300 tabular-nums" title={`Canonical UTC: ${entry.timestamp}`}>{formatToIST(entry.timestamp)}</span>
-                        </div>
+                      <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400 mt-1.5 font-mono">
+                        <span>
+                          DEVICE:{' '}
+                          <strong className="text-slate-200">
+                            {entry.device_hostname}
+                          </strong>
+                        </span>
+                        <span className="text-slate-600">•</span>
+                        <span className="text-slate-300 tabular-nums" title={`UTC: ${entry.timestamp}`}>
+                          {formatToIST(entry.timestamp)}
+                        </span>
                       </div>
                     </div>
 
-                    {/* Badges & Actions */}
-                    <div className="flex flex-wrap items-center gap-2.5">
-                      <div className="flex items-center space-x-1.5 font-mono text-xs mr-1 tabular-nums">
+                    {/* Verdict Badges & Single Primary Row Action */}
+                    <div className="flex flex-wrap items-center gap-3">
+                      <div className="flex items-center space-x-1.5 font-mono text-xs tabular-nums">
                         <span className="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 font-bold border border-emerald-700">
                           {passCount} PASS
                         </span>
                         <span className="px-2 py-0.5 rounded bg-rose-950 text-rose-300 font-bold border border-rose-700">
                           {failCount} FAIL
                         </span>
-                        <span className="px-2 py-0.5 rounded bg-amber-950 text-amber-300 font-bold border border-amber-700">
-                          {unknownCount} UNKNOWN
-                        </span>
+                        {unknownCount > 0 && (
+                          <span className="px-2 py-0.5 rounded bg-amber-950 text-amber-300 font-bold border border-amber-700">
+                            {unknownCount} UNKNOWN
+                          </span>
+                        )}
                       </div>
 
+                      {/* ONE Primary Row Action: View Report */}
                       <button
-                        onClick={() => handleVerifyPdf(entry.entry_id)}
-                        disabled={isVerifyingPdf}
-                        className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-xs font-mono border border-slate-700 transition-[transform,background-color] duration-150 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sky-500 cursor-pointer"
-                        title="Cryptographically verify PDF hash against ledger"
+                        onClick={() => handleOpenWorkspace(entry)}
+                        className="px-3.5 py-1.5 rounded text-xs font-mono font-semibold bg-sky-600 hover:bg-sky-500 text-white border border-sky-500 transition-[transform,background-color,border-color] duration-150 active:scale-[0.98] shadow-xs flex items-center gap-1.5 cursor-pointer"
+                        title={`Open report workspace for ${entry.entry_id}`}
                       >
-                        {isVerifyingPdf ? 'Verifying...' : 'Verify PDF'}
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        <span>View Report</span>
                       </button>
-
-                      {/* Format Selection + Authenticated Canonical Export OR Legacy Indicator */}
-                      {hasCanonical && canonicalReportId ? (
-                        <>
-                          <div className="flex items-center gap-1">
-                            <select
-                              value={exportFormatMap[entry.entry_id] || 'pdf'}
-                              onChange={(e) =>
-                                setExportFormatMap((prev) => ({
-                                  ...prev,
-                                  [entry.entry_id]: e.target.value as 'pdf' | 'docx',
-                                }))
-                              }
-                              className="text-xs font-mono bg-slate-800 border border-slate-700 text-slate-200 rounded px-2 py-1.5 cursor-pointer focus:outline-none focus:ring-1 focus:ring-sky-500"
-                              aria-label="Export Format"
-                            >
-                              <option value="pdf">PDF</option>
-                              <option value="docx">DOCX</option>
-                            </select>
-
-                            <button
-                              onClick={() => handleExport(entry.entry_id)}
-                              disabled={isExportingMap[entry.entry_id]}
-                              className={`px-3 py-1.5 rounded text-xs font-mono font-semibold transition-[transform,background-color,border-color] duration-150 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/80 border flex items-center gap-1.5 shadow-xs cursor-pointer ${
-                                isExportingMap[entry.entry_id]
-                                  ? 'bg-slate-800 text-slate-500 border-slate-700 cursor-not-allowed'
-                                  : 'bg-sky-600 hover:bg-sky-500 text-white border-sky-500'
-                              }`}
-                              title={`Export canonical report as ${(exportFormatMap[entry.entry_id] || 'pdf').toUpperCase()}`}
-                            >
-                              {isExportingMap[entry.entry_id] ? (
-                                <>
-                                  <span className="inline-block w-3 h-3 border border-slate-400 border-t-transparent rounded-full animate-spin"></span>
-                                  <span>Exporting...</span>
-                                </>
-                              ) : (
-                                <>
-                                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                  </svg>
-                                  <span>Export {(exportFormatMap[entry.entry_id] || 'pdf').toUpperCase()}</span>
-                                </>
-                              )}
-                            </button>
-                          </div>
-
-                          {/* Edit Report button for Reviewer / Uploader */}
-                          {canEdit && (
-                            <button
-                              onClick={() => handleOpenEdit(entry.entry_id)}
-                              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-300 hover:text-amber-200 rounded text-xs font-mono font-semibold transition-[transform,background-color,border-color] duration-150 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/80 border border-slate-700 flex items-center gap-1.5 cursor-pointer shadow-xs"
-                              title="Open canonical report editor"
-                            >
-                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                              </svg>
-                              <span>Edit Report</span>
-                            </button>
-                          )}
-
-                          {/* Single Unified View/Hide Toggle Button */}
-                          <button
-                            onClick={() => toggleExpand(entry.entry_id)}
-                            className={`px-2.5 py-1.5 rounded text-xs font-mono font-medium transition-[transform,background-color] duration-150 active:scale-[0.98] border flex items-center gap-1.5 cursor-pointer ${
-                              isExpanded
-                                ? 'bg-slate-800 text-sky-400 border-sky-700'
-                                : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700'
-                            }`}
-                            title={isExpanded ? 'Collapse canonical report details' : 'Expand canonical report details'}
-                            aria-expanded={isExpanded}
-                          >
-                            <span>{isExpanded ? 'Hide Details' : 'View Report'}</span>
-                            <svg
-                              className={`w-3.5 h-3.5 transition-transform duration-150 ${isExpanded ? 'rotate-180' : ''}`}
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                          </button>
-                        </>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <span className="text-[11px] font-mono text-slate-500 italic">
-                            Canonical report unavailable
-                          </span>
-                        </div>
-                      )}
                     </div>
                   </div>
 
-                  {/* Export Error Banner */}
-                  {exportErrorMap[entry.entry_id] && (
-                    <div className="px-4 pb-2">
-                      <div className="p-2.5 rounded border text-xs font-mono bg-rose-950/60 border-rose-700 text-rose-300 flex items-center justify-between">
-                        <span>Export failed: {exportErrorMap[entry.entry_id]}</span>
-                        <button
-                          onClick={() => setExportErrorMap((prev) => ({ ...prev, [entry.entry_id]: null }))}
-                          className="text-rose-400 hover:text-rose-200 ml-2"
-                        >
-                          ✕
-                        </button>
-                      </div>
+                  {/* Authentic Cryptographic Chain Linkage Sub-bar */}
+                  <div className="mt-3 pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-3 text-[11px] font-mono text-slate-400">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-slate-500">Prev Hash:</span>
+                      <code
+                        className="text-slate-300 select-all cursor-help"
+                        title={`Authentic Previous Block Hash: ${entry.prevEntryHash}`}
+                      >
+                        {entry.prevEntryHash.substring(0, 8)}...{entry.prevEntryHash.substring(56)}
+                      </code>
+                      <span className="text-slate-600">→</span>
+                      <span className="text-slate-500">Node Hash:</span>
+                      <code
+                        className="text-emerald-400 font-semibold select-all cursor-help"
+                        title={`Authentic Entry Hash: ${entry.entryHash}`}
+                      >
+                        {entry.entryHash.substring(0, 8)}...{entry.entryHash.substring(56)}
+                      </code>
                     </div>
-                  )}
 
-                  {/* Inline PDF Verification Banner */}
-                  {pdfVerification && (
-                    <div className="px-4 pb-3">
-                      <div className={`p-2.5 rounded border text-xs font-mono flex items-center justify-between ${
-                        pdfVerification.valid
-                          ? 'bg-emerald-950/50 border-emerald-700 text-emerald-300'
-                          : 'bg-rose-950/50 border-rose-700 text-rose-300'
-                      }`}>
-                        <span>{pdfVerification.message}</span>
-                        <span className="font-bold uppercase ml-2">
-                          {pdfVerification.valid ? 'AUTHENTIC' : 'INVALID'}
-                        </span>
-                      </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-slate-500">Config:</span>
+                      <code
+                        className="text-sky-300 select-all cursor-help"
+                        title={`Configuration Hash: ${entry.config_file_hash}`}
+                      >
+                        {(entry.config_file_hash || '').substring(0, 10)}...
+                      </code>
                     </div>
-                  )}
-
-                  {/* Expanded Cryptographic Detail Panel */}
-                  {isExpanded && (
-                    <div className="bg-slate-950 border-t border-slate-700 p-4 space-y-3 font-mono text-xs">
-                      <div className="flex items-center space-x-2 text-slate-400 font-bold uppercase text-[11px]">
-                        <svg className="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                        </svg>
-                        <span>SHA-256 Ledger Node Verification Linkage:</span>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div className="bg-slate-900/80 p-2.5 rounded border border-slate-700">
-                          <span className="text-[10px] text-slate-500 uppercase block mb-1">
-                            Previous Entry Hash (prevEntryHash):
-                          </span>
-                          <div className="text-slate-300 break-all select-all text-[11px]">
-                            {entry.prevEntryHash}
-                          </div>
-                        </div>
-
-                        <div className="bg-slate-900/80 p-2.5 rounded border border-slate-700">
-                          <span className="text-[10px] text-slate-500 uppercase block mb-1">
-                            Current Entry Hash (entryHash):
-                          </span>
-                          <div className="break-all select-all text-[11px] font-bold text-emerald-400">
-                            {entry.entryHash}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-wrap items-center justify-between text-[11px] text-slate-400 pt-2 border-t border-slate-700 gap-2">
-                        <div>
-                          <span>CONFIG SHA-256: </span>
-                          <code className="text-sky-300">{(entry.config_file_hash || '').substring(0, 24)}...</code>
-                        </div>
-                        <div>
-                          <span>CANONICAL TIMESTAMP (UTC): </span>
-                          <code className="text-slate-300 select-all">{entry.timestamp}</code>
-                        </div>
-                        <div>
-                          <span>REMEDIATED RULE: </span>
-                          <code className="text-slate-200">{entry.remediation_summary?.rule_id || 'None'}</code>
-                        </div>
-                      </div>
-
-                      {/* Canonical Report Workflow or Legacy Notice */}
-                      {hasCanonical && canonicalReportId ? (
-                        <ReportWorkflowPanel
-                          reportId={canonicalReportId}
-                          currentUser={currentUser}
-                          initialEditMode={editOpenMap[entry.entry_id]}
-                        />
-                      ) : (
-                        <div className="mt-3 p-3 bg-slate-900/60 rounded border border-slate-700 text-slate-400 font-mono text-xs space-y-1">
-                          <div className="font-bold text-slate-300 flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-slate-500 inline-block"></span>
-                            Historical Audit Record (Legacy)
-                          </div>
-                          <p className="text-slate-500 text-[11px]">
-                            This audit was recorded prior to canonical report generation. Canonical editable reports, version increments, and multi-format exports (PDF/DOCX) are available on newly finalized audits.
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  </div>
                 </div>
               </div>
             );
           })}
         </div>
       )}
+
+      {/* ========================================================= */}
+      {/* 2. REPORT WORKSPACE (LARGE CENTERED RESPONSIVE MODAL)     */}
+      {/* ========================================================= */}
+      {activeEntry && (() => {
+        const canonicalReportId = activeEntry.report_id || reportIdMap[activeEntry.entry_id];
+        const hasCanonical = Boolean(activeEntry.has_canonical_report || activeEntry.report_id || canonicalReportId);
+        const results = activeEntry.audit_results || {};
+        const passCount = Object.values(results).filter((v) => v === 'Pass').length;
+        const failCount = Object.values(results).filter((v) => v === 'Fail').length;
+        const unknownCount = Object.values(results).filter((v) => v === 'Unknown').length;
+        const total = passCount + failCount + unknownCount;
+        const passRate = total > 0 ? ((passCount / total) * 100).toFixed(1) : '0.0';
+
+        const pdfVerification = pdfVerifyResults[activeEntry.entry_id];
+        const isVerifyingPdf = verifyingPdfMap[activeEntry.entry_id] || false;
+
+        return (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 md:p-8 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-150"
+            onClick={handleCloseWorkspace}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="workspace-title"
+          >
+            <div
+              className="bg-slate-900 border border-slate-700 rounded-lg shadow-2xl w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden animate-modal-in"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div className="px-5 py-4 border-b border-slate-700 bg-slate-950 flex flex-wrap items-center justify-between gap-3 shrink-0">
+                <div className="flex items-center space-x-3">
+                  <div className="w-9 h-9 rounded bg-sky-950 border border-sky-800 text-sky-400 flex items-center justify-center shrink-0">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h2 id="workspace-title" className="text-sm font-bold text-slate-100 font-sans">
+                        Audit Compliance Report Workspace
+                      </h2>
+                      {hasCanonical ? (
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-sky-950 text-sky-400 border border-sky-800 font-bold">
+                          CANONICAL
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-400 border border-slate-700">
+                          LEGACY RECORD
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2.5 text-[11px] font-mono text-slate-400 mt-0.5">
+                      <span>Audit ID: <code className="text-sky-300 font-bold select-all">{activeEntry.entry_id}</code></span>
+                      <span className="text-slate-600">|</span>
+                      <span>Device: <strong className="text-slate-200">{activeEntry.device_hostname}</strong></span>
+                      <span className="text-slate-600">|</span>
+                      <span>{formatToIST(activeEntry.timestamp)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Close Button */}
+                <button
+                  onClick={handleCloseWorkspace}
+                  className="px-3 py-1.5 rounded text-xs font-mono bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-colors flex items-center gap-1.5 cursor-pointer"
+                  title="Close Workspace (Escape)"
+                >
+                  <span>✕ Close (Esc)</span>
+                </button>
+              </div>
+
+              {/* Compliance & Cryptographic Integrity Summary Bar */}
+              <div className="px-5 py-3 border-b border-slate-800 bg-slate-900/90 flex flex-wrap items-center justify-between gap-3 text-xs font-mono shrink-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-slate-400 text-[11px] uppercase font-bold mr-1">Compliance Summary:</span>
+                  <span className="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 font-bold border border-emerald-700">
+                    {passCount} PASS
+                  </span>
+                  <span className="px-2 py-0.5 rounded bg-rose-950 text-rose-300 font-bold border border-rose-700">
+                    {failCount} FAIL
+                  </span>
+                  {unknownCount > 0 && (
+                    <span className="px-2 py-0.5 rounded bg-amber-950 text-amber-300 font-bold border border-amber-700">
+                      {unknownCount} UNKNOWN
+                    </span>
+                  )}
+                  <span className="ml-1 px-2 py-0.5 rounded bg-sky-950 text-sky-300 font-bold border border-sky-800">
+                    {passRate}% Pass Rate
+                  </span>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 text-[11px]">
+                  <span className="text-slate-500">Node SHA-256:</span>
+                  <code
+                    className="text-emerald-400 font-bold select-all cursor-help"
+                    title={`Full Entry Hash: ${activeEntry.entryHash}`}
+                  >
+                    {activeEntry.entryHash.substring(0, 16)}...
+                  </code>
+                </div>
+              </div>
+
+              {/* ACTION BAR (Dedicated Workspace Action Bar) */}
+              <div className="px-5 py-3 border-b border-slate-800 bg-slate-950 flex flex-wrap items-center justify-between gap-3 shrink-0">
+                <div className="flex flex-wrap items-center gap-2.5">
+                  {/* Verify PDF Button */}
+                  <button
+                    onClick={() => handleVerifyPdf(activeEntry.entry_id)}
+                    disabled={isVerifyingPdf}
+                    className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-100 rounded text-xs font-mono font-semibold border border-slate-700 transition-[transform,background-color] duration-150 active:scale-[0.98] flex items-center gap-1.5 cursor-pointer shadow-xs"
+                    title="Cryptographically verify PDF certificate against ledger hash"
+                  >
+                    {isVerifyingPdf ? (
+                      <>
+                        <span className="inline-block w-3.5 h-3.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></span>
+                        <span>Verifying PDF Certificate...</span>
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-3.5 h-3.5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                        <span>Verify PDF Certificate</span>
+                      </>
+                    )}
+                  </button>
+
+                  {/* Format Selector + Export Button (for canonical records) */}
+                  {hasCanonical && canonicalReportId ? (
+                    <div className="flex items-center gap-1.5">
+                      <select
+                        value={workspaceExportFormat}
+                        onChange={(e) => setWorkspaceExportFormat(e.target.value as 'pdf' | 'docx')}
+                        className="text-xs font-mono bg-slate-800 border border-slate-700 text-slate-200 rounded px-2.5 py-1.5 cursor-pointer focus:outline-none focus:ring-1 focus:ring-sky-500"
+                        aria-label="Export Format"
+                      >
+                        <option value="pdf">PDF</option>
+                        <option value="docx">DOCX</option>
+                      </select>
+                      <button
+                        onClick={() => handleExportCanonical(activeEntry.entry_id, canonicalReportId)}
+                        disabled={isWorkspaceExporting}
+                        className={`px-3.5 py-1.5 rounded text-xs font-mono font-semibold transition-[transform,background-color,border-color] duration-150 active:scale-[0.98] border flex items-center gap-1.5 shadow-xs cursor-pointer ${
+                          isWorkspaceExporting
+                            ? 'bg-slate-800 text-slate-500 border-slate-700 cursor-not-allowed'
+                            : 'bg-sky-600 hover:bg-sky-500 text-white border-sky-500'
+                        }`}
+                        title={`Export canonical report as ${workspaceExportFormat.toUpperCase()}`}
+                      >
+                        {isWorkspaceExporting ? (
+                          <>
+                            <span className="inline-block w-3 h-3 border border-slate-400 border-t-transparent rounded-full animate-spin"></span>
+                            <span>Exporting...</span>
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            <span>Export {workspaceExportFormat.toUpperCase()}</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  ) : (
+                    <span className="text-[11px] font-mono text-slate-500 italic">
+                      Export unavailable for legacy records
+                    </span>
+                  )}
+                </div>
+
+                {/* Edit Report Toggle Button (for Reviewer / Uploader on Canonical records) */}
+                {canEdit && hasCanonical && canonicalReportId && (
+                  <button
+                    onClick={() => setWorkspaceEditMode((prev) => !prev)}
+                    className={`px-3.5 py-1.5 rounded text-xs font-mono font-semibold border transition-[transform,background-color,border-color] duration-150 active:scale-[0.98] flex items-center gap-1.5 shadow-xs cursor-pointer ${
+                      workspaceEditMode
+                        ? 'bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700'
+                        : 'bg-amber-950/70 hover:bg-amber-900 text-amber-300 border-amber-700'
+                    }`}
+                    title={workspaceEditMode ? 'Exit editor and view formatted report' : 'Open canonical report editor'}
+                  >
+                    {workspaceEditMode ? (
+                      <>
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        <span>View Mode</span>
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        <span>Edit Report</span>
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+
+              {/* PDF Verification Feedback Banner */}
+              {pdfVerification && (
+                <div className="px-5 pt-3 shrink-0">
+                  <div
+                    className={`p-3 rounded border text-xs font-mono flex items-center justify-between animate-reveal ${
+                      pdfVerification.valid
+                        ? 'bg-emerald-950/60 border-emerald-700 text-emerald-300'
+                        : 'bg-rose-950/60 border-rose-700 text-rose-300'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-sm">
+                        {pdfVerification.valid ? '✓' : '✗'}
+                      </span>
+                      <span>{pdfVerification.message}</span>
+                    </div>
+                    <span className="font-bold uppercase tracking-wider text-[11px] px-2 py-0.5 rounded bg-black/30 border border-current">
+                      {pdfVerification.valid ? 'AUTHENTIC' : 'INVALID / TAMPERED'}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Export Error Banner */}
+              {workspaceExportError && (
+                <div className="px-5 pt-3 shrink-0">
+                  <div className="p-3 rounded border text-xs font-mono bg-rose-950/60 border-rose-700 text-rose-300 flex items-center justify-between">
+                    <span>Export failed: {workspaceExportError}</span>
+                    <button
+                      onClick={() => setWorkspaceExportError(null)}
+                      className="text-rose-400 hover:text-rose-200 ml-2 cursor-pointer font-bold"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Modal Body / Report Content */}
+              <div className="p-5 overflow-y-auto space-y-4 flex-1 font-sans">
+                {hasCanonical && canonicalReportId ? (
+                  <ReportWorkflowPanel
+                    reportId={canonicalReportId}
+                    currentUser={currentUser}
+                    isEditing={workspaceEditMode}
+                    onToggleEdit={setWorkspaceEditMode}
+                    showInternalToolbar={false}
+                  />
+                ) : (
+                  /* Legacy Record Findings Display */
+                  <div className="space-y-4">
+                    <div className="p-4 bg-slate-950/70 border border-slate-800 rounded text-slate-400 font-mono text-xs space-y-1.5">
+                      <div className="font-bold text-slate-200 flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-slate-500 inline-block"></span>
+                        Historical Audit Record (Legacy)
+                      </div>
+                      <p className="text-slate-400 text-xs leading-relaxed font-sans">
+                        This audit was recorded prior to canonical report generation. Audit verdicts, evaluated rules, and cryptographic hashes are permanently preserved in the append-only SHA-256 ledger.
+                      </p>
+                    </div>
+
+                    <div className="bg-slate-950 border border-slate-800 rounded p-4 space-y-3 font-mono text-xs">
+                      <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                        <h4 className="font-bold uppercase text-slate-300">
+                          Evaluated Security Controls ({Object.keys(results).length})
+                        </h4>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 pt-1 max-h-96 overflow-y-auto">
+                        {Object.entries(results).map(([ruleId, verdict]) => (
+                          <div
+                            key={ruleId}
+                            className="p-2 bg-slate-900/80 rounded border border-slate-800 flex items-center justify-between gap-2"
+                          >
+                            <span className="text-[11px] text-slate-300 font-semibold truncate" title={ruleId}>
+                              {ruleId}
+                            </span>
+                            <span
+                              className={`px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0 ${
+                                verdict === 'Pass'
+                                  ? 'bg-emerald-950 text-emerald-300 border border-emerald-700'
+                                  : verdict === 'Fail'
+                                  ? 'bg-rose-950 text-rose-300 border border-rose-700'
+                                  : 'bg-amber-950 text-amber-300 border border-amber-700'
+                              }`}
+                            >
+                              {String(verdict).toUpperCase()}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };

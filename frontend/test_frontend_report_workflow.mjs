@@ -239,3 +239,82 @@ test('7. getLedger returns has_canonical_report and report_id without client-sid
   assert.deepEqual(calledUrls, ['/api/ledger']);
 });
 
+test('8. Invariant: Ledger entries render single primary "View Report" action without row-level Edit/Export/Verify buttons', async () => {
+  const fs = await import('node:fs');
+  const path = await import('node:path');
+  const screenContent = fs.readFileSync(path.resolve('src/components/AuditLogReportScreen.tsx'), 'utf8');
+
+  // Ledger entry must expose ONE primary button: "View Report"
+  assert.ok(screenContent.includes('<span>View Report</span>'), 'Ledger row must render single View Report button');
+  assert.ok(screenContent.includes('handleOpenWorkspace(entry)'), 'View Report must invoke handleOpenWorkspace');
+
+  // The primary row summary must NOT contain inline Edit Report or row-level Export
+  // Separate row actions must not exist on the entry row
+  const rowSummaryBlock = screenContent.split('{/* Primary Row Summary */}')[1]?.split('{/* Authentic Cryptographic Chain Linkage Sub-bar */}')[0];
+  assert.ok(rowSummaryBlock, 'Must locate Primary Row Summary block');
+  assert.ok(!rowSummaryBlock.includes('handleOpenEdit'), 'Ledger row must not have handleOpenEdit');
+  assert.ok(!rowSummaryBlock.includes('Export PDF'), 'Ledger row must not have row-level Export PDF');
+  assert.ok(!rowSummaryBlock.includes('Verify PDF Certificate'), 'Ledger row must not have row-level Verify PDF Certificate');
+});
+
+test('9. Invariant: Ledger entries display authentic cryptographic hashes and timeline spine', async () => {
+  const fs = await import('node:fs');
+  const path = await import('node:path');
+  const screenContent = fs.readFileSync(path.resolve('src/components/AuditLogReportScreen.tsx'), 'utf8');
+
+  // Cryptographic spine must be rendered
+  assert.ok(screenContent.includes('Continuous Cryptographic Chain Spine'), 'Must include continuous cryptographic chain spine');
+
+  // Authentic hashes from backend response must be displayed
+  assert.ok(screenContent.includes('entry.prevEntryHash'), 'Must display authentic prevEntryHash');
+  assert.ok(screenContent.includes('entry.entryHash'), 'Must display authentic entryHash');
+  assert.ok(screenContent.includes('entry.config_file_hash'), 'Must display authentic config_file_hash');
+
+  // Global ledger action for chain verification must remain
+  assert.ok(screenContent.includes('Verify Chain Integrity'), 'Must maintain global Verify Chain Integrity');
+  assert.ok(screenContent.includes('handleVerifyChain'), 'Must maintain handleVerifyChain');
+});
+
+test('10. Invariant: Report Workspace centered modal contains Header, Compliance Summary, Action Bar, and Content Body', async () => {
+  const fs = await import('node:fs');
+  const path = await import('node:path');
+  const screenContent = fs.readFileSync(path.resolve('src/components/AuditLogReportScreen.tsx'), 'utf8');
+
+  // Modal structure verification
+  assert.ok(screenContent.includes('Audit Compliance Report Workspace'), 'Modal must render Workspace Title');
+  assert.ok(screenContent.includes('Compliance Summary:'), 'Modal must render Compliance Summary bar');
+  assert.ok(screenContent.includes('ACTION BAR (Dedicated Workspace Action Bar)'), 'Modal must render dedicated Action Bar');
+
+  // Action Bar actions
+  assert.ok(screenContent.includes('Verify PDF Certificate'), 'Action Bar must include Verify PDF Certificate');
+  assert.ok(screenContent.includes('handleExportCanonical'), 'Action Bar must include export canonical handler');
+  assert.ok(screenContent.includes('workspaceExportFormat'), 'Action Bar must support format selection (PDF/DOCX)');
+  assert.ok(screenContent.includes('setWorkspaceEditMode'), 'Action Bar must support toggling Edit Report');
+
+  // Escape key handler
+  assert.ok(screenContent.includes("e.key === 'Escape'"), 'Must close modal on Escape key');
+});
+
+test('11. Invariant: ReportWorkflowPanel supports structured preview, allowlisted fields, and in-place editing', async () => {
+  const fs = await import('node:fs');
+  const path = await import('node:path');
+  const panelContent = fs.readFileSync(path.resolve('src/components/ReportWorkflowPanel.tsx'), 'utf8');
+
+  // Structured preview sections
+  assert.ok(panelContent.includes('Executive Summary'), 'Panel must include Executive Summary');
+  assert.ok(panelContent.includes('Auditor Observations'), 'Panel must include Auditor Observations');
+  assert.ok(panelContent.includes('Recommendations'), 'Panel must include Recommendations');
+  assert.ok(panelContent.includes('Additional Findings'), 'Panel must include Additional Findings');
+  assert.ok(panelContent.includes('Final Reviewer Notes'), 'Panel must include Final Reviewer Notes');
+  assert.ok(panelContent.includes('Evaluated Framework Profiles'), 'Panel must include Frameworks overview');
+  assert.ok(panelContent.includes('Cryptographic Edit Log'), 'Panel must include immutable edit audit trail');
+
+  // Concurrency & In-place update
+  assert.ok(panelContent.includes('patchCanonicalReport'), 'Panel must use patchCanonicalReport');
+  assert.ok(panelContent.includes('report.version'), 'Panel must track and display report.version');
+  assert.ok(panelContent.includes('409'), 'Panel must handle 409 concurrency conflict');
+
+  // Workflow safety: No UNDER_REVIEW state
+  assert.ok(!panelContent.includes('UNDER_REVIEW'), 'Panel must NOT introduce UNDER_REVIEW state');
+});
+
