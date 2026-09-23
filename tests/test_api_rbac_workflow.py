@@ -482,3 +482,407 @@ def test_report_download_and_verify_ownership(uploader_a_token, uploader_b_token
     # 5. Non-existent entry returns 404 for all
     assert client.get("/api/report/nonexistent-entry-id/download", headers={"Authorization": f"Bearer {reviewer_token}"}).status_code == 404
     assert client.get("/api/report/nonexistent-entry-id/verify", headers={"Authorization": f"Bearer {reviewer_token}"}).status_code == 404
+
+
+# ==============================================================================
+# 5. AUDIT WORKFLOW END-TO-END INTEGRATION TEST (Phase 3.3)
+# ==============================================================================
+
+def test_full_audit_workflow_e2e(uploader_a_token, uploader_b_token, reviewer_token, viewer_token):
+    """End-to-end multi-role audit lifecycle test:
+    Uploader: upload -> in_progress -> inspect (non-mutating) -> submit -> submitted -> inspect -> cross-owner checks
+    Reviewer: list -> submitted appears -> inspect (read-only, no UNDER_REVIEW) -> finalize -> ledger owner is uploader -> hash-chain verified
+    Viewer: list -> inspect -> download/verify reports -> denied all mutation (upload/submit/finalize/approve)
+    """
+    # 1. UPLOADER STAGE
+    # Upload valid Cisco configuration
+    resp_up = client.post(
+        "/api/audit/upload",
+        json={"raw_config": SAMPLE_CONFIG, "filename": "core_switch.cfg"},
+        headers={"Authorization": f"Bearer {uploader_a_token}"}
+    )
+    assert resp_up.status_code == 200, resp_up.json()
+    sess_id = resp_up.json()["session_id"]
+
+    # Verify session created with workflow_status='in_progress' and owner_user_id='usr-uploader-a'
+    saved_session = database.get_session(sess_id)
+    assert saved_session is not None
+    assert saved_session["workflow_status"] == "in_progress"
+    assert saved_session["owner_user_id"] == "usr-uploader-a"
+
+    # Retrieve session results
+    resp_res = client.get(
+        f"/api/audit/{sess_id}/results",
+        headers={"Authorization": f"Bearer {uploader_a_token}"}
+    )
+    assert resp_res.status_code == 200
+    assert resp_res.json()["workflow_status"] == "in_progress"
+
+    # Confirm GET results does NOT mutate workflow_status
+    assert database.get_session(sess_id)["workflow_status"] == "in_progress"
+
+    # Submit session for reviewer attention
+    resp_sub = client.post(
+        f"/api/audit/{sess_id}/submit",
+        headers={"Authorization": f"Bearer {uploader_a_token}"}
+    )
+    assert resp_sub.status_code == 200
+    assert resp_sub.json()["workflow_status"] == "submitted"
+
+    # Confirm status in database is now 'submitted'
+    assert database.get_session(sess_id)["workflow_status"] == "submitted"
+
+    # Confirm uploader can still inspect the submitted session
+    resp_res_sub = client.get(
+        f"/api/audit/{sess_id}/results",
+        headers={"Authorization": f"Bearer {uploader_a_token}"}
+    )
+    assert resp_res_sub.status_code == 200
+    assert resp_res_sub.json()["workflow_status"] == "submitted"
+
+    # Confirm Uploader B cannot submit Uploader A's session (404)
+    resp_b_submit = client.post(
+        f"/api/audit/{sess_id}/submit",
+        headers={"Authorization": f"Bearer {uploader_b_token}"}
+    )
+    assert resp_b_submit.status_code == 404
+
+    # Confirm Uploader B cannot inspect Uploader A's session (404)
+    resp_b_inspect = client.get(
+        f"/api/audit/{sess_id}/results",
+        headers={"Authorization": f"Bearer {uploader_b_token}"}
+    )
+    assert resp_b_inspect.status_code == 404
+
+    # 2. REVIEWER STAGE
+    # Reviewer lists sessions
+    resp_rev_list = client.get(
+        "/api/audit/sessions",
+        headers={"Authorization": f"Bearer {reviewer_token}"}
+    )
+    assert resp_rev_list.status_code == 200
+    matching = [s for s in resp_rev_list.json() if s["session_id"] == sess_id]
+    assert len(matching) == 1
+    assert matching[0]["workflow_status"] == "submitted"
+
+    # Reviewer inspects submitted audit
+    resp_rev_res = client.get(
+        f"/api/audit/{sess_id}/results",
+        headers={"Authorization": f"Bearer {reviewer_token}"}
+    )
+    assert resp_rev_res.status_code == 200
+    assert resp_rev_res.json()["workflow_status"] == "submitted"
+
+    # Confirm inspection is strictly read-only (no UNDER_REVIEW)
+    assert database.get_session(sess_id)["workflow_status"] == "submitted"
+
+    # Reviewer finalizes the uploader's submitted audit
+    resp_fin = client.post(
+        "/api/audit/finalize",
+        json={"session_id": sess_id, "remediation_summary": {"SSH": "compliant"}},
+        headers={"Authorization": f"Bearer {reviewer_token}"}
+    )
+    assert resp_fin.status_code == 200
+    fin_data = resp_fin.json()
+    entry_id = fin_data["entry_id"]
+
+    # Confirm session status becomes 'finalized'
+    assert database.get_session(sess_id)["workflow_status"] == "finalized"
+
+    # Confirm ledger entry owner_user_id is the original uploader
+    conn = database.get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT owner_user_id FROM audit_ledger WHERE entry_id = ?", (entry_id,))
+    ledger_row = cur.fetchone()
+    assert ledger_row is not None
+    assert ledger_row[0] == "usr-uploader-a", "Ledger owner must be original uploader, not reviewer"
+    conn.close()
+
+    # Confirm hash-chain verification still succeeds
+    valid, msg, _ = audit_log.verify_chain(main.LOG_FILE)
+    assert valid is True, f"Hash chain verification failed: {msg}"
+
+    # Confirm report download succeeds
+    resp_dl = client.get(
+        f"/api/report/{entry_id}/download",
+        headers={"Authorization": f"Bearer {reviewer_token}"}
+    )
+    assert resp_dl.status_code == 200
+
+    # 3. VIEWER STAGE
+    # Viewer lists sessions
+    resp_view_list = client.get(
+        "/api/audit/sessions",
+        headers={"Authorization": f"Bearer {viewer_token}"}
+    )
+    assert resp_view_list.status_code == 200
+    assert any(s["session_id"] == sess_id for s in resp_view_list.json())
+
+    # Viewer inspects results
+    resp_view_res = client.get(
+        f"/api/audit/{sess_id}/results",
+        headers={"Authorization": f"Bearer {viewer_token}"}
+    )
+    assert resp_view_res.status_code == 200
+    assert resp_view_res.json()["workflow_status"] == "finalized"
+
+    # Viewer accesses permitted reports
+    assert client.get(f"/api/report/{entry_id}/download", headers={"Authorization": f"Bearer {viewer_token}"}).status_code == 200
+    assert client.get(f"/api/report/{entry_id}/verify", headers={"Authorization": f"Bearer {viewer_token}"}).status_code == 200
+
+    # Confirm viewer CANNOT mutate workflow
+    # Cannot upload
+    assert client.post("/api/audit/upload", json={"raw_config": SAMPLE_CONFIG}, headers={"Authorization": f"Bearer {viewer_token}"}).status_code == 403
+    # Cannot submit
+    assert client.post(f"/api/audit/{sess_id}/submit", headers={"Authorization": f"Bearer {viewer_token}"}).status_code == 403
+    # Cannot finalize
+    assert client.post("/api/audit/finalize", json={"session_id": sess_id}, headers={"Authorization": f"Bearer {viewer_token}"}).status_code == 403
+    # Cannot approve AI suggestion
+    assert client.post("/api/ai/approve", json={"suggestion_id": "dummy", "decision": "approve"}, headers={"Authorization": f"Bearer {viewer_token}"}).status_code == 403
+
+
+# ==============================================================================
+# 6. MAPPING REVIEW INDEPENDENCE FROM AUDIT WORKFLOW
+# ==============================================================================
+
+def test_mapping_review_separated_from_audit_workflow(uploader_a_token, reviewer_token):
+    """Verify that mapping suggestions and approvals/rejections do not alter audit workflow_status."""
+    # Seed an in_progress session and a submitted session
+    seed_session("sess-map-inp", "usr-uploader-a", "in_progress")
+    seed_session("sess-map-sub", "usr-uploader-a", "submitted")
+
+    # 1. AI Suggestion does not change workflow_status
+    resp_sug = client.post(
+        "/api/ai/suggest",
+        json={"unmapped_line": "service password-encryption", "vendor": "cisco"},
+        headers={"Authorization": f"Bearer {uploader_a_token}"}
+    )
+    assert resp_sug.status_code == 200
+    sug_id = resp_sug.json()["suggestion_id"]
+
+    # Verify sessions remain untouched
+    assert database.get_session("sess-map-inp")["workflow_status"] == "in_progress"
+    assert database.get_session("sess-map-sub")["workflow_status"] == "submitted"
+
+    # 2. Non-approver reviewer cannot approve mapping
+    non_approver_token = auth.create_access_token(
+        user_id="usr-reviewer-no-app",
+        username="secops_junior",
+        role="reviewer",
+        is_authorized_approver=False,
+    )
+    resp_no_app = client.post(
+        "/api/ai/approve",
+        json={"suggestion_id": sug_id, "decision": "approve", "session_id": "sess-map-sub"},
+        headers={"Authorization": f"Bearer {non_approver_token}"}
+    )
+    assert resp_no_app.status_code == 403
+
+    # 3. Authorized reviewer approves mapping with session_id
+    resp_app = client.post(
+        "/api/ai/approve",
+        json={"suggestion_id": sug_id, "decision": "approve", "session_id": "sess-map-sub"},
+        headers={"Authorization": f"Bearer {reviewer_token}"}
+    )
+    assert resp_app.status_code == 200
+
+    # CRUCIAL INVARIANT: session workflow_status is STILL 'submitted', not finalized!
+    assert database.get_session("sess-map-sub")["workflow_status"] == "submitted"
+
+    # 4. Another suggestion rejected does not alter session status
+    resp_sug2 = client.post(
+        "/api/ai/suggest",
+        json={"unmapped_line": "ntp server 10.0.0.1", "vendor": "cisco"},
+        headers={"Authorization": f"Bearer {uploader_a_token}"}
+    )
+    sug_id2 = resp_sug2.json()["suggestion_id"]
+
+    resp_rej = client.post(
+        "/api/ai/approve",
+        json={"suggestion_id": sug_id2, "decision": "reject", "session_id": "sess-map-sub"},
+        headers={"Authorization": f"Bearer {reviewer_token}"}
+    )
+    assert resp_rej.status_code == 200
+    assert database.get_session("sess-map-sub")["workflow_status"] == "submitted"
+
+
+# ==============================================================================
+# 7. HORIZONTAL PRIVILEGE BOUNDARIES (Strict 404 Anti-Enumeration)
+# ==============================================================================
+
+def test_horizontal_privilege_boundaries_strict_404(uploader_a_token, uploader_b_token, reviewer_token):
+    """Verify all 5 cross-owner actions by uploaders return indistinguishable 404 Not Found."""
+    seed_session("sess-a-priv", "usr-uploader-a", "in_progress")
+    seed_session("sess-b-priv", "usr-uploader-b", "in_progress")
+
+    # Finalize B's session to generate a report
+    resp_fin_b = client.post(
+        "/api/audit/finalize",
+        json={"session_id": "sess-b-priv", "remediation_summary": {}},
+        headers={"Authorization": f"Bearer {uploader_b_token}"}
+    )
+    assert resp_fin_b.status_code == 200
+    entry_id_b = resp_fin_b.json()["entry_id"]
+
+    headers_a = {"Authorization": f"Bearer {uploader_a_token}"}
+
+    # 1. Uploader A cannot inspect B's session results
+    r1 = client.get("/api/audit/sess-b-priv/results", headers=headers_a)
+    assert r1.status_code == 404
+    assert "not found" in r1.json()["detail"].lower()
+
+    # 2. Uploader A cannot submit B's session
+    r2 = client.post("/api/audit/sess-b-priv/submit", headers=headers_a)
+    assert r2.status_code == 404
+    assert "not found" in r2.json()["detail"].lower()
+
+    # 3. Uploader A cannot finalize B's session
+    r3 = client.post("/api/audit/finalize", json={"session_id": "sess-b-priv"}, headers=headers_a)
+    assert r3.status_code == 404
+    assert "not found" in r3.json()["detail"].lower()
+
+    # 4. Uploader A cannot download B's report
+    r4 = client.get(f"/api/report/{entry_id_b}/download", headers=headers_a)
+    assert r4.status_code == 404
+    assert "not found" in r4.json()["detail"].lower()
+
+    # 5. Uploader A cannot verify B's report
+    r5 = client.get(f"/api/report/{entry_id_b}/verify", headers=headers_a)
+    assert r5.status_code == 404
+    assert "not found" in r5.json()["detail"].lower()
+
+    # Compare 404 message against non-existent session
+    r_nonexist = client.get("/api/audit/does-not-exist/results", headers=headers_a)
+    assert r1.json()["detail"] == "Session 'sess-b-priv' not found."
+    assert r_nonexist.json()["detail"] == "Session 'does-not-exist' not found."
+
+
+# ==============================================================================
+# 8. CLIENT-SUPPLIED IDENTITY OVERRIDE RESISTANCE
+# ==============================================================================
+
+def test_client_supplied_identity_ignored(uploader_a_token):
+    """Verify that client-supplied identity in body, query, or headers cannot override JWT identity."""
+    spoof_headers = {
+        "Authorization": f"Bearer {uploader_a_token}",
+        "X-User-ID": "usr-uploader-b",
+        "X-Owner-ID": "usr-uploader-b",
+        "X-Forwarded-User": "usr-uploader-b"
+    }
+
+    # 1. Upload with spoofing attempts
+    resp_up = client.post(
+        "/api/audit/upload?owner_user_id=usr-uploader-b",
+        json={
+            "raw_config": SAMPLE_CONFIG,
+            "filename": "spoof_test.cfg",
+            "owner_user_id": "usr-uploader-b",
+            "created_by": "usr-uploader-b"
+        },
+        headers=spoof_headers
+    )
+    assert resp_up.status_code == 200
+    sess_id = resp_up.json()["session_id"]
+
+    # Verify database stored actual authenticated identity
+    session = database.get_session(sess_id)
+    assert session["owner_user_id"] == "usr-uploader-a", "Server MUST ignore client-supplied owner overrides"
+
+    # 2. Finalize with spoofing attempts
+    resp_fin = client.post(
+        "/api/audit/finalize?owner_user_id=usr-uploader-b",
+        json={
+            "session_id": sess_id,
+            "remediation_summary": {},
+            "owner_user_id": "usr-uploader-b"
+        },
+        headers=spoof_headers
+    )
+    assert resp_fin.status_code == 200
+    entry_id = resp_fin.json()["entry_id"]
+
+    conn = database.get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT owner_user_id FROM audit_ledger WHERE entry_id = ?", (entry_id,))
+    ledger_owner = cur.fetchone()[0]
+    conn.close()
+
+    assert ledger_owner == "usr-uploader-a", "Ledger owner MUST derive from server session owner"
+
+
+# ==============================================================================
+# 9. READ-ONLY GET INVARIANTS (No UNDER_REVIEW state)
+# ==============================================================================
+
+def test_read_only_get_invariants_no_under_review(uploader_a_token, reviewer_token, viewer_token):
+    """Verify that all GET endpoints are strictly side-effect free and no UNDER_REVIEW state exists."""
+    seed_session("sess-no-mutate", "usr-uploader-a", "submitted")
+
+    # Initial assertion
+    assert database.get_session("sess-no-mutate")["workflow_status"] == "submitted"
+
+    # Multiple GET calls from different roles
+    tokens = [uploader_a_token, reviewer_token, viewer_token]
+    for tok in tokens:
+        headers = {"Authorization": f"Bearer {tok}"}
+
+        # GET /api/audit/sessions
+        r_list = client.get("/api/audit/sessions", headers=headers)
+        assert r_list.status_code == 200
+
+        # GET /api/audit/sessions?status=submitted
+        r_list_sub = client.get("/api/audit/sessions?status=submitted", headers=headers)
+        assert r_list_sub.status_code == 200
+
+        # GET /api/audit/{id}/results
+        r_res = client.get("/api/audit/sess-no-mutate/results", headers=headers)
+        assert r_res.status_code == 200
+        assert r_res.json()["workflow_status"] == "submitted"
+
+        # GET /api/ledger
+        r_led = client.get("/api/ledger", headers=headers)
+        assert r_led.status_code == 200
+
+    # Status must STILL be 'submitted'
+    final_session = database.get_session("sess-no-mutate")
+    assert final_session["workflow_status"] == "submitted"
+    assert "under_review" not in final_session["workflow_status"].lower()
+
+
+# ==============================================================================
+# 10. FINALIZATION COMPATIBILITY (Path A vs Path B)
+# ==============================================================================
+
+def test_finalization_compatibility_both_paths(uploader_a_token, reviewer_token):
+    """Verify that both Path A (in_progress -> submitted -> finalized) and
+    Path B (in_progress -> finalized directly) remain completely supported.
+    """
+    # PATH A: in_progress -> submitted -> finalized
+    seed_session("sess-path-a", "usr-uploader-a", "in_progress")
+    # Submit
+    r_sub = client.post("/api/audit/sess-path-a/submit", headers={"Authorization": f"Bearer {uploader_a_token}"})
+    assert r_sub.status_code == 200
+    assert database.get_session("sess-path-a")["workflow_status"] == "submitted"
+    # Finalize by reviewer
+    r_fin_a = client.post(
+        "/api/audit/finalize",
+        json={"session_id": "sess-path-a", "remediation_summary": {}},
+        headers={"Authorization": f"Bearer {reviewer_token}"}
+    )
+    assert r_fin_a.status_code == 200
+    assert database.get_session("sess-path-a")["workflow_status"] == "finalized"
+
+    # PATH B: in_progress -> finalized directly (compatibility path)
+    seed_session("sess-path-b", "usr-uploader-a", "in_progress")
+    # Direct finalize by uploader
+    r_fin_b = client.post(
+        "/api/audit/finalize",
+        json={"session_id": "sess-path-b", "remediation_summary": {}},
+        headers={"Authorization": f"Bearer {uploader_a_token}"}
+    )
+    assert r_fin_b.status_code == 200
+    assert database.get_session("sess-path-b")["workflow_status"] == "finalized"
+
+    # Both paths have valid hash chain
+    valid, msg, _ = audit_log.verify_chain(main.LOG_FILE)
+    assert valid is True, f"Hash chain verification failed: {msg}"
