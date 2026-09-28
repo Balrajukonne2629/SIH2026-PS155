@@ -234,7 +234,8 @@ class MultiFrameworkAggregator:
             p_count = sum(1 for r in sorted_res if r.status == ComplianceStatus.PASS)
             f_count = sum(1 for r in sorted_res if r.status == ComplianceStatus.FAIL)
             u_count = sum(1 for r in sorted_res if r.status == ComplianceStatus.UNKNOWN)
-            t_count = len(sorted_res)
+            # Assessed controls count (excludes NOT_ASSESSED)
+            t_count = p_count + f_count + u_count
 
             # Pass rate: PASS / (PASS + FAIL). UNKNOWN is excluded from denominator.
             evaluated_count = p_count + f_count

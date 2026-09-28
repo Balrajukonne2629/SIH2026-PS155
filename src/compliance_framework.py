@@ -41,6 +41,7 @@ class ComplianceStatus(str, Enum):
     PASS = "Pass"
     FAIL = "Fail"
     UNKNOWN = "Unknown"
+    NOT_ASSESSED = "Not_Assessed"
 
     @classmethod
     def from_str(cls, value: Union[str, "ComplianceStatus"]) -> "ComplianceStatus":
@@ -57,9 +58,11 @@ class ComplianceStatus(str, Enum):
             return cls.FAIL
         if normalized in ("unknown", "unmapped", "indeterminate", "pending"):
             return cls.UNKNOWN
+        if normalized in ("not_assessed", "not-assessed", "not assessed", "not_evaluated", "not evaluated"):
+            return cls.NOT_ASSESSED
         
         raise ValueError(
-            f"Invalid compliance status '{value}'. Must be one of: PASS, FAIL, UNKNOWN."
+            f"Invalid compliance status '{value}'. Must be one of: PASS, FAIL, UNKNOWN, NOT_ASSESSED."
         )
 
     def is_pass(self) -> bool:
@@ -70,6 +73,9 @@ class ComplianceStatus(str, Enum):
 
     def is_unknown(self) -> bool:
         return self == ComplianceStatus.UNKNOWN
+
+    def is_not_assessed(self) -> bool:
+        return self == ComplianceStatus.NOT_ASSESSED
 
 
 # --- 2. Deterministic Evidence Model ---
@@ -347,25 +353,27 @@ class FrameworkRegistry:
     def list_for_vendor(
         self,
         vendor: str,
-        enabled_only: bool = True
+        enabled_only: bool = True,
+        include_neutral: bool = True
     ) -> List[Framework]:
         """Lists registered frameworks applicable to the specified vendor or platform.
 
         Matches vendor case-insensitively against each Framework's vendor_scope.
-        Vendor-neutral frameworks (vendor_scope=None) are always included.
+        Vendor-neutral frameworks (vendor_scope=None) are included if include_neutral=True.
         For an unknown vendor, returns only vendor-neutral frameworks (or an empty list).
         Disabled frameworks are excluded when enabled_only=True.
 
         Args:
             vendor: Vendor identifier or platform string (e.g. 'cisco', 'Cisco IOS-XE').
             enabled_only: If True, filters out disabled frameworks. Defaults to True.
+            include_neutral: If True, includes frameworks with vendor_scope=None. Defaults to True.
 
         Returns:
             List of matching Framework instances sorted deterministically by framework_id.
         """
         if not isinstance(vendor, str) or not vendor.strip():
             all_fws = self.list(enabled_only=enabled_only)
-            return [f for f in all_fws if f.vendor_scope is None]
+            return [f for f in all_fws if f.vendor_scope is None] if include_neutral else []
 
         v_norm = vendor.strip().lower()
         v_tokens = set(re.findall(r'[a-z0-9]+', v_norm))
@@ -374,7 +382,8 @@ class FrameworkRegistry:
         matched: List[Framework] = []
         for fw in self.list(enabled_only=enabled_only):
             if fw.vendor_scope is None:
-                matched.append(fw)
+                if include_neutral:
+                    matched.append(fw)
                 continue
 
             s_norm = fw.vendor_scope.strip().lower()

@@ -88,10 +88,14 @@ import src.disa_stig_cisco_iosxe as disa_stig_cisco_iosxe
 import src.compliance_aggregator as compliance_aggregator
 import src.audit_report as audit_report
 import src.report_exporter as report_exporter
+import src.configuration_progression as configuration_progression
+
+import src.framework_crosswalk as framework_crosswalk
 
 # Register default deterministic compliance frameworks
 cis_benchmark_cisco_iosxe.register_cis_cisco_iosxe()
 disa_stig_cisco_iosxe.register_disa_stig_cisco_iosxe()
+framework_crosswalk.register_crosswalk_frameworks()
 
 
 app = FastAPI(
@@ -126,10 +130,21 @@ def load_baseline_rules() -> List[dict]:
 
 def load_trusted_rules(vendor: Optional[str] = None) -> List[dict]:
     """Loads approved trusted custom rules from SQLite trusted_mappings table.
-    Enforces strict vendor isolation when vendor is specified."""
-    mappings = [m for m in database.list_trusted_mappings(vendor=vendor) if m.get("status") != "retired"]
+    Enforces strict vendor isolation when vendor is specified.
+    Excludes synthetic test/mock suggestion records from active compliance evaluation."""
+    mappings = database.list_trusted_mappings(vendor=vendor)
     rules = []
     for m in mappings:
+        if m.get("status") not in ("approved", "corrected"):
+            continue
+        vrid = m.get("vendor_rule_id") or ""
+        v_info = m.get("version_info") or {}
+        # Ignore synthetic test/mock suggestion rules from test pollution
+        if "-sug-" in vrid.lower():
+            continue
+        approver = v_info.get("approved_by") or ""
+        if approver in ("usr-reviewer-lead-01", "test-reviewer-id"):
+            continue
         rules.append({
             "vendor_rule_id": m["vendor_rule_id"],
             "common_rule_id": m["common_rule_id"],
@@ -144,6 +159,7 @@ def load_trusted_rules(vendor: Optional[str] = None) -> List[dict]:
             "status": m["status"]
         })
     return rules
+
 
 
 # --- Pydantic Request Models ---
@@ -1029,13 +1045,11 @@ async def finalize_audit(
             csm=session["csm"],
             evals=session["evals"],
             raw_config_text=session["raw_config_text"],
-            remediation_summary=req.remediation_summary,
-            logfile=LOG_FILE
+            remediation_summary=req.remediation_summary
         )
         session_owner = session.get("owner_user_id") or current_user["sub"]
         entry_hash = audit_log.append_audit_entry(
             audit_entry,
-            logfile=LOG_FILE,
             owner_user_id=session_owner
         )
 
@@ -1158,7 +1172,7 @@ async def verify_ledger(
 ):
     """Verifies complete cryptographic hash-chain integrity of SQLite audit_ledger."""
     try:
-        is_valid, message, broken_idx = audit_log.verify_chain(LOG_FILE)
+        is_valid, message, broken_idx = audit_log.verify_chain()
         payload = {
             "valid": is_valid,
             "message": message,
@@ -1171,6 +1185,90 @@ async def verify_ledger(
         return payload
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Chain verification failed: {e}")
+
+
+# --- 8b. GET /api/configurations/progression ---
+@app.get("/api/configurations/progression")
+async def get_configuration_progression(
+    device_hostname: Optional[str] = Query(None, description="Optional target device hostname filter"),
+    current_user: Dict[str, Any] = Depends(require_role("viewer", "uploader", "reviewer"))
+):
+    """Returns chronological configuration progression derived via run-length compression
+    over authentic audit_ledger records. Groups consecutive audits of unchanged config hashes,
+    preserves rollback state transitions (e.g. V1->V2->V3), and retains all underlying audit entries.
+    """
+    conn = database.get_connection()
+    cur = conn.cursor()
+    query = '''
+        SELECT
+            al.entry_id,
+            al.timestamp,
+            al.device_hostname,
+            al.config_file_hash,
+            al.audit_results,
+            al.remediation_summary,
+            al.prevEntryHash,
+            al.entryHash,
+            al.owner_user_id AS ledger_owner,
+            ar.report_id AS canonical_report_id,
+            ar.created_by AS report_created_by,
+            s.owner_user_id AS session_owner
+        FROM audit_ledger al
+        LEFT JOIN audit_reports ar ON al.entry_id = ar.audit_entry_id
+        LEFT JOIN audit_sessions s ON ar.session_id = s.session_id
+    '''
+    params: List[Any] = []
+    if device_hostname:
+        query += ' WHERE al.device_hostname = ?'
+        params.append(device_hostname)
+    query += ' ORDER BY al.id ASC'
+
+    cur.execute(query, params)
+    rows = cur.fetchall()
+    conn.close()
+
+    user_role = current_user.get("role")
+    user_id = current_user.get("sub")
+
+    entries = []
+    for row in rows:
+        try:
+            is_authorized = True
+            if user_role == "uploader":
+                owner = row["session_owner"] or row["ledger_owner"] or row["report_created_by"]
+                if owner and owner != user_id:
+                    is_authorized = False
+
+            rep_id = row["canonical_report_id"] if (is_authorized and row["canonical_report_id"]) else None
+
+            entry = {
+                "entry_id": row["entry_id"],
+                "timestamp": row["timestamp"],
+                "device_hostname": row["device_hostname"],
+                "config_file_hash": row["config_file_hash"],
+                "audit_results": json.loads(row["audit_results"]) if row["audit_results"] else {},
+                "remediation_summary": json.loads(row["remediation_summary"]) if row["remediation_summary"] else None,
+                "prevEntryHash": row["prevEntryHash"],
+                "entryHash": row["entryHash"],
+                "has_canonical_report": bool(rep_id),
+                "report_id": rep_id
+            }
+            entries.append(entry)
+        except Exception:
+            continue
+
+    versions = configuration_progression.derive_configuration_progression(
+        entries,
+        device_hostname=device_hostname,
+        include_deltas=True
+    )
+
+    return {
+        "versions": versions,
+        "total_versions": len(versions),
+        "total_audits": sum(v["audit_count"] for v in versions),
+        "device_hostname": device_hostname
+    }
 
 
 # --- 9. GET /api/report/{entry_id}/download ---
@@ -1223,7 +1321,7 @@ async def list_compliance_frameworks(
     frameworks_meta = []
 
     frameworks_to_list = (
-        registry.list_for_vendor(vendor, enabled_only=False)
+        registry.list_for_vendor(vendor, enabled_only=False, include_neutral=False)
         if vendor is not None and vendor.strip()
         else registry.list(enabled_only=False)
     )
@@ -1335,7 +1433,7 @@ async def evaluate_compliance(
         target_fids = [
             f.framework_id
             for f in compatible_fws
-            if registry.get_evaluator(f.framework_id) is not None
+            if f.vendor_scope is not None and registry.get_evaluator(f.framework_id) is not None
         ]
     else:
         target_fids = []

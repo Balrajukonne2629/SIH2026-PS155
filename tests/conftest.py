@@ -23,8 +23,10 @@ _MODULE_NAMES = [
     "cisco_auditor",
     "compliance_aggregator",
     "compliance_framework",
+    "configuration_progression",
     "database",
     "disa_stig_cisco_iosxe",
+    "framework_crosswalk",
     "juniper_auditor",
     "main",
     "remediation_engine",
@@ -37,3 +39,25 @@ _MODULE_NAMES = [
 for _name in _MODULE_NAMES:
     _mod = __import__(f"src.{_name}", fromlist=[_name])
     sys.modules[_name] = _mod
+
+import pytest
+
+@pytest.fixture(autouse=True)
+def isolate_test_database(request, tmp_path, monkeypatch):
+    """Isolates tests from production database (data/auditor.db).
+    If the test module has its own setup_module managing DB_PATH, respects it.
+    Otherwise directs database operations to an ephemeral SQLite database in tmp_path.
+    """
+    if hasattr(request.module, "setup_module"):
+        yield
+        return
+
+    test_db = tmp_path / "conftest_test_auditor.db"
+    import database
+    monkeypatch.setattr(database, "DB_PATH", test_db)
+    if "src.database" in sys.modules:
+        monkeypatch.setattr(sys.modules["src.database"], "DB_PATH", test_db)
+    database.initialize_database()
+    yield
+
+

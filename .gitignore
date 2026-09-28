@@ -91,5 +91,14 @@ ntro-architecture.visual-check.*
 graphify-out/cache/
 
 # Runtime exports and test databases
-data/exports/
+data/*.db
+data/*.backup*
+data/exports/*
+!data/exports/.gitkeep
 data/test_*.db
+
+# Ephemeral scratch workspace and browser debug screenshots
+scratch/
+__pycache__/
+backups/
+legacy_archive/
