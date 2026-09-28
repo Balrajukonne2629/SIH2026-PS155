@@ -589,6 +589,9 @@ def create_or_get_canonical_report(
         "vendor": vendor,
         "platform": device_info.get("platform") or vendor,
         "management_ip": device_info.get("management_ip"),
+        "hardware_model": device_info.get("hardware_model"),
+        "serial_number": device_info.get("serial_number"),
+        "os_version": device_info.get("os_version"),
         "interfaces_count": len(csm.get("interfaces", [])) if isinstance(csm, dict) else 0,
     }
 

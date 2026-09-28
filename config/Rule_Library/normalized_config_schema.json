@@ -65,6 +65,12 @@
             "string",
             "null"
           ]
+        },
+        "hardware_model": {
+          "type": [
+            "string",
+            "null"
+          ]
         }
       }
     },

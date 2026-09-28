@@ -108,9 +108,13 @@ def generate_pdf_report(csm: dict,
     story.append(Paragraph("Automated Deterministic Verification & Tamper-Evident Audit Report | NTRO PS 26155", subtitle_style))
     story.append(HRFlowable(width="100%", thickness=1.5, color=colors.HexColor("#0284c7"), spaceAfter=10))
 
-    # 2. Metadata Table
-    host = csm.get("device", {}).get("hostname", "UNKNOWN")
-    platform = csm.get("device", {}).get("platform", "IOS-XE")
+    dev = csm.get("device", {}) if isinstance(csm, dict) else {}
+    host = dev.get("hostname") or "UNKNOWN"
+    platform = dev.get("platform") or "IOS-XE"
+    model = dev.get("hardware_model") or "Not In Config"
+    serial = dev.get("serial_number") or "Not In Config"
+    os_ver = dev.get("os_version") or "Not In Config"
+    mgmt_ip = dev.get("management_ip") or "Not In Config"
     entry_id = audit_entry.get("entry_id", "N/A")
     entry_hash = audit_entry.get("entryHash", "N/A")
     config_hash = audit_entry.get("config_file_hash", "N/A")
@@ -119,12 +123,16 @@ def generate_pdf_report(csm: dict,
     meta_data = [
         [Paragraph("<b>Target Device:</b>", body_style), Paragraph(f"{host} ({platform})", body_style),
          Paragraph("<b>Audit Date:</b>", body_style), Paragraph(timestamp[:19] + " UTC", body_style)],
+        [Paragraph("<b>Hardware Model:</b>", body_style), Paragraph(model, body_style),
+         Paragraph("<b>Serial Number:</b>", body_style), Paragraph(serial, mono_style)],
+        [Paragraph("<b>OS Version:</b>", body_style), Paragraph(os_ver, body_style),
+         Paragraph("<b>Management IP:</b>", body_style), Paragraph(mgmt_ip, mono_style)],
         [Paragraph("<b>Audit Entry ID:</b>", body_style), Paragraph(entry_id, body_style),
          Paragraph("<b>Config Hash:</b>", body_style), Paragraph(f"{config_hash[:16]}...", mono_style)],
         [Paragraph("<b>Chain Entry Hash:</b>", body_style), Paragraph(f"{entry_hash[:20]}...", mono_style),
          Paragraph("<b>Verification:</b>", body_style), Paragraph("<font color='#16a34a'><b>TAMPER-EVIDENT</b></font>", body_style)]
     ]
-    meta_table = Table(meta_data, colWidths=[95, 175, 95, 175])
+    meta_table = Table(meta_data, colWidths=[105, 165, 105, 165])
     meta_table.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#f8fafc")),
         ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),

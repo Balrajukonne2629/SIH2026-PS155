@@ -177,17 +177,20 @@ def canonicalize_junos_statements(text: str) -> Tuple[List[str], List[str]]:
     statements: List[str] = []
     unmapped: List[str] = []
 
-    # 1. Strip C-style comments /* ... */ while noting their presence
-    clean = re.sub(r"/\*.*?\*/", "", text, flags=re.DOTALL)
+    # 1. Strip appended show commands and C-style comments /* ... */
+    clean = re.sub(r"(?:^|\n)\s*(?:show\s+version|show\s+chassis\s+hardware).*$", "", text, flags=re.IGNORECASE | re.DOTALL)
+    clean = re.sub(r"/\*.*?\*/", "", clean, flags=re.DOTALL)
 
     # 2. Check if configuration is predominantly flat 'set' syntax
-    raw_lines = [line.strip() for line in clean.splitlines() if line.strip()]
+    raw_lines = [
+        line.strip()
+        for line in clean.splitlines()
+        if line.strip() and not line.strip().startswith("#") and not line.strip().startswith("!")
+    ]
     set_lines = [l for l in raw_lines if l.startswith("set ")]
 
     if len(set_lines) > 0 and len(set_lines) >= (len(raw_lines) / 2):
         for line in raw_lines:
-            if line.startswith("#") or line.startswith("!"):
-                continue
             if line.startswith("set "):
                 stmt = line[4:].strip().rstrip(";")
                 statements.append(stmt)
@@ -257,6 +260,7 @@ def parse_juniper(
             "platform": "Junos",
             "os_version": None,
             "serial_number": None,
+            "hardware_model": None,
             "management_ip": None,
         },
         "source": {
@@ -356,6 +360,38 @@ def parse_juniper(
             "source_lines": [source_line],
             "confidence": 1.0,
         })
+
+    # 1. Device identity from running-config comments/headers & show commands
+    for raw in text.splitlines():
+        line = raw.strip()
+        if line.startswith("#") or line.startswith("!"):
+            m_ver = re.search(r"version\s*[:\s]\s*([0-9A-Za-z_().-]+)", line, re.IGNORECASE)
+            if m_ver and not csm["device"]["os_version"]:
+                csm["device"]["os_version"] = m_ver.group(1)
+            m_mod = re.search(r"Model:\s*(\S+)", line, re.IGNORECASE)
+            if m_mod and not csm["device"]["hardware_model"]:
+                csm["device"]["hardware_model"] = m_mod.group(1)
+            m_sn = re.search(r"Serial\s*(?:Number)?:\s*(\S+)", line, re.IGNORECASE)
+            if m_sn and not csm["device"]["serial_number"]:
+                csm["device"]["serial_number"] = m_sn.group(1)
+
+    # 2. Device identity from show version / show chassis hardware if appended
+    if not csm["device"]["os_version"]:
+        m_ver = re.search(r"Junos:\s*([0-9A-Za-z_().-]+)", text, re.IGNORECASE) or re.search(r"version\s+([0-9A-Za-z_().-]+);", text, re.IGNORECASE)
+        if m_ver:
+            csm["device"]["os_version"] = m_ver.group(1)
+    if not csm["device"]["hardware_model"]:
+        m_mod = re.search(r"Model:\s*(\S+)", text, re.IGNORECASE)
+        if m_mod:
+            csm["device"]["hardware_model"] = m_mod.group(1)
+    if not csm["device"]["serial_number"]:
+        m_sn1 = re.search(r"Serial\s*number\s*:\s*(\S+)", text, re.IGNORECASE)
+        if m_sn1 and m_sn1.group(1).lower() not in ("number", "description", "version"):
+            csm["device"]["serial_number"] = m_sn1.group(1)
+        else:
+            m_sn2 = re.search(r"Chassis\s+([A-Za-z0-9_-]{6,})", text, re.IGNORECASE)
+            if m_sn2 and m_sn2.group(1).lower() not in ("inventory", "hardware", "version"):
+                csm["device"]["serial_number"] = m_sn2.group(1)
 
     statements, unmapped = canonicalize_junos_statements(text)
     csm["unmapped_lines"].extend(unmapped)
@@ -556,10 +592,6 @@ def parse_juniper(
                 if m_addr:
                     ip_str = m_addr.group(1)
                     cur_if["ip_addresses"].append(ip_str)
-                    if not csm["device"]["management_ip"] and (
-                        if_name.startswith("fxp0") or if_name.startswith("lo0")
-                    ):
-                        csm["device"]["management_ip"] = ip_str.split("/")[0]
             continue
 
         # 9. Management VRF / Routing Instances
@@ -591,6 +623,16 @@ def parse_juniper(
         csm["unmapped_lines"].append(line)
 
     csm["interfaces"] = list(interfaces_map.values())
+
+    # Preferred management_ip: fxp0 / me0 / em0, else None
+    mgmt_ip = None
+    for intf in csm["interfaces"]:
+        name = intf.get("name", "").lower()
+        if (name.startswith("fxp0") or name.startswith("me0") or name.startswith("em0")) and intf.get("ip_addresses"):
+            mgmt_ip = intf["ip_addresses"][0].split("/")[0]
+            break
+    csm["device"]["management_ip"] = mgmt_ip
+
     return csm
 
 

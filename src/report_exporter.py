@@ -230,30 +230,42 @@ def _build_pdf(report: AuditReport, target_file: pathlib.Path) -> None:
     # --- Metadata Table ---
     dev = report.device_metadata or {}
     cfg = report.configuration_metadata or {}
+    hostname = dev.get("hostname") or "Unknown"
+    platform = dev.get("platform") or "Unknown"
+    model = dev.get("hardware_model") or "Not In Config"
+    serial = dev.get("serial_number") or "Not In Config"
+    os_ver = dev.get("os_version") or "Not In Config"
+    mgmt_ip = dev.get("management_ip") or "Not In Config"
     meta_data = [
         [
             Paragraph("<b>Target Hostname:</b>", body_style),
-            Paragraph(_pdf_escape(dev.get("hostname", "Unknown")), mono_style),
-            Paragraph("<b>Platform / OS:</b>", body_style),
-            Paragraph(_pdf_escape(dev.get("platform", "Unknown")), body_style),
+            Paragraph(_pdf_escape(hostname), mono_style),
+            Paragraph("<b>Platform:</b>", body_style),
+            Paragraph(_pdf_escape(platform), body_style),
         ],
         [
+            Paragraph("<b>Hardware Model:</b>", body_style),
+            Paragraph(_pdf_escape(model), body_style),
+            Paragraph("<b>Serial Number:</b>", body_style),
+            Paragraph(_pdf_escape(serial), mono_style),
+        ],
+        [
+            Paragraph("<b>OS Version:</b>", body_style),
+            Paragraph(_pdf_escape(os_ver), body_style),
             Paragraph("<b>Management IP:</b>", body_style),
-            Paragraph(_pdf_escape(dev.get("management_ip", "Unknown")), mono_style),
+            Paragraph(_pdf_escape(mgmt_ip), mono_style),
+        ],
+        [
             Paragraph("<b>Config Filename:</b>", body_style),
             Paragraph(_pdf_escape(cfg.get("filename", "Unknown")), mono_style),
-        ],
-        [
             Paragraph("<b>Config SHA-256:</b>", body_style),
             Paragraph(_pdf_escape(cfg.get("config_file_hash", "Unknown")), mono_style),
-            Paragraph("<b>Audit Session ID:</b>", body_style),
-            Paragraph(_pdf_escape(report.session_id), mono_style),
         ],
         [
+            Paragraph("<b>Audit Session ID:</b>", body_style),
+            Paragraph(_pdf_escape(report.session_id), mono_style),
             Paragraph("<b>Created At:</b>", body_style),
             Paragraph(_pdf_escape(report.created_at), body_style),
-            Paragraph("<b>Last Updated:</b>", body_style),
-            Paragraph(_pdf_escape(report.updated_at), body_style),
         ],
     ]
     meta_table = Table(meta_data, colWidths=[100, 170, 100, 170])
@@ -744,31 +756,44 @@ def _build_docx(report: AuditReport, target_file: pathlib.Path) -> None:
     # --- Metadata Table ---
     dev = report.device_metadata or {}
     cfg = report.configuration_metadata or {}
+    hostname = dev.get("hostname") or "Unknown"
+    platform = dev.get("platform") or "Unknown"
+    model = dev.get("hardware_model") or "Not In Config"
+    serial = dev.get("serial_number") or "Not In Config"
+    os_ver = dev.get("os_version") or "Not In Config"
+    mgmt_ip = dev.get("management_ip") or "Not In Config"
+
     meta_headers = ["Property", "Value", "Property", "Value"]
     meta_rows = [
         [
             ("Target Hostname", None, True, False),
-            (str(dev.get("hostname", "Unknown")), None, False, True),
-            ("Platform / OS", None, True, False),
-            (str(dev.get("platform", "Unknown")), None, False, False),
+            (str(hostname), None, False, True),
+            ("Platform", None, True, False),
+            (str(platform), None, False, False),
         ],
         [
+            ("Hardware Model", None, True, False),
+            (str(model), None, False, False),
+            ("Serial Number", None, True, False),
+            (str(serial), None, False, True),
+        ],
+        [
+            ("OS Version", None, True, False),
+            (str(os_ver), None, False, False),
             ("Management IP", None, True, False),
-            (str(dev.get("management_ip", "Unknown")), None, False, True),
+            (str(mgmt_ip), None, False, True),
+        ],
+        [
             ("Config Filename", None, True, False),
             (str(cfg.get("filename", "Unknown")), None, False, True),
-        ],
-        [
             ("Config SHA-256", None, True, False),
             (str(cfg.get("config_file_hash", "Unknown")), None, False, True),
-            ("Audit Session ID", None, True, False),
-            (str(report.session_id), None, False, True),
         ],
         [
+            ("Audit Session ID", None, True, False),
+            (str(report.session_id), None, False, True),
             ("Created At", None, True, False),
             (str(report.created_at), None, False, False),
-            ("Last Updated", None, True, False),
-            (str(report.updated_at), None, False, False),
         ],
     ]
     builder.add_table(meta_headers, meta_rows, header_bg="E2E8F0")

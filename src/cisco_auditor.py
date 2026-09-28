@@ -40,7 +40,7 @@ def eval_condition(val, cond: str) -> str:
 def parse_cisco(text: str, filename: str = "labeled_test_config.txt", trusted_rules: list = None) -> dict:
     csm = {
         "schema_version": "1.0",
-        "device": {"hostname": "unknown", "vendor": "cisco", "platform": "IOS-XE", "os_version": None, "serial_number": None, "management_ip": None},
+        "device": {"hostname": "unknown", "vendor": "cisco", "platform": "IOS-XE", "os_version": None, "serial_number": None, "hardware_model": None, "management_ip": None},
         "source": {"source_type": "uploaded_file", "file_name": filename, "parser": "cisco_auditor", "parser_version": "1.0", "parsed_at": "2026-09-13T00:00:00Z"},
         "interfaces": [],
         "services": {"telnet": False, "ssh": False, "ssh_version": None, "http": False, "https": False, "ftp": False, "cdp_or_lldp": False, "finger": False, "call_home": False},
@@ -56,6 +56,41 @@ def parse_cisco(text: str, filename: str = "labeled_test_config.txt", trusted_ru
     def add_ev(f, v, s): csm["raw_evidence"].append({"field": f, "value": v, "source_lines": [s], "confidence": 1.0})
     block, cur_if = None, None
     trusted_evidence = {ev for r in (trusted_rules or []) for ev in r.get("configuration_evidence", [])}
+
+    # 1. Device identity from running-config comments/headers & show commands
+    for raw in text.splitlines():
+        line = raw.strip()
+        if line.startswith("!"):
+            m_ver = re.search(r"Version\s*[:\s]\s*([0-9A-Za-z_().-]+)", line, re.IGNORECASE)
+            if m_ver and not csm["device"]["os_version"]:
+                csm["device"]["os_version"] = m_ver.group(1)
+            m_mod = re.search(r"Model:\s*(\S+)", line, re.IGNORECASE)
+            if m_mod and not csm["device"]["hardware_model"]:
+                csm["device"]["hardware_model"] = m_mod.group(1)
+            m_sn = re.search(r"Serial\s*(?:Number)?:\s*(\S+)", line, re.IGNORECASE)
+            if m_sn and not csm["device"]["serial_number"]:
+                csm["device"]["serial_number"] = m_sn.group(1)
+
+    # 2. Device identity from show version / show inventory if appended
+    if not csm["device"]["os_version"]:
+        m_sw = re.search(r"Cisco\s+IOS(?:-XE)?\s+Software.*Version\s+([0-9A-Za-z_().]+)", text, re.IGNORECASE)
+        if m_sw: csm["device"]["os_version"] = m_sw.group(1)
+    if not csm["device"]["hardware_model"]:
+        m_proc = re.search(r"cisco\s+([A-Za-z0-9_-]+)\s+\([^)]+\)\s+processor", text, re.IGNORECASE)
+        if m_proc: csm["device"]["hardware_model"] = m_proc.group(1)
+        else:
+            m_pid = re.search(r"PID:\s*(\S+)", text, re.IGNORECASE)
+            if m_pid: csm["device"]["hardware_model"] = m_pid.group(1).rstrip(",")
+    if not csm["device"]["serial_number"]:
+        m_sn1 = re.search(r"Processor\s+board\s+ID\s+(\S+)", text, re.IGNORECASE)
+        if m_sn1: csm["device"]["serial_number"] = m_sn1.group(1)
+        else:
+            m_sn2 = re.search(r"System\s+serial\s+number\s*:\s*(\S+)", text, re.IGNORECASE)
+            if m_sn2: csm["device"]["serial_number"] = m_sn2.group(1)
+            else:
+                m_sn3 = re.search(r"SN:\s*(\S+)", text, re.IGNORECASE)
+                if m_sn3: csm["device"]["serial_number"] = m_sn3.group(1).rstrip(",")
+
     for raw in text.splitlines():
         line = raw.strip()
         if not line or line.startswith("!"): continue
@@ -73,7 +108,6 @@ def parse_cisco(text: str, filename: str = "labeled_test_config.txt", trusted_ru
             elif line == "no shutdown": cur_if["shutdown"], cur_if["enabled"] = False, True
             elif line.startswith("ip address "):
                 ip = line.split()[2]; cur_if["ip_addresses"].append(ip)
-                if not csm["device"]["management_ip"]: csm["device"]["management_ip"] = ip
             elif "vrf forwarding" in line: csm["management"]["management_vrf_enabled"] = True; add_ev("management.vrf_forwarding", cur_if["name"], line)
             continue
         m = re.match(r"^line\s+vty", line)
@@ -131,6 +165,21 @@ def parse_cisco(text: str, filename: str = "labeled_test_config.txt", trusted_ru
             if not any(ev in line for ev in trusted_evidence): csm["unmapped_lines"].append(line)
         elif line == "end": pass
         else: csm["unmapped_lines"].append(line)
+
+    # Select preferred management_ip: Loopback0 > Mgmt/Gi0/0 > None
+    mgmt_ip = None
+    for intf in csm["interfaces"]:
+        if intf.get("name", "").lower() in ("loopback0", "lo0") and intf.get("ip_addresses"):
+            mgmt_ip = intf["ip_addresses"][0]
+            break
+    if not mgmt_ip:
+        for intf in csm["interfaces"]:
+            name = intf.get("name", "").lower()
+            if (name.startswith("mgmt") or name in ("gigabitethernet0/0", "gigabitethernet0", "gi0/0", "gi0")) and intf.get("ip_addresses"):
+                mgmt_ip = intf["ip_addresses"][0]
+                break
+    csm["device"]["management_ip"] = mgmt_ip
+
     return csm
 
 def evaluate_rules(csm: dict, rules: list, trusted_rules: list = None) -> dict:

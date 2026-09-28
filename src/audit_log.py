@@ -2,7 +2,6 @@
 Records tamper-evident compliance audit entries into SQLite table audit_ledger.
 Each entry links cryptographically to the preceding entry's entryHash.
 Provides standalone verify_chain() to detect any retrospective modifications.
-Accepts legacy logfile parameter for backward compatibility with existing callers.
 """
 import datetime
 import hashlib
@@ -12,7 +11,7 @@ from typing import Optional, Tuple
 import src.database as database
 
 BASE = pathlib.Path(__file__).resolve().parent.parent
-DEFAULT_LOG_FILE = BASE / "data" / "audit_log.jsonl"
+DEFAULT_LOG_FILE = BASE / "data" / "audit_log.jsonl"  # Retained for backward-compatible module attribute access
 GENESIS_PREV_HASH = "0" * 64
 
 def compute_entry_hash(entry_data: dict) -> str:
@@ -21,7 +20,7 @@ def compute_entry_hash(entry_data: dict) -> str:
     canonical_json = json.dumps(canonical_dict, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(canonical_json.encode("utf-8")).hexdigest()
 
-def get_last_entry(logfile: pathlib.Path = DEFAULT_LOG_FILE) -> Optional[dict]:
+def get_last_entry() -> Optional[dict]:
     """Reads the last entry of the sqlite log to retrieve the previous entryHash."""
     conn = database.get_connection()
     cur = conn.cursor()
@@ -46,10 +45,9 @@ def get_last_entry(logfile: pathlib.Path = DEFAULT_LOG_FILE) -> Optional[dict]:
 def create_audit_entry(csm: dict,
                        evals: dict,
                        raw_config_text: str,
-                       remediation_summary: Optional[dict] = None,
-                       logfile: pathlib.Path = DEFAULT_LOG_FILE) -> dict:
+                       remediation_summary: Optional[dict] = None) -> dict:
     """Builds a new hash-chained audit entry, computing prevEntryHash and entryHash."""
-    last_entry = get_last_entry(logfile)
+    last_entry = get_last_entry()
     prev_hash = last_entry["entryHash"] if last_entry and "entryHash" in last_entry else GENESIS_PREV_HASH
 
     now = datetime.datetime.now(datetime.timezone.utc)
@@ -81,7 +79,7 @@ def create_audit_entry(csm: dict,
     entry_core["entryHash"] = entry_hash
     return entry_core
 
-def append_audit_entry(entry: dict, logfile: pathlib.Path = DEFAULT_LOG_FILE, owner_user_id: Optional[str] = None) -> str:
+def append_audit_entry(entry: dict, owner_user_id: Optional[str] = None) -> str:
     """Appends an audit entry into SQLite.
     
     Uses sort_keys=True for JSON columns so that json.loads → json.dumps(sort_keys=True)
@@ -110,7 +108,7 @@ def append_audit_entry(entry: dict, logfile: pathlib.Path = DEFAULT_LOG_FILE, ow
     conn.close()
     return entry["entryHash"]
 
-def verify_chain(logfile: pathlib.Path = DEFAULT_LOG_FILE) -> Tuple[bool, str, int]:
+def verify_chain() -> Tuple[bool, str, int]:
     """Re-walks entire log table, recalculates all hashes, and verifies prevEntryHash linkage.
     Returns (is_valid, message, broken_entry_index).
     """
