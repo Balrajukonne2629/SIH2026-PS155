@@ -13,6 +13,7 @@ import time
 import urllib.error
 import urllib.request
 import jinja2
+from typing import Tuple
 import src.ai_model_manager as ai_model_manager
 from src.ai_model_manager import ModelMode, WorkloadType
 
@@ -20,33 +21,199 @@ BASE = pathlib.Path(__file__).resolve().parent.parent
 TEMPLATE_DIR = BASE / "templates" / "remediation"
 _MODEL_MANAGER = ai_model_manager.get_model_manager()
 
+# Baseline remediation registry keyed by baseline rule IDs only (Cisco 10, Junos 10).
+# CIS and DISA-STIG controls resolve automatically through their mapped internal rules.
+BASELINE_REMEDIATION_REGISTRY = {
+    # --- Cisco IOS-XE Baseline Rules ---
+    "CISCO-SSH-001": (
+        "ip ssh version 2\n"
+        "line vty 0 4\n"
+        " transport input ssh"
+    ),
+    "CISCO-AAA-001": (
+        "aaa new-model\n"
+        "aaa authentication login default local\n"
+        "aaa authorization exec default local"
+    ),
+    "CISCO-NTP-001": (
+        "ntp authenticate\n"
+        "{% if ntp.servers -%}\n"
+        "{% for srv in ntp.servers -%}\n"
+        "ntp server {{ srv }}\n"
+        "{% endfor -%}\n"
+        "{% else -%}\n"
+        "ntp server <NTP_SERVER_IP>\n"
+        "{% endif -%}"
+    ),
+    "CISCO-LOG-001": (
+        "service timestamps log datetime msec\n"
+        "logging buffered 64000\n"
+        "logging trap informational\n"
+        "{% if logging.remote_servers -%}\n"
+        "{% for srv in logging.remote_servers -%}\n"
+        "logging host {{ srv }}\n"
+        "{% endfor -%}\n"
+        "{% else -%}\n"
+        "logging host <LOG_SERVER_IP>\n"
+        "{% endif -%}"
+    ),
+    "CISCO-SNMP-001": (
+        "no snmp-server community public\n"
+        "no snmp-server community private\n"
+        "snmp-server community <STRONG_COMMUNITY_STRING> RO"
+    ),
+    "CISCO-ACL-001": (
+        "ip access-list extended MGMT-ACL\n"
+        " permit tcp <TRUSTED_MGMT_NET> any eq 22\n"
+        " deny ip any any log\n"
+        "line vty 0 4\n"
+        " access-class MGMT-ACL in"
+    ),
+    "CISCO-INT-001": (
+        "{% if interfaces -%}\n"
+        "{% for intf in interfaces if 'unused' in (intf.description or '').lower() -%}\n"
+        "interface {{ intf.name }}\n"
+        " shutdown\n"
+        "{% endfor -%}\n"
+        "{% else -%}\n"
+        "interface <UNUSED_INTERFACE>\n"
+        " shutdown\n"
+        "{% endif -%}"
+    ),
+    "CISCO-ROUTING-001": (
+        "router ospf 1\n"
+        " area 0 authentication message-digest\n"
+        "interface <ROUTING_INTERFACE>\n"
+        " ip ospf message-digest-key 1 md5 <STRONG_KEY>"
+    ),
+    "CISCO-STP-001": (
+        "spanning-tree portfast bpduguard default"
+    ),
+    "CISCO-MGMT-001": (
+        "ip vrf Mgmt-intf\n"
+        "interface GigabitEthernet0/0\n"
+        " ip vrf forwarding Mgmt-intf\n"
+        " ip address <MGMT_IP> <NETMASK>"
+    ),
+
+    # --- Juniper Junos Baseline Rules ---
+    "JUNOS-SSH-001": (
+        "set system services ssh protocol-version v2\n"
+        "delete system services telnet"
+    ),
+    "JUNOS-SSH-002": (
+        "set system services ssh root-login deny"
+    ),
+    "JUNOS-SSH-003": (
+        "set system services ssh connection-limit 10\n"
+        "set system services ssh rate-limit 5"
+    ),
+    "JUNOS-AAA-001": (
+        "set system authentication-order password\n"
+        "set system login retry-options backoff-threshold 3\n"
+        "set system login retry-options backoff-factor 5\n"
+        "set system login retry-options minimum-time 20\n"
+        "set system login retry-options tries-before-disconnect 3"
+    ),
+    "JUNOS-AAA-002": (
+        "set system login password change-frequency 90\n"
+        "set system login password format sha512"
+    ),
+    "JUNOS-NTP-001": (
+        "{% if ntp.servers -%}\n"
+        "{% for srv in ntp.servers -%}\n"
+        "set system ntp server {{ srv }}\n"
+        "{% endfor -%}\n"
+        "{% else -%}\n"
+        "set system ntp server <NTP_SERVER_IP>\n"
+        "{% endif -%}\n"
+        "set system ntp boot-server <NTP_BOOT_SERVER_IP>"
+    ),
+    "JUNOS-LOG-001": (
+        "set system syslog user * any emergency\n"
+        "set system syslog file messages any notice\n"
+        "set system syslog file authorization authorization info\n"
+        "{% if logging.remote_servers -%}\n"
+        "{% for srv in logging.remote_servers -%}\n"
+        "set system syslog host {{ srv }} any info\n"
+        "{% endfor -%}\n"
+        "{% else -%}\n"
+        "set system syslog host <LOG_SERVER_IP> any info\n"
+        "{% endif -%}"
+    ),
+    "JUNOS-SNMP-001": (
+        "delete snmp community public\n"
+        "delete snmp community private\n"
+        "set snmp v3 usm local-engine user <SNMPV3_USER> authentication-sha authentication-password <AUTH_PASS>\n"
+        "set snmp v3 usm local-engine user <SNMPV3_USER> privacy-aes128 privacy-password <PRIV_PASS>"
+    ),
+    "JUNOS-ACL-001": (
+        "set firewall family inet filter MGMT-FILTER term ALLOW-SSH from source-address <TRUSTED_MGMT_NET>\n"
+        "set firewall family inet filter MGMT-FILTER term ALLOW-SSH from protocol tcp\n"
+        "set firewall family inet filter MGMT-FILTER term ALLOW-SSH from destination-port 22\n"
+        "set firewall family inet filter MGMT-FILTER term ALLOW-SSH then accept\n"
+        "set firewall family inet filter MGMT-FILTER term DROP-OTHER then reject"
+    ),
+    "JUNOS-MGMT-001": (
+        "set routing-instances mgmt_junos routing-options static route 0.0.0.0/0 next-hop <GATEWAY_IP>\n"
+        "set routing-instances mgmt_junos interface fxp0.0"
+    ),
+}
+
+
+def resolve_rule_to_baseline(rule_id: str) -> Tuple[str, str]:
+    """Resolves rule_id to an active baseline rule id.
+    Returns (resolved_baseline_id, resolution_path_description).
+    """
+    clean_id = rule_id.strip()
+    if clean_id in BASELINE_REMEDIATION_REGISTRY:
+        return clean_id, "direct baseline match"
+
+    # Attempt resolution via CIS control metadata
+    try:
+        from src.cis_benchmark_cisco_iosxe import CIS_CISCO_IOSXE_CONTROLS
+        if clean_id in CIS_CISCO_IOSXE_CONTROLS:
+            mapped = CIS_CISCO_IOSXE_CONTROLS[clean_id].evaluation_metadata.get("mapped_internal_rules", [])
+            if mapped and mapped[0] in BASELINE_REMEDIATION_REGISTRY:
+                return mapped[0], f"CIS control {clean_id} -> {mapped[0]}"
+    except Exception:
+        pass
+
+    # Attempt resolution via DISA-STIG control metadata
+    try:
+        from src.disa_stig_cisco_iosxe import DISA_STIG_CISCO_IOSXE_CONTROLS
+        if clean_id in DISA_STIG_CISCO_IOSXE_CONTROLS:
+            mapped = DISA_STIG_CISCO_IOSXE_CONTROLS[clean_id].evaluation_metadata.get("mapped_internal_rules", [])
+            if mapped and mapped[0] in BASELINE_REMEDIATION_REGISTRY:
+                return mapped[0], f"DISA-STIG control {clean_id} -> {mapped[0]}"
+    except Exception:
+        pass
+
+    raise KeyError(f"Unknown rule ID '{rule_id}': no remediation available in baseline registry or framework control mappings.")
+
+
 def generate_remediation(rule_id: str, csm: dict) -> str:
-    """Renders Jinja2 remediation template for the given rule_id.
+    """Renders remediation for the given rule_id (baseline, CIS, or STIG).
     Context variables are derived ONLY from parsed CSM fields.
     Returns rendered CLI command text. NEVER executes anything.
     """
-    env = jinja2.Environment(
-        loader=jinja2.FileSystemLoader(str(TEMPLATE_DIR)),
-        autoescape=False,
-        trim_blocks=True,
-        lstrip_blocks=True
-    )
-    template_name = f"{rule_id}.j2"
-    try:
-        template = env.get_template(template_name)
-    except jinja2.TemplateNotFound:
-        raise FileNotFoundError(f"Remediation template '{template_name}' not found in {TEMPLATE_DIR}")
+    resolved_id, _ = resolve_rule_to_baseline(rule_id)
+    template_str = BASELINE_REMEDIATION_REGISTRY[resolved_id]
+
+    # Render Jinja template directly in-memory (no filesystem dependency)
+    tmpl = jinja2.Template(template_str, autoescape=False, trim_blocks=True, lstrip_blocks=True)
 
     # Pass only known CSM fields as context
     context = {
         "device": csm.get("device", {}),
         "ntp": csm.get("ntp", {}),
         "snmp": csm.get("snmp", {}),
+        "logging": csm.get("logging", {}),
         "services": csm.get("services", {}),
         "management": csm.get("management", {}),
         "interfaces": csm.get("interfaces", [])
     }
-    rendered = template.render(**context)
+    rendered = tmpl.render(**context)
     return rendered.strip()
 
 def check_static_conflicts(rule_id: str, csm: dict, remediation_commands: str) -> dict:
