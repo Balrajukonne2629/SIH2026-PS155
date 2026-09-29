@@ -6,7 +6,7 @@ export const ProblemSolution: React.FC = () => {
     {
       icon: <Network className="w-4 h-4 text-rose-400" />,
       title: "Syntax Divergence Across Vendors",
-      desc: "Heterogeneous networking hardware (Cisco IOS-XE, Juniper Junos, Arista EOS) uses fundamentally divergent CLI hierarchies, syntax tokens, and semantics. Traditional auditing requires deep per-vendor tooling and duplicate rule libraries."
+      desc: "Heterogeneous networking hardware (Cisco IOS-XE, Juniper Junos, Arista EOS, Fortinet FortiOS, Palo Alto PAN-OS) uses fundamentally divergent CLI hierarchies, syntax tokens, and semantics. Traditional auditing requires deep per-vendor tooling and duplicate rule libraries."
     },
     {
       icon: <FileWarning className="w-4 h-4 text-rose-400" />,

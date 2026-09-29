@@ -134,12 +134,12 @@ flowchart LR
         CSM[("Canonical JSON Model<br/>• services (SSH, Telnet, HTTP, SNMP)<br/>• interfaces (admin, shutdown, IP)<br/>• aaa (authentication, TACACS+, RADIUS)<br/>• logging (remote hosts, timestamps)<br/>• ntp (servers, authentication)<br/>• routing (BGP, OSPF MD5 auth)<br/>• device (serial, model, firmware)")]
     end
 
-    subgraph FRAMEWORKS ["Universal Compliance Standards (8 Frameworks)"]
+    subgraph FRAMEWORKS ["Universal Compliance Standards (9 Frameworks)"]
         CIS["CIS Benchmark v2.2.1"]
         STIG["DISA-STIG V3R7"]
         NIST["NIST SP 800-53 rev5"]
         ISO["ISO/IEC 27001:2022"]
-        BASE["4 Vendor Baselines"]
+        BASE["5 Vendor Baselines"]
     end
 
     C --> CA

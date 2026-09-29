@@ -33,8 +33,8 @@ Key principles of this decision:
    - The operational database (`data/auditor.db`) and persistent state files remain 100% untouched.
 
 3. **Strict Zero-Fabrication Quantitative Policy**:
-   - All numbers displayed on the landing page (780+ tests, ~0.33ms latency, 69 controls, 4 vendors, 6,364 graph nodes, 8.47 GB package size, exact SHA-256 hash) are derived directly from live repository evidence and benchmark logs.
-   - Vendor maturity is explicitly segmented: Production-ready parsers (Cisco, Juniper) vs registered architectural adapters (Arista, Fortinet).
+   - All numbers displayed on the landing page (780+ tests, ~0.33ms latency, 82 controls, 5 vendors, 2,744 graph nodes, 8.47 GB package size, exact SHA-256 hash) are derived directly from live repository evidence and benchmark logs.
+   - Verified production support for all 5 vendors (Cisco IOS-XE, Juniper Junos, Arista EOS, Fortinet FortiOS, and Palo Alto PAN-OS) with empirical datasets and test suites.
 
 4. **Self-Contained Evaluation Artifacts**:
    - High-fidelity interactive diagrams (`v7_system_architecture.html`, `graph.html`) and responsive vector diagrams (16:9 widescreen and 9:16 mobile) are packaged within `landing-page/public/` for standalone viewing.

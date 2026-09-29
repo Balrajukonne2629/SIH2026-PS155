@@ -15,11 +15,11 @@ export const MultiVendorSection: React.FC = () => {
             Standards & Hardware Coverage
           </div>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold font-display text-slate-900 tracking-tight">
-            4 Vendor Architectures · 8 Integrated Frameworks
+            5 Vendor Architectures · 9 Integrated Frameworks
           </h2>
           <p className="mt-3.5 text-sm sm:text-base text-slate-600 leading-relaxed font-sans">
-            Cisco IOS-XE · Juniper Junos · Arista EOS · Fortinet FortiOS. 
-            Normalized into the Common Security Model (CSM v7) to evaluate 69 authoritative controls without M × N rule explosion.
+            Cisco IOS-XE · Juniper Junos · Arista EOS · Fortinet FortiOS · Palo Alto PAN-OS. 
+            Normalized into the Common Security Model (CSM v7) to evaluate 82 authoritative controls without M × N rule explosion.
           </p>
         </div>
 
@@ -135,14 +135,14 @@ export const MultiVendorSection: React.FC = () => {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-base font-bold text-slate-900 font-sans">
-                8 Integrated Compliance Frameworks & Catalogs
+                9 Integrated Compliance Frameworks & Catalogs
               </h3>
               <p className="text-xs text-slate-500">
                 Authoritative standards catalogs managed under FrameworkRegistry
               </p>
             </div>
             <span className="text-xs font-mono font-bold text-sky-700 px-2.5 py-1 rounded bg-sky-50 border border-sky-200">
-              69 Total Controls
+              82 Total Controls
             </span>
           </div>
 

@@ -24,7 +24,7 @@ export const PIPELINE_STEPS: PipelineStep[] = [
     technicalDetails: [
       "AST safety sandbox verifies zero subprocess, socket, or network execution imports",
       "Fail-closed vendor detection inspects structural syntax signatures",
-      "Resolves vendor adapter (Cisco, Juniper, Arista, Fortinet) without hardcoded branching"
+      "Resolves vendor adapter (Cisco, Juniper, Arista, Fortinet, Palo Alto) without hardcoded branching"
     ],
     securityInvariant: "Zero arbitrary execution imports allowed (ast_safety.py enforced)",
     input: "Raw config text (.cfg / .conf / .txt / .zip)",

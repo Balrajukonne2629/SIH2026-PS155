@@ -61,7 +61,7 @@ flowchart TD
     end
 
     subgraph NORMALIZATION ["2. Normalization & Identity Layer"]
-        ADAPTER["Vendor Adapter Registry<br/>Cisco IOS-XE / Junos / EOS (reuse) / PAN-OS"]:::adapterStyle
+        ADAPTER["Vendor Adapter Registry<br/>Cisco IOS-XE / Junos / EOS / PAN-OS / FortiOS"]:::adapterStyle
         DEVID["Device Identity Extractor<br/>Serial, Model, OS, Mgmt IP ('Not In Config')"]:::adapterStyle
         CSM[("Common Security Model (CSM v7 JSON Schema)<br/>interfaces, services, aaa, logging, ntp, routing, device")]:::csmStyle
         UNMAPPED["Unmapped Syntax Lines<br/>(Unknown / Vendor-Specific CLI)"]:::aiStyle
@@ -71,7 +71,7 @@ flowchart TD
     end
 
     subgraph ENGINE ["3. Deterministic Compliance Engine"]
-        BASELINE["Vendor Baseline Rules<br/>(Cisco 10, Junos 10, Arista, PAN-OS)"]:::evalStyle
+        BASELINE["5 Vendor Baseline Rules<br/>(Cisco, Junos, Arista, Fortinet, PAN-OS · 50 Rules)"]:::evalStyle
         REGISTRY["Framework Registry & Evaluators"]:::evalStyle
         CIS["CIS Benchmark Evaluator<br/>(v2.2.1 Controls)"]:::evalStyle
         STIG["DISA-STIG Evaluator<br/>(V3R7 Controls)"]:::evalStyle
@@ -156,33 +156,41 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    subgraph VENDORS ["Heterogeneous Network Fleets (M)"]
+    subgraph VENDORS ["Heterogeneous Network Fleets (5 Vendors)"]
         C["Cisco IOS-XE (CLI)"]
         J["Juniper Junos (Curly/Set)"]
         A["Arista EOS (Declarative)"]
+        P["Palo Alto PAN-OS (Set XML)"]
+        F["Fortinet FortiOS (Config Object)"]
     end
 
-    subgraph ADAPTERS ["Vendor Adapter Registry"]
+    subgraph ADAPTERS ["Vendor Adapter Registry (Pluggable)"]
         CA["Cisco Adapter"]
         JA["Juniper Adapter"]
         AA["Arista Adapter"]
+        PA["Palo Alto Adapter"]
+        FA["Fortinet Adapter"]
     end
 
-    subgraph CSM_LAYER ["Normalized Abstraction Layer"]
-        CSM[("Common Security Model (CSM JSON)<br/>• .services (SSH, Telnet, HTTP)<br/>• .interfaces (admin, shutdown)<br/>• .aaa (new-model, TACACS+)<br/>• .logging (host, timestamps)<br/>• .ntp (servers, auth)<br/>• .routing (BGP/OSPF auth)")]
+    subgraph CSM_LAYER ["Common Security Model (CSM v7)"]
+        CSM[("Canonical JSON Model<br/>• services (SSH, Telnet, HTTP, SNMP)<br/>• interfaces (admin, shutdown, IP)<br/>• aaa (authentication, TACACS+, RADIUS)<br/>• logging (remote hosts, timestamps)<br/>• ntp (servers, authentication)<br/>• routing (BGP, OSPF MD5 auth)<br/>• device (serial, model, firmware)")]
     end
 
-    subgraph FRAMEWORKS ["Universal Compliance Standards (N)"]
-        CIS["CIS Benchmark (v2.2.1)"]
-        STIG["DISA-STIG (V3R7)"]
+    subgraph FRAMEWORKS ["Universal Compliance Standards (9 Frameworks)"]
+        CIS["CIS Benchmark v2.2.1"]
+        STIG["DISA-STIG V3R7"]
         NIST["NIST SP 800-53 rev5"]
+        ISO["ISO/IEC 27001:2022"]
+        BASE["5 Vendor Baselines"]
     end
 
     C --> CA
     J --> JA
     A --> AA
-    CA & JA & AA --> CSM
-    CSM --> CIS & STIG & NIST
+    P --> PA
+    F --> FA
+    CA & JA & AA & PA & FA --> CSM
+    CSM --> CIS & STIG & NIST & ISO & BASE
 ```
 * **Architectural Advantage:** Adding a new vendor requires only **1 parser adapter**. All compliance evaluators, scoring logic, and report generators remain completely untouched.
 

@@ -9,7 +9,7 @@ export const GraphifySpotlight: React.FC = () => {
     { name: "Frontend Console UI", role: "React SPA sovereign operator interface (238 nodes)" },
     { name: "API Gateway & Router", role: "FastAPI endpoints, CORS boundary, lifecycle orchestration (111 nodes)" },
     { name: "Compliance Engine", role: "CIS & STIG rule runners, FrameworkRegistry, crosswalks (182 nodes)" },
-    { name: "Vendor Normalization", role: "VendorRegistry plug-and-play adapter boundary (Cisco, Junos, Arista, Fortinet)" },
+    { name: "Vendor Normalization", role: "VendorRegistry plug-and-play adapter boundary (Cisco, Junos, Arista, Fortinet, Palo Alto)" },
     { name: "AI Advisory Intelligence", role: "Local DistilBERT / Llama 3.2 1B advisory scoring with HITL approval gate" },
     { name: "Audit Ledger & Invariants", role: "SHA-256 hash-chained immutable blocks & bit-level tamper verification" },
   ];
