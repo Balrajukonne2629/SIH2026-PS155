@@ -2,6 +2,9 @@
 
 An offline, air-gapped, multi-vendor network security compliance auditing engine featuring deterministic rule evaluation (CIS Benchmarks, DISA STIG, NIST SP 800-53), human-in-the-loop AI assistance, cryptographic SHA-256 audit chaining, non-repudiation verification, and canonical multi-framework reporting.
 
+> 🌐 **Live Evaluator Presentation Portal:** [https://balrajukonne2629.github.io/SIH2026-PS155/](https://balrajukonne2629.github.io/SIH2026-PS155/)  
+> 📸 **Operational UI Screenshots & Walkthrough:** [screenshots.md](screenshots.md)
+
 ---
 
 ## Canonical Repository Structure
@@ -81,7 +84,18 @@ An offline, air-gapped, multi-vendor network security compliance auditing engine
 ## Quickstart & Evaluation Workflow
 
 ### 1. Evaluator Presentation Landing Page (Port 3001)
-Explore the complete product presentation, verified benchmarks, 7-stage pipeline contracts, interactive architecture, and offline download package:
+
+- **Live Evaluator URL:** [https://balrajukonne2629.github.io/SIH2026-PS155/](https://balrajukonne2629.github.io/SIH2026-PS155/)
+- **Local Dev URL:** `http://localhost:3001`
+
+**Main Purpose & Use of the Landing Page:**
+- **Zero-Install Evaluator Access:** Evaluators and jury members can immediately inspect the system architecture, empirical benchmarks, and product demonstrations directly in any modern browser without configuring local Python, Ollama, or Node environments.
+- **Interactive 4-Tier System Architecture & Visual Pipeline:** Pan, zoom, and drill down into the 7-stage deterministic auditing pipeline, vendor isolation boundaries, and AST safety models.
+- **Empirical Benchmarks & Cryptographic Tamper Simulator:** Review verified hardware-aware latency metrics (<60s SLAs, 100% deterministic AST rules) and test cryptographic SHA-256 hash-chain integrity verification in real-time.
+- **Multi-Vendor & Multi-Framework Catalogs:** Explore supported vendor grammars (Cisco IOS-XE, Juniper Junos, Fortinet FortiOS, Arista EOS, Palo Alto PAN-OS) and compliance standards (CIS Benchmarks, DISA STIG, NIST SP 800-53 Rev 5).
+- **Air-Gapped Offline Demo Download & Documentation:** Direct access to download the self-contained offline deployment package (`NTRO-PS26155-OFFLINE-DEMO-v1.0.zip`), video walkthroughs, and technical documentation.
+
+To run the landing page locally:
 ```bash
 cd landing-page
 npm install
