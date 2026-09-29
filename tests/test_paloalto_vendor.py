@@ -47,7 +47,9 @@ from src.compliance_framework import (
 from src.main import app
 
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
-PANOS_ZIP = BASE_DIR / "SIH26155_PaloAlto_PANOS_RealWorld_PublicDataset_v1.zip"
+PANOS_ZIP = BASE_DIR / "datasets" / "SIH26155_PaloAlto_PANOS_RealWorld_PublicDataset_v1.zip"
+if not PANOS_ZIP.exists():
+    PANOS_ZIP = BASE_DIR / "SIH26155_PaloAlto_PANOS_RealWorld_PublicDataset_v1.zip"
 
 
 # --- Fixtures ---

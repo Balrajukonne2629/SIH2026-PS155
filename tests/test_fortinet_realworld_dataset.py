@@ -47,7 +47,9 @@ from src.compliance_framework import (
 from src.main import app
 
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
-FORTINET_ZIP = BASE_DIR / "SIH26155_Fortinet_FortiGate_RealWorld_PublicDataset_v1.zip"
+FORTINET_ZIP = BASE_DIR / "datasets" / "SIH26155_Fortinet_FortiGate_RealWorld_PublicDataset_v1.zip"
+if not FORTINET_ZIP.exists():
+    FORTINET_ZIP = BASE_DIR / "SIH26155_Fortinet_FortiGate_RealWorld_PublicDataset_v1.zip"
 
 
 # --- Fixtures ---
