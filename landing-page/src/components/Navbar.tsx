@@ -34,7 +34,7 @@ export const Navbar: React.FC = () => {
     { id: 'ai-governance', label: 'AI Safety & HITL Queue', icon: Cpu, href: '#ai-governance' },
     { id: 'multi-vendor', label: 'Multi-Vendor Standards', icon: Server, href: '#multi-vendor' },
     { id: 'evidence', label: 'SHA-256 Ledger Proof', icon: CheckCircle2, href: '#evidence' },
-    { id: 'knowledge-graph', label: 'Graphify (6,364 Nodes)', icon: Network, href: '#knowledge-graph' },
+    { id: 'knowledge-graph', label: 'Graphify (2,744 Nodes)', icon: Network, href: '#knowledge-graph' },
     { id: 'prototype', label: 'Working Prototype Console', icon: Terminal, href: '#prototype' },
     { id: 'videos', label: 'Video Demonstration', icon: Video, href: '#videos' },
     { id: 'documentation', label: 'Specifications & ADRs', icon: FileText, href: '#documentation' },

@@ -6,11 +6,12 @@ export const GraphifySpotlight: React.FC = () => {
   const [iframeKey, setIframeKey] = useState(0);
 
   const hubs = [
-    { name: "FrameworkRegistry", role: "Central registry for CIS, STIG, and crosswalk evaluators" },
-    { name: "VendorRegistry", role: "Dynamic plug-and-play adapter boundary (Cisco, Junos, EOS, FortiOS)" },
-    { name: "MultiFrameworkAggregator", role: "Deduplication and scoring without arbitrary weights" },
-    { name: "audit_log", role: "Cryptographic SHA-256 hash chaining engine" },
-    { name: "ast_safety", role: "Static AST analyzer prohibiting execution imports" },
+    { name: "Frontend Console UI", role: "React SPA sovereign operator interface (238 nodes)" },
+    { name: "API Gateway & Router", role: "FastAPI endpoints, CORS boundary, lifecycle orchestration (111 nodes)" },
+    { name: "Compliance Engine", role: "CIS & STIG rule runners, FrameworkRegistry, crosswalks (182 nodes)" },
+    { name: "Vendor Normalization", role: "VendorRegistry plug-and-play adapter boundary (Cisco, Junos, Arista, Fortinet)" },
+    { name: "AI Advisory Intelligence", role: "Local DistilBERT / Llama 3.2 1B advisory scoring with HITL approval gate" },
+    { name: "Audit Ledger & Invariants", role: "SHA-256 hash-chained immutable blocks & bit-level tamper verification" },
   ];
 
   return (
@@ -24,11 +25,11 @@ export const GraphifySpotlight: React.FC = () => {
               <span>Codebase Architectural Topology · Graphify Knowledge Graph</span>
             </div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold font-display text-slate-900 tracking-tight">
-              Interactive Codebase Knowledge Graph (6,364 Nodes)
+              Interactive Codebase Knowledge Graph (2,744 Nodes)
             </h2>
             <p className="mt-4 text-sm sm:text-base text-slate-600 leading-relaxed font-sans">
-              The entire 283-file repository was parsed via AST extraction into a live, interactive topological graph. 
-              Evaluators can directly search symbols, inspect community clusters, trace shortest call paths, and inspect AST security boundaries and call dependencies.
+              The verified 101-file repository was parsed via AST extraction into a live, progressive disclosure architecture graph. 
+              Evaluators can explore the clean 4-tier functional pipeline, trace 13 directed dataflow highways, drill down into 2,744 AST implementation nodes, and inspect isolated subsystem boundaries.
             </p>
           </div>
 
@@ -57,23 +58,23 @@ export const GraphifySpotlight: React.FC = () => {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
           <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-sm">
             <span className="text-xs text-slate-500 font-mono block mb-1">Total Graph Nodes</span>
-            <span className="text-2xl sm:text-3xl font-bold font-mono text-slate-900">6,364</span>
+            <span className="text-2xl sm:text-3xl font-bold font-mono text-slate-900">2,744</span>
             <span className="text-[10px] text-slate-400 font-mono block mt-1">Functions, Classes, Modules</span>
           </div>
           <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-sm">
             <span className="text-xs text-slate-500 font-mono block mb-1">Dependency Edges</span>
-            <span className="text-2xl sm:text-3xl font-bold font-mono text-sky-600">10,873</span>
-            <span className="text-[10px] text-slate-400 font-mono block mt-1">Calls, Imports, Inheritance</span>
+            <span className="text-2xl sm:text-3xl font-bold font-mono text-sky-600">5,213</span>
+            <span className="text-[10px] text-slate-400 font-mono block mt-1">Calls, Imports, Dataflows</span>
           </div>
           <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-sm">
             <span className="text-xs text-slate-500 font-mono block mb-1">Detected Communities</span>
-            <span className="text-2xl sm:text-3xl font-bold font-mono text-slate-900">360</span>
+            <span className="text-2xl sm:text-3xl font-bold font-mono text-slate-900">177</span>
             <span className="text-[10px] text-slate-400 font-mono block mt-1">Louvain Community Hubs</span>
           </div>
           <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-sm">
             <span className="text-xs text-slate-500 font-mono block mb-1">Analyzed Source Corpus</span>
-            <span className="text-2xl sm:text-3xl font-bold font-mono text-emerald-600">283</span>
-            <span className="text-[10px] text-slate-400 font-mono block mt-1">Files · ~465k Words</span>
+            <span className="text-2xl sm:text-3xl font-bold font-mono text-emerald-600">101</span>
+            <span className="text-[10px] text-slate-400 font-mono block mt-1">Verified Files · Product Core</span>
           </div>
         </div>
 
@@ -82,7 +83,7 @@ export const GraphifySpotlight: React.FC = () => {
           <div className="px-4 py-2.5 bg-slate-100 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
             <div className="flex items-center gap-2 text-slate-700 font-medium">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>LIVE WEBGL TOPOLOGY ENGINE: Click & drag nodes · Scroll to zoom · Search components in sidebar</span>
+              <span>LIVE ARCHITECTURE ENGINE: 4-Tier Pipeline · Click cards to drill into AST nodes · Mode Switcher</span>
             </div>
             <div className="flex items-center gap-3 text-slate-500">
               <span>Artifact: <code>graphify-out/graph.html</code></span>
@@ -129,7 +130,7 @@ export const GraphifySpotlight: React.FC = () => {
 
               <div className="flex items-center gap-3 text-xs font-mono text-slate-500 pt-1">
                 <GitCommit className="w-3.5 h-3.5 text-sky-600" />
-                <span>Extracted from live commit <code>1d33a4f9</code> · 95% Extracted, 5% Inferred</span>
+                <span>Extracted from live verified repository · 100% Deterministic AST Extraction</span>
               </div>
             </div>
 
@@ -139,15 +140,16 @@ export const GraphifySpotlight: React.FC = () => {
                 How to Evaluate
               </span>
               <h4 className="text-xs font-bold text-slate-900 font-sans">
-                Inspecting Architectural Isolation
+                Interactive Exploration Modes
               </h4>
               <p className="text-xs text-slate-600 leading-relaxed font-sans">
-                Use the embedded search bar on the right side of the graph canvas to lookup:
+                Use the mode bar and canvas interaction to inspect:
               </p>
               <ul className="text-xs font-mono text-slate-700 space-y-1.5 pl-2">
-                <li>• <code>VendorRegistry</code> (Plug-and-play adapter boundary)</li>
-                <li>• <code>ast_safety</code> (Zero socket import validator)</li>
-                <li>• <code>audit_log</code> (SHA-256 chain recorder)</li>
+                <li>• <b>Architecture Flow:</b> Clean 4-tier pipeline with 13 directed dataflows</li>
+                <li>• <b>Subsystem Drilldown:</b> Click any card to fan out inner AST nodes</li>
+                <li>• <b>Detailed Topology:</b> Full 11 hubs and 27 inter-module edges</li>
+                <li>• <b>+ Verification Suite:</b> Includes 1,638 automated test nodes</li>
               </ul>
               <a
                 href="./interactive/graph.html"

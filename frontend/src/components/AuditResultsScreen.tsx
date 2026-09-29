@@ -37,11 +37,38 @@ export const AuditResultsScreen: React.FC<AuditResultsScreenProps> = ({
   const [expandedFrameworkEvidence, setExpandedFrameworkEvidence] = useState<Record<string, boolean>>({});
 
   const resolveVendor = (auditData: any): string => {
-    const raw = auditData?.csm?.device?.vendor || auditData?.csm?.device?.platform || auditData?.platform || 'cisco';
+    const direct = auditData?.vendor || auditData?.csm?.device?.vendor;
+    if (direct) {
+      const v = String(direct).toLowerCase().trim();
+      if (['cisco', 'juniper', 'fortinet', 'arista', 'paloalto'].includes(v)) {
+        return v;
+      }
+    }
+    const raw = auditData?.csm?.device?.platform || auditData?.platform || '';
     const str = String(raw).toLowerCase().trim();
+    if (str.includes('palo') || str.includes('pan-os') || str.includes('panos')) return 'paloalto';
+    if (str.includes('arista') || str.includes('eos')) return 'arista';
+    if (str.includes('fortinet') || str.includes('fortios')) return 'fortinet';
     if (str.includes('juniper') || str.includes('junos')) return 'juniper';
     if (str.includes('cisco') || str.includes('ios')) return 'cisco';
-    return str || 'cisco';
+    return 'cisco';
+  };
+
+  const getVendorDisplay = (vendorId: string): { name: string; platform: string; full: string } => {
+    switch (vendorId) {
+      case 'cisco':
+        return { name: 'Cisco Systems', platform: 'IOS / IOS-XE', full: 'Cisco IOS-XE' };
+      case 'juniper':
+        return { name: 'Juniper Networks', platform: 'Junos', full: 'Juniper Junos' };
+      case 'fortinet':
+        return { name: 'Fortinet', platform: 'FortiOS', full: 'Fortinet FortiOS' };
+      case 'arista':
+        return { name: 'Arista Networks', platform: 'EOS', full: 'Arista EOS' };
+      case 'paloalto':
+        return { name: 'Palo Alto Networks', platform: 'PAN-OS', full: 'Palo Alto PAN-OS' };
+      default:
+        return { name: vendorId.toUpperCase(), platform: 'Network OS', full: vendorId.toUpperCase() };
+    }
   };
 
   const loadFrameworkEvaluation = async (resolvedVendor: string) => {
@@ -152,7 +179,8 @@ export const AuditResultsScreen: React.FC<AuditResultsScreenProps> = ({
   });
 
   const resolvedVendor = resolveVendor(data);
-  const resolvedVendorDisplay = resolvedVendor === 'juniper' ? 'Juniper Junos' : 'Cisco IOS-XE';
+  const vendorInfo = getVendorDisplay(resolvedVendor);
+  const resolvedVendorDisplay = vendorInfo.full;
   const selectedFramework = availableFrameworks.find((f) => f.framework_id === activeTab);
   const selectedSummary: FrameworkSummaryItem | undefined = multiAuditResult?.framework_summaries?.[activeTab];
   const frameworkResultsList = selectedSummary?.results || [];

@@ -102,3 +102,6 @@ scratch/
 __pycache__/
 backups/
 legacy_archive/
+
+# Large offline demo archives
+NTRO-PS26155-OFFLINE-DEMO*

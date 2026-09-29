@@ -99,7 +99,7 @@ export const Hero: React.FC = () => {
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 text-xs font-medium border border-slate-300 transition-all duration-200 shadow-sm hover:-translate-y-0.5"
           >
             <Cpu className="w-4 h-4 text-sky-600" />
-            <span>Graphify Topology (6,364)</span>
+            <span>Graphify Topology (2,744)</span>
           </a>
           <a
             href="#download"

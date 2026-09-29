@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { uploadAuditConfig, getLedger, getComplianceFrameworks } from '../api';
 import { formatToIST } from '../utils';
-import { UserIdentity, FrameworkMetadataItem } from '../types';
+import { UserIdentity, FrameworkMetadataItem, AuditLedgerItem } from '../types';
 
 interface UploadScreenProps {
   onAuditStarted: (sessionId: string, initialResults: any) => void;
@@ -227,7 +227,7 @@ set shared server-profile netflow NetFlow-Profile server 10.0.0.60
 set network virtual-router default protocol bgp enable yes
 set rulebase security rules Allow-Mgmt action allow`;
 
-const VENDOR_OPTIONS = [
+export const VENDOR_OPTIONS = [
   { id: 'auto', label: 'Auto Detect', badge: 'Deterministic' },
   { id: 'cisco', label: 'Cisco IOS-XE', badge: 'Cisco' },
   { id: 'juniper', label: 'Juniper Junos', badge: 'Juniper' },
@@ -236,9 +236,86 @@ const VENDOR_OPTIONS = [
   { id: 'paloalto', label: 'Palo Alto PAN-OS', badge: 'Palo Alto' },
 ] as const;
 
-type VendorId = typeof VENDOR_OPTIONS[number]['id'];
+export type VendorId = typeof VENDOR_OPTIONS[number]['id'];
 
-function detectVendorFromContent(content: string): string {
+interface VendorCardInfo {
+  id: VendorId;
+  name: string;
+  platform: string;
+  badge: string;
+  badgeType: 'auto' | 'supported';
+  description: string;
+  syntaxClues: string;
+}
+
+const VENDOR_CARDS: VendorCardInfo[] = [
+  {
+    id: 'auto',
+    name: 'Auto Detect',
+    platform: 'Syntactic Heuristic',
+    badge: 'Deterministic',
+    badgeType: 'auto',
+    description: 'Infers target platform from syntax tokens, block structure, and header clues.',
+    syntaxClues: 'Header sniff / CLI grammar match',
+  },
+  {
+    id: 'cisco',
+    name: 'Cisco Systems',
+    platform: 'IOS / IOS-XE',
+    badge: 'Active Adapter',
+    badgeType: 'supported',
+    description: 'Modular enterprise CLI, VRF isolation, AAA models, and management access-lists.',
+    syntaxClues: 'hostname, vrf definition, aaa new-model',
+  },
+  {
+    id: 'juniper',
+    name: 'Juniper Networks',
+    platform: 'Junos',
+    badge: 'Active Adapter',
+    badgeType: 'supported',
+    description: 'Hierarchical brace & set syntax, firewall filters, and secure routing engines.',
+    syntaxClues: 'system { ... } or set system ...',
+  },
+  {
+    id: 'fortinet',
+    name: 'Fortinet',
+    platform: 'FortiOS',
+    badge: 'Active Adapter',
+    badgeType: 'supported',
+    description: 'FortiGate NGFW, VDOM segmentation, admin lockout, custom NTP & syslog.',
+    syntaxClues: 'config system global ... end',
+  },
+  {
+    id: 'arista',
+    name: 'Arista Networks',
+    platform: 'EOS',
+    badge: 'Active Adapter',
+    badgeType: 'supported',
+    description: 'Extensible Operating System, management SSH, switchport mode & STP guards.',
+    syntaxClues: 'management ssh, switchport, role network-admin',
+  },
+  {
+    id: 'paloalto',
+    name: 'Palo Alto Networks',
+    platform: 'PAN-OS',
+    badge: 'Active Adapter',
+    badgeType: 'supported',
+    description: 'PAN-OS NGFW, deviceconfig CLI, security rulebase policies, server profiles.',
+    syntaxClues: 'set deviceconfig system, set rulebase security',
+  },
+];
+
+const AUDIT_STAGES = [
+  { step: 1, label: 'Configuration Payload Received', detail: 'Payload buffered; SHA-256 digest computed' },
+  { step: 2, label: 'Target Vendor Boundary Isolated', detail: 'Authoritative selection applied or heuristic confirmed' },
+  { step: 3, label: 'AST Parsed & Normalized to CSM', detail: 'Device attributes, interfaces, services & ACLs extracted' },
+  { step: 4, label: 'Vendor Baseline Rules Evaluated', detail: '10 core security controls evaluated deterministically' },
+  { step: 5, label: 'Regulatory Frameworks Scoped', detail: 'CIS, DISA STIG, NIST, and ISO compliance calculated' },
+  { step: 6, label: 'Evidence Traces & Directives Indexed', detail: 'Source lines, rationales & expected states bound' },
+  { step: 7, label: 'Cryptographic Ledger Finalized', detail: 'Non-repudiation entry hashed into audit_log.jsonl' },
+];
+
+export function detectVendorFromContent(content: string): 'cisco' | 'juniper' | 'fortinet' | 'arista' | 'paloalto' {
   if (!content) return 'cisco';
   if (content.includes('#config-version') || (content.includes('config system') && content.includes('end'))) {
     return 'fortinet';
@@ -249,7 +326,7 @@ function detectVendorFromContent(content: string): string {
   if (content.includes('management ssh') || content.includes('management api') || (content.includes('role network-admin') && content.includes('switchport'))) {
     return 'arista';
   }
-  if (content.includes('deviceconfig system') || content.includes('panos') || content.includes('rulebase security')) {
+  if (content.includes('deviceconfig system') || content.includes('panos') || content.includes('rulebase security') || content.includes('paloaltonetworks')) {
     return 'paloalto';
   }
   return 'cisco';
@@ -258,13 +335,14 @@ function detectVendorFromContent(content: string): string {
 export const UploadScreen: React.FC<UploadScreenProps> = ({
   onAuditStarted,
   onNavigateToLedger,
-  currentUser
+  currentUser,
 }) => {
   const [dragActive, setDragActive] = useState(false);
-  const [selectedFileName, setSelectedFileName] = useState<string>('labeled_test_config.txt');
+  const [selectedFileName, setSelectedFileName] = useState<string>('labeled_cisco_config.txt');
   const [fileContent, setFileContent] = useState<string>(SAMPLE_CISCO);
   const [fileObject, setFileObject] = useState<File | undefined>(undefined);
   const [fileSize, setFileSize] = useState<number>(SAMPLE_CISCO.length);
+  const [showRawEditor, setShowRawEditor] = useState(false);
 
   // Vendor & Framework Selection
   const [selectedVendor, setSelectedVendor] = useState<VendorId>('auto');
@@ -278,7 +356,7 @@ export const UploadScreen: React.FC<UploadScreenProps> = ({
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   // Recent Audits from Real Ledger (GET /api/ledger)
-  const [ledgerEntries, setLedgerEntries] = useState<any[]>([]);
+  const [ledgerEntries, setLedgerEntries] = useState<AuditLedgerItem[]>([]);
   const [isLoadingLedger, setIsLoadingLedger] = useState(true);
   const [ledgerError, setLedgerError] = useState<string | null>(null);
 
@@ -444,27 +522,39 @@ export const UploadScreen: React.FC<UploadScreenProps> = ({
   const lineCount = fileContent.split('\n').length;
 
   return (
-    <div className="space-y-8 font-sans">
-      {/* Screen Title Bar */}
-      <div className="border-b border-slate-700 pb-4 flex items-center justify-between">
+    <div className="space-y-8 font-sans max-w-7xl mx-auto">
+      {/* ── Screen Title Bar ── */}
+      <div className="border-b border-slate-700/80 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-100">
-            Configuration Ingestion &amp; Compliance Intake
-          </h1>
+          <div className="flex items-center gap-2.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-sky-400"></span>
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-100 tracking-tight">
+              Configuration Ingestion &amp; Compliance Intake
+            </h1>
+            <span className="badge-pass text-[10px]">
+              5 VENDORS ACTIVE
+            </span>
+          </div>
           <p className="text-xs text-slate-400 mt-1">
-            Upload multi-vendor device configurations (.cfg, .txt, .conf) with deterministic vendor detection and multi-framework compliance scoping.
+            Deterministic AST parsing, multi-vendor isolation, and regulatory compliance scoping across Cisco IOS-XE, Juniper Junos, Fortinet FortiOS, Arista EOS, and Palo Alto PAN-OS.
           </p>
+        </div>
+
+        <div className="flex items-center gap-2 font-mono text-xs">
+          <span className="px-2.5 py-1 rounded bg-slate-900 border border-slate-700 text-slate-300">
+            Offline Sandbox Active
+          </span>
         </div>
       </div>
 
-      {/* Upload Error Banner */}
+      {/* ── Error Banner ── */}
       {uploadError && (
-        <div className="bg-rose-950/60 border border-rose-700 rounded p-4 flex items-start space-x-3 text-xs text-rose-200">
+        <div className="bg-rose-950/60 border border-rose-700 rounded p-4 flex items-start space-x-3 text-xs text-rose-200 animate-reveal">
           <svg className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <div className="flex-1">
-            <strong className="block font-mono uppercase font-bold text-rose-300">Upload &amp; Parsing Error:</strong>
+            <strong className="block font-mono uppercase font-bold text-rose-300">Ingestion &amp; Parsing Exception:</strong>
             <p className="mt-0.5">{uploadError}</p>
           </div>
           <button
@@ -476,416 +566,507 @@ export const UploadScreen: React.FC<UploadScreenProps> = ({
         </div>
       )}
 
-      {/* Main Ingestion Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Intake Controls & Staging */}
-        <div className="lg:col-span-8 space-y-6">
+      {/* ── SECTION 1: CONFIGURATION SOURCE ── */}
+      <div className="bg-slate-900 border border-slate-700 rounded-lg p-5 space-y-4 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+          <div>
+            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-200 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-sky-400"></span>
+              1. Configuration Source
+            </h2>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Provide network device configuration via drag-and-drop, local file browser, or 1-click canonical presets.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 font-mono text-[11px] text-slate-400">
+            <span>Staged:</span>
+            <strong className="text-slate-200 truncate max-w-[180px]">{selectedFileName}</strong>
+            <span className="text-slate-600">|</span>
+            <span>{fileSize} B</span>
+            <span className="text-slate-600">|</span>
+            <span>{lineCount} L</span>
+          </div>
+        </div>
 
-          {/* 1. Target Vendor Selector */}
-          <div className="bg-slate-900 border border-slate-700 rounded p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-sky-400"></span>
-                Target Device Vendor
+        {/* Canonical Quick-load Presets */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">
+              Quick-Load Canonical Reference Configurations (5 Supported Vendors):
+            </span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+            <button
+              type="button"
+              onClick={() => handleLoadSample('cisco')}
+              className="px-3 py-2 rounded bg-slate-800 hover:bg-slate-750 text-sky-400 text-xs font-mono border border-slate-700 hover:border-sky-500/60 transition-all flex flex-col items-start cursor-pointer group text-left"
+            >
+              <div className="flex items-center justify-between w-full">
+                <span className="font-bold text-slate-200 group-hover:text-sky-300">Cisco</span>
+                <span className="text-[10px] text-slate-500">IOS-XE</span>
+              </div>
+              <span className="text-[10px] text-slate-400 truncate mt-0.5">EDGE-RTR-01</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleLoadSample('juniper')}
+              className="px-3 py-2 rounded bg-slate-800 hover:bg-slate-750 text-sky-400 text-xs font-mono border border-slate-700 hover:border-sky-500/60 transition-all flex flex-col items-start cursor-pointer group text-left"
+            >
+              <div className="flex items-center justify-between w-full">
+                <span className="font-bold text-slate-200 group-hover:text-sky-300">Juniper</span>
+                <span className="text-[10px] text-slate-500">Junos</span>
+              </div>
+              <span className="text-[10px] text-slate-400 truncate mt-0.5">lab-junos-router</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleLoadSample('fortinet')}
+              className="px-3 py-2 rounded bg-slate-800 hover:bg-slate-750 text-sky-400 text-xs font-mono border border-slate-700 hover:border-sky-500/60 transition-all flex flex-col items-start cursor-pointer group text-left"
+            >
+              <div className="flex items-center justify-between w-full">
+                <span className="font-bold text-slate-200 group-hover:text-sky-300">Fortinet</span>
+                <span className="text-[10px] text-slate-500">FortiOS</span>
+              </div>
+              <span className="text-[10px] text-slate-400 truncate mt-0.5">CORP-FORTIGATE-01</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleLoadSample('arista')}
+              className="px-3 py-2 rounded bg-slate-800 hover:bg-slate-750 text-sky-400 text-xs font-mono border border-slate-700 hover:border-sky-500/60 transition-all flex flex-col items-start cursor-pointer group text-left"
+            >
+              <div className="flex items-center justify-between w-full">
+                <span className="font-bold text-slate-200 group-hover:text-sky-300">Arista</span>
+                <span className="text-[10px] text-slate-500">EOS</span>
+              </div>
+              <span className="text-[10px] text-slate-400 truncate mt-0.5">ARISTA-SECURE-LAB</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleLoadSample('paloalto')}
+              className="px-3 py-2 rounded bg-slate-800 hover:bg-slate-750 text-sky-400 text-xs font-mono border border-slate-700 hover:border-sky-500/60 transition-all flex flex-col items-start cursor-pointer group text-left"
+            >
+              <div className="flex items-center justify-between w-full">
+                <span className="font-bold text-slate-200 group-hover:text-sky-300">Palo Alto</span>
+                <span className="text-[10px] text-slate-500">PAN-OS</span>
+              </div>
+              <span className="text-[10px] text-slate-400 truncate mt-0.5">PA-VM-SECURE</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Drag & Drop Upload Zone */}
+        <div
+          onDragEnter={handleDrag}
+          onDragLeave={handleDrag}
+          onDragOver={handleDrag}
+          onDrop={handleDrop}
+          className={`border-2 border-dashed rounded-lg p-6 text-center transition-all ${
+            dragActive
+              ? 'border-sky-500 bg-sky-500/10'
+              : 'border-slate-700 bg-slate-950/60 hover:border-slate-600'
+          }`}
+        >
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".cfg,.txt,.conf,.log"
+            onChange={handleBrowseChange}
+            className="hidden"
+          />
+
+          <div className="mx-auto w-10 h-10 rounded bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 mb-2">
+            <svg className="w-5 h-5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+          </div>
+
+          <h3 className="text-xs font-semibold text-slate-200">
+            Drag &amp; drop configuration file here, or select from local storage
+          </h3>
+          <p className="text-[11px] text-slate-400 mt-1">
+            Supports Cisco IOS-XE, Juniper Junos, Fortinet FortiOS, Arista EOS, and Palo Alto PAN-OS raw configs (.txt, .cfg, .conf)
+          </p>
+
+          <div className="mt-3 flex items-center justify-center gap-2">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="btn-primary"
+            >
+              Browse Local File
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowRawEditor(!showRawEditor)}
+              className="btn-secondary"
+            >
+              {showRawEditor ? 'Hide Raw Editor' : 'Inspect / Edit Raw Config'}
+            </button>
+          </div>
+        </div>
+
+        {/* Expandable Raw Configuration Editor */}
+        {showRawEditor && (
+          <div className="space-y-2 pt-2 border-t border-slate-800 animate-reveal">
+            <div className="flex items-center justify-between text-xs font-mono">
+              <span className="text-slate-400 flex items-center gap-2">
+                <span>Raw Configuration Buffer:</span>
+                <span className="px-2 py-0.5 rounded text-[10px] bg-sky-950 border border-sky-800 text-sky-300">
+                  Detected: {detectedVendor.toUpperCase()}
+                </span>
               </span>
-              <span className="text-[11px] font-mono text-slate-400">
-                {selectedVendor === 'auto' ? (
-                  <span className="text-sky-300 bg-sky-950/50 border border-sky-800 px-2 py-0.5 rounded">
-                    Auto-Detected: <strong className="uppercase">{detectedVendor}</strong>
-                  </span>
-                ) : (
-                  <span className="text-emerald-300 bg-emerald-950/50 border border-emerald-800 px-2 py-0.5 rounded">
-                    Explicit: <strong className="uppercase">{selectedVendor}</strong>
-                  </span>
-                )}
-              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setFileContent('');
+                  setFileSize(0);
+                  setSelectedFileName('custom_manual_input.txt');
+                }}
+                className="text-[11px] text-rose-400 hover:text-rose-300 underline cursor-pointer"
+              >
+                Clear Buffer
+              </button>
+            </div>
+            <textarea
+              value={fileContent}
+              onChange={(e) => {
+                const text = e.target.value;
+                setFileContent(text);
+                setFileSize(text.length);
+              }}
+              rows={10}
+              placeholder="Paste raw configuration dump here..."
+              className="w-full bg-slate-950 border border-slate-700 rounded p-3 text-xs font-mono text-slate-200 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 resize-y leading-relaxed"
+            />
+          </div>
+        )}
+      </div>
+
+      {/* ── SECTION 2: ANALYSIS CONFIGURATION ── */}
+      <div className="bg-slate-900 border border-slate-700 rounded-lg p-5 space-y-6 shadow-sm">
+        <div className="border-b border-slate-800 pb-3">
+          <h2 className="text-sm font-bold uppercase tracking-wider text-slate-200 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+            2. Analysis Configuration
+          </h2>
+          <p className="text-xs text-slate-400 mt-0.5">
+            Select the target vendor isolation boundary and specify regulatory compliance frameworks for evaluation.
+          </p>
+        </div>
+
+        {/* Sub-section 2A: Target Vendor Selection Tiles */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-sky-400"></span>
+              Target Device Vendor (5 First-Class Supported Platforms)
+            </span>
+            <span className="text-[11px] font-mono">
+              {selectedVendor === 'auto' ? (
+                <span className="text-sky-300 bg-sky-950/60 border border-sky-800 px-2 py-0.5 rounded">
+                  Heuristic Active: <strong className="uppercase">{detectedVendor}</strong>
+                </span>
+              ) : (
+                <span className="text-emerald-300 bg-emerald-950/60 border border-emerald-800 px-2 py-0.5 rounded">
+                  Authoritative: <strong className="uppercase">{selectedVendor}</strong>
+                </span>
+              )}
+            </span>
+          </div>
+
+          {/* 6 Selectable Polished Tiles */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {VENDOR_CARDS.map((card) => {
+              const isSelected = selectedVendor === card.id;
+              const isInferred = selectedVendor === 'auto' && card.id === detectedVendor;
+
+              return (
+                <div
+                  key={card.id}
+                  onClick={() => setSelectedVendor(card.id)}
+                  className={`p-3.5 rounded-lg border transition-all cursor-pointer select-none text-left relative ${
+                    isSelected
+                      ? 'bg-sky-950/30 border-sky-500 shadow-md ring-1 ring-sky-500/80'
+                      : 'bg-slate-800/60 border-slate-700 hover:border-slate-600 hover:bg-slate-800'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-bold text-slate-100">{card.name}</span>
+                        {isSelected && (
+                          <span className="text-sky-400 text-xs font-bold font-mono">✓</span>
+                        )}
+                      </div>
+                      <span className="text-[11px] font-mono text-sky-400 block mt-0.5">
+                        {card.platform}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-col items-end gap-1">
+                      <span
+                        className={`text-[9px] font-mono px-1.5 py-0.5 rounded border uppercase font-semibold ${
+                          card.badgeType === 'auto'
+                            ? 'bg-sky-950 text-sky-300 border-sky-800'
+                            : 'bg-emerald-950 text-emerald-300 border-emerald-800'
+                        }`}
+                      >
+                        {card.badge}
+                      </span>
+                      {isInferred && (
+                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800">
+                          Inferred
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <p className="text-[11px] text-slate-400 mt-2 leading-relaxed line-clamp-2">
+                    {card.description}
+                  </p>
+
+                  <div className="mt-2 pt-2 border-t border-slate-700/60 flex items-center justify-between text-[10px] font-mono text-slate-500">
+                    <span className="truncate">Grammar: {card.syntaxClues}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Real-time Guidance Banner */}
+          <div className="p-3 rounded bg-slate-950 border border-slate-800 text-xs font-mono text-slate-300 flex items-center justify-between">
+            <div>
+              {selectedVendor === 'auto' ? (
+                <span>
+                  ⚡ <strong className="text-sky-300">Auto-Detect Mode:</strong> Analyzes configuration headers dynamically. Current inferred target is <strong className="text-emerald-400 uppercase">{detectedVendor}</strong>.
+                </span>
+              ) : (
+                <span>
+                  🎯 <strong className="text-emerald-300">Authoritative Override:</strong> Locked strictly to <strong className="text-sky-300 uppercase">{selectedVendor}</strong>. Heuristic detection is bypassed.
+                </span>
+              )}
+            </div>
+            <span className="text-[10px] text-slate-500 hidden md:inline">
+              Pure AST Sandbox • Zero Cross-Vendor Leakage
+            </span>
+          </div>
+        </div>
+
+        {/* Sub-section 2B: Regulatory Compliance Frameworks */}
+        <div className="space-y-3 pt-2 border-t border-slate-800">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                Target Compliance Frameworks ({effectiveVendor.toUpperCase()} Scope)
+              </h3>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                Evaluated against the normalized Common Security Model (CSM) through vendor-scoped evaluators.
+              </p>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-              {VENDOR_OPTIONS.map((opt) => {
-                const isActive = selectedVendor === opt.id;
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-mono bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">
+                {selectedFrameworkIds.length} of {availableFrameworks.length} selected
+              </span>
+              <button
+                type="button"
+                onClick={handleSelectAllFrameworks}
+                className="text-[11px] text-sky-400 hover:text-sky-300 font-mono underline cursor-pointer"
+              >
+                Select All
+              </button>
+              <span className="text-slate-600">|</span>
+              <button
+                type="button"
+                onClick={handleDeselectAllFrameworks}
+                className="text-[11px] text-slate-400 hover:text-slate-300 font-mono underline cursor-pointer"
+              >
+                Clear All
+              </button>
+            </div>
+          </div>
+
+          {isLoadingFrameworks ? (
+            <div className="py-8 text-center text-xs text-slate-400 font-mono bg-slate-950 rounded border border-slate-800">
+              <span className="inline-block w-4 h-4 border-2 border-sky-400 border-t-transparent rounded-full animate-spin mr-2"></span>
+              Discovering compatible compliance standards for {effectiveVendor.toUpperCase()}...
+            </div>
+          ) : frameworksError ? (
+            <div className="p-3 text-xs text-rose-300 bg-rose-950/40 border border-rose-800 rounded font-mono">
+              Framework discovery warning: {frameworksError}
+            </div>
+          ) : availableFrameworks.length === 0 ? (
+            <div className="p-4 text-center text-xs text-slate-400 font-mono bg-slate-950 rounded border border-slate-800">
+              No regulatory frameworks registered for vendor '{effectiveVendor}'. Audit will evaluate 10 core vendor baseline rules.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {availableFrameworks.map((fw) => {
+                const isChecked = selectedFrameworkIds.includes(fw.framework_id);
                 return (
-                  <button
-                    key={opt.id}
-                    type="button"
-                    onClick={() => setSelectedVendor(opt.id)}
-                    className={`px-3 py-2 rounded text-xs font-medium text-left transition-all border cursor-pointer ${
-                      isActive
-                        ? 'bg-sky-600 border-sky-400 text-white shadow-sm font-semibold'
-                        : 'bg-slate-800/80 border-slate-700 text-slate-300 hover:bg-slate-750 hover:text-slate-100 hover:border-slate-600'
+                  <div
+                    key={fw.framework_id}
+                    onClick={() => handleToggleFramework(fw.framework_id)}
+                    className={`p-3 rounded-lg border transition-all cursor-pointer select-none ${
+                      isChecked
+                        ? 'bg-sky-950/30 border-sky-600/70 shadow-sm'
+                        : 'bg-slate-850 border-slate-800 hover:border-slate-700'
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <span>{opt.label}</span>
-                      {isActive && <span className="text-[10px]">✓</span>}
+                    <div className="flex items-start gap-3">
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => {}}
+                        className="mt-1 h-4 w-4 rounded border-slate-700 text-sky-600 focus:ring-sky-500 cursor-pointer"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="text-xs font-semibold text-slate-200 truncate">
+                            {fw.name}
+                          </span>
+                          <span className="text-[10px] font-mono text-emerald-400 shrink-0">
+                            {fw.control_count} controls
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-[10px] font-mono bg-slate-800 text-slate-300 px-1.5 py-0.2 rounded border border-slate-700">
+                            {fw.framework_id}
+                          </span>
+                          <span className="text-[10px] font-mono text-slate-400 uppercase">
+                            {fw.vendor_scope}
+                          </span>
+                        </div>
+
+                        <p className="text-[11px] text-slate-400 mt-1 line-clamp-2">
+                          {fw.description}
+                        </p>
+                      </div>
                     </div>
-                  </button>
+                  </div>
                 );
               })}
             </div>
+          )}
 
-            <div className="text-[11px] text-slate-400 font-mono flex items-center justify-between pt-1">
-              <span>
-                {selectedVendor === 'auto'
-                  ? '⚡ Auto-sniffing inspects config tokens; explicit vendor selection bypasses detection.'
-                  : `🎯 Explicit selection locks parsing to ${selectedVendor.toUpperCase()} CSM and isolated baseline rules.`}
-              </span>
-            </div>
-          </div>
-
-          {/* 2. Drag & Drop Upload Zone */}
-          <div
-            onDragEnter={handleDrag}
-            onDragLeave={handleDrag}
-            onDragOver={handleDrag}
-            onDrop={handleDrop}
-            className={`border-2 border-dashed rounded p-6 text-center transition-all ${
-              dragActive
-                ? 'border-sky-500 bg-sky-500/10'
-                : 'border-slate-700 bg-slate-900/60 hover:border-slate-600'
-            }`}
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".cfg,.txt,.conf,.log"
-              onChange={handleBrowseChange}
-              className="hidden"
-            />
-
-            <div className="mx-auto w-12 h-12 rounded bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 mb-2">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-              </svg>
-            </div>
-
-            <h3 className="text-sm font-semibold text-slate-200">
-              Select or Drag &amp; Drop Network Configuration File
-            </h3>
-            <p className="text-xs text-slate-400 mt-1">
-              Supports Cisco IOS-XE, Juniper Junos, Fortinet FortiOS, Arista EOS, and Palo Alto PAN-OS raw configs (.txt, .cfg, .conf)
-            </p>
-
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="btn-primary"
-              >
-                Browse Local File
-              </button>
-            </div>
-
-            {/* Canonical Sample Presets */}
-            <div className="mt-4 pt-4 border-t border-slate-800">
-              <div className="text-[11px] font-mono text-slate-400 mb-2">
-                Quick-load canonical reference configs:
-              </div>
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleLoadSample('cisco')}
-                  className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-sky-400 text-xs font-mono border border-slate-700 hover:border-sky-500/50 cursor-pointer"
-                >
-                  Cisco (EDGE-RTR-01)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleLoadSample('juniper')}
-                  className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-sky-400 text-xs font-mono border border-slate-700 hover:border-sky-500/50 cursor-pointer"
-                >
-                  Juniper (lab-junos-router)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleLoadSample('fortinet')}
-                  className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-sky-400 text-xs font-mono border border-slate-700 hover:border-sky-500/50 cursor-pointer"
-                >
-                  Fortinet (CORP-FORTIGATE-01)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleLoadSample('arista')}
-                  className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-sky-400 text-xs font-mono border border-slate-700 hover:border-sky-500/50 cursor-pointer"
-                >
-                  Arista (ARISTA-SECURE-LAB)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleLoadSample('paloalto')}
-                  className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-sky-400 text-xs font-mono border border-slate-700 hover:border-sky-500/50 cursor-pointer"
-                >
-                  Palo Alto (PA-VM-SECURE)
-                </button>
-              </div>
-            </div>
-
-            <div className="mt-4 text-[11px] text-slate-500 font-mono">
-              Processed offline in backend memory sandbox • Zero live device connections made
-            </div>
-          </div>
-
-          {/* 3. Interactive Framework Selection Grid */}
-          <div className="bg-slate-900 border border-slate-700 rounded p-4 space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
-              <div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-                  Target Compliance Frameworks
-                </h3>
-                <p className="text-[11px] text-slate-400 mt-0.5">
-                  Select regulatory frameworks to evaluate against this {effectiveVendor.toUpperCase()} device.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-mono bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">
-                  {selectedFrameworkIds.length} of {availableFrameworks.length} selected
-                </span>
-                <button
-                  type="button"
-                  onClick={handleSelectAllFrameworks}
-                  className="text-[11px] text-sky-400 hover:text-sky-300 font-mono underline cursor-pointer"
-                >
-                  Select All
-                </button>
-                <span className="text-slate-600">|</span>
-                <button
-                  type="button"
-                  onClick={handleDeselectAllFrameworks}
-                  className="text-[11px] text-slate-400 hover:text-slate-300 font-mono underline cursor-pointer"
-                >
-                  Clear All
-                </button>
-              </div>
-            </div>
-
-            {isLoadingFrameworks ? (
-              <div className="py-6 text-center text-xs text-slate-400 font-mono">
-                <span className="inline-block w-4 h-4 border-2 border-sky-400 border-t-transparent rounded-full animate-spin mr-2"></span>
-                Discovering compatible frameworks for {effectiveVendor.toUpperCase()}...
-              </div>
-            ) : frameworksError ? (
-              <div className="p-3 text-xs text-rose-300 bg-rose-950/40 border border-rose-800 rounded font-mono">
-                Framework discovery warning: {frameworksError}
-              </div>
-            ) : availableFrameworks.length === 0 ? (
-              <div className="p-4 text-center text-xs text-slate-400 font-mono">
-                No frameworks registered for vendor '{effectiveVendor}'. Audit will evaluate core vendor baseline rules.
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {availableFrameworks.map((fw) => {
-                  const isChecked = selectedFrameworkIds.includes(fw.framework_id);
-                  return (
-                    <div
-                      key={fw.framework_id}
-                      onClick={() => handleToggleFramework(fw.framework_id)}
-                      className={`p-3 rounded border transition-all cursor-pointer select-none ${
-                        isChecked
-                          ? 'bg-sky-950/30 border-sky-600/70 shadow-sm'
-                          : 'bg-slate-800/40 border-slate-800 hover:border-slate-700'
-                      }`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={() => {}} // handled by parent onClick
-                          className="mt-1 h-4 w-4 rounded border-slate-700 text-sky-600 focus:ring-sky-500 cursor-pointer"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-1">
-                            <span className="text-xs font-semibold text-slate-200 truncate">
-                              {fw.name}
-                            </span>
-                            <span className="text-[10px] font-mono text-emerald-400 shrink-0">
-                              {fw.control_count} controls
-                            </span>
-                          </div>
-
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="text-[10px] font-mono bg-slate-800 text-slate-300 px-1.5 py-0.2 rounded border border-slate-700">
-                              {fw.framework_id}
-                            </span>
-                            <span className="text-[10px] font-mono text-slate-400 uppercase">
-                              {fw.vendor_scope}
-                            </span>
-                          </div>
-
-                          <p className="text-[11px] text-slate-400 mt-1 line-clamp-2">
-                            {fw.description}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {selectedFrameworkIds.length === 0 && availableFrameworks.length > 0 && (
-              <div className="text-[11px] text-amber-300 bg-amber-950/30 border border-amber-800/60 rounded p-2 font-mono">
-                ⚠️ Notice: Zero frameworks selected. Ingestion will verify vendor baseline rules without regulatory crosswalk scoring.
-              </div>
-            )}
-          </div>
-
-          {/* 4. Active Staging & Audit Execution Card */}
-          {selectedFileName && (
-            <div className="bg-slate-900 border border-slate-700 rounded p-4 space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-700 pb-3">
-                <div className="flex items-center space-x-2">
-                  <span className="w-2 h-2 rounded-full bg-sky-400"></span>
-                  <span className="text-xs font-semibold text-slate-300">
-                    Staged Configuration Payload
-                  </span>
-                </div>
-                <span className="badge-pass text-[11px]">
-                  READY FOR AUDIT
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-mono">
-                <div>
-                  <span className="text-slate-500 block text-[10px] uppercase">File Name</span>
-                  <span className="text-slate-200 font-bold truncate block">{selectedFileName}</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block text-[10px] uppercase">Size</span>
-                  <span className="text-slate-200">{fileSize} bytes</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block text-[10px] uppercase">Line Count</span>
-                  <span className="text-slate-200">{lineCount} lines</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block text-[10px] uppercase">Target Vendor</span>
-                  <span className="text-sky-300 uppercase font-bold">
-                    {selectedVendor === 'auto' ? `Auto (${detectedVendor})` : selectedVendor}
-                  </span>
-                </div>
-              </div>
-
-              {/* Frameworks Summary Pill Row */}
-              <div className="pt-2 border-t border-slate-800">
-                <span className="text-slate-500 block text-[10px] font-mono uppercase mb-1">
-                  Active Framework Scope ({selectedFrameworkIds.length}):
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {selectedFrameworkIds.length === 0 ? (
-                    <span className="text-[11px] font-mono text-slate-400">None (Baseline rules only)</span>
-                  ) : (
-                    selectedFrameworkIds.map((id) => (
-                      <span
-                        key={id}
-                        className="text-[10px] font-mono bg-sky-950/60 border border-sky-800/80 text-sky-300 px-2 py-0.5 rounded"
-                      >
-                        {id}
-                      </span>
-                    ))
-                  )}
-                </div>
-              </div>
-
-              {/* Action Button */}
-              <div className="flex flex-col sm:flex-row justify-end items-center gap-3 pt-2">
-                {currentUser?.role === 'viewer' && (
-                  <span className="text-xs font-mono text-amber-400 bg-amber-950/40 px-2.5 py-1 rounded border border-amber-800">
-                    Viewer Role: Read-only access. Ingestion disabled.
-                  </span>
-                )}
-                <button
-                  type="button"
-                  disabled={isUploading || currentUser?.role === 'viewer'}
-                  onClick={handleExecuteAudit}
-                  className={`px-6 py-2.5 rounded text-xs font-bold uppercase tracking-wider transition-[transform,background-color,border-color] duration-150 ease-out shadow-sm flex items-center gap-2 border cursor-pointer ${
-                    isUploading || currentUser?.role === 'viewer'
-                      ? 'bg-slate-800 text-slate-500 border-slate-700 cursor-not-allowed'
-                      : 'bg-sky-600 hover:bg-sky-500 text-white border-sky-500 active:scale-[0.98]'
-                  }`}
-                >
-                  {isUploading ? (
-                    <>
-                      <span className="inline-block w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></span>
-                      <span>Executing Deterministic Audit...</span>
-                    </>
-                  ) : (
-                    <>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <span>Execute Deterministic Audit</span>
-                    </>
-                  )}
-                </button>
-              </div>
+          {selectedFrameworkIds.length === 0 && availableFrameworks.length > 0 && (
+            <div className="text-[11px] text-amber-300 bg-amber-950/30 border border-amber-800/60 rounded p-2.5 font-mono">
+              ⚠️ Notice: Zero frameworks selected. Ingestion will verify vendor baseline rules without regulatory crosswalk scoring.
             </div>
           )}
         </div>
 
-        {/* Right Column: Ingestion Protocol & Validation Policy */}
-        <div className="lg:col-span-4 space-y-4">
-          <div className="bg-slate-900 border border-slate-700 rounded p-4">
-            <h4 className="text-xs font-bold text-slate-200 mb-3 flex items-center gap-2">
-              <span className="w-1.5 h-1.5 bg-sky-400 rounded-sm"></span>
-              CSM Audit Protocol Verification
-            </h4>
-            <div className="space-y-3 text-xs text-slate-400">
-              <div className="border-l-2 border-emerald-500 pl-2.5 py-0.5">
-                <div className="text-slate-200 font-medium">Deterministic Multi-Vendor Engine</div>
-                <div className="text-[11px] text-slate-400 mt-0.5">
-                  Full CSM normalization for Cisco IOS-XE, Juniper Junos, Fortinet FortiOS, and Arista EOS. Zero cross-vendor rule leakage.
-                </div>
-              </div>
+        {/* Sub-section 2C: Staged Payload & Audit Execution */}
+        <div className="pt-4 border-t border-slate-800 space-y-4">
+          <div className="bg-slate-950 border border-slate-800 rounded-lg p-4 space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300">
+                Staged Audit Execution Summary
+              </span>
+              <span className="badge-pass text-[10px]">
+                SANDBOX READY
+              </span>
+            </div>
 
-              <div className="border-l-2 border-sky-500 pl-2.5 py-0.5">
-                <div className="text-slate-200 font-medium">Dynamic Framework Scoping</div>
-                <div className="text-[11px] text-slate-400 mt-0.5">
-                  Scoped evaluation against CIS benchmarks, DISA STIG, vendor baselines, and crosswalk frameworks (NIST SP 800-53, ISO 27001).
-                </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-mono">
+              <div>
+                <span className="text-slate-500 block text-[10px] uppercase">Payload File</span>
+                <span className="text-slate-200 font-bold truncate block">{selectedFileName}</span>
               </div>
-
-              <div className="border-l-2 border-amber-500 pl-2.5 py-0.5">
-                <div className="text-slate-200 font-medium">Isolated AI Suggestion Sandbox</div>
-                <div className="text-[11px] text-slate-400 mt-0.5">
-                  Unrecognized CLI lines route to the local AI suggester. Suggestions require explicit human approval before mapping into trusted rules.
-                </div>
+              <div>
+                <span className="text-slate-500 block text-[10px] uppercase">File Metrics</span>
+                <span className="text-slate-200">{fileSize} B • {lineCount} L</span>
               </div>
-
-              <div className="border-l-2 border-indigo-500 pl-2.5 py-0.5">
-                <div className="text-slate-200 font-medium">Cryptographic Hash Chaining</div>
-                <div className="text-[11px] text-slate-400 mt-0.5">
-                  Every audit produces a linked hash entry in <code className="font-mono text-slate-300">audit_log.jsonl</code>, providing tamper-evident non-repudiation.
-                </div>
+              <div>
+                <span className="text-slate-500 block text-[10px] uppercase">Target Vendor</span>
+                <span className="text-sky-300 uppercase font-bold">
+                  {selectedVendor === 'auto' ? `Auto (${detectedVendor})` : selectedVendor}
+                </span>
+              </div>
+              <div>
+                <span className="text-slate-500 block text-[10px] uppercase">Regulatory Scope</span>
+                <span className="text-emerald-400 font-bold">
+                  {selectedFrameworkIds.length} Framework{selectedFrameworkIds.length === 1 ? '' : 's'}
+                </span>
               </div>
             </div>
 
-            <div className="mt-4 pt-3 border-t border-slate-700">
-              <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
-                <span>PARSER RUNTIME</span>
-                <span className="text-emerald-400">OFFLINE / LOCAL</span>
+            {/* Synchronous Pipeline Execution Overlay */}
+            {isUploading && (
+              <div className="pt-3 border-t border-slate-800 space-y-2 animate-reveal">
+                <div className="flex items-center justify-between text-xs font-mono text-sky-300">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>
+                    <span>Synchronous Ingestion Pipeline In Progress</span>
+                  </div>
+                  <span className="text-slate-500 text-[10px]">Deterministic Evaluation</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono text-slate-400">
+                  {AUDIT_STAGES.map((s) => (
+                    <div key={s.step} className="flex items-center gap-2 bg-slate-900/80 p-2 rounded border border-slate-800">
+                      <span className="w-4 h-4 rounded-full bg-sky-900 border border-sky-700 text-sky-300 flex items-center justify-center text-[9px] font-bold shrink-0">
+                        {s.step}
+                      </span>
+                      <div className="truncate">
+                        <span className="text-slate-200 font-medium">{s.label}</span>
+                        <span className="block text-[10px] text-slate-500 truncate">{s.detail}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 mt-1">
-                <span>SUPPORTED VENDORS</span>
-                <span className="text-slate-300">4 Active Adapters</span>
-              </div>
-              <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 mt-1">
-                <span>ESTIMATED DURATION</span>
-                <span className="text-slate-300">&lt; 150 ms (Deterministic)</span>
-              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row justify-end items-center gap-3 pt-2">
+              {currentUser?.role === 'viewer' && (
+                <span className="text-xs font-mono text-amber-400 bg-amber-950/40 px-2.5 py-1 rounded border border-amber-800">
+                  Viewer Role: Read-only access. Ingestion disabled.
+                </span>
+              )}
+              <button
+                type="button"
+                disabled={isUploading || currentUser?.role === 'viewer'}
+                onClick={handleExecuteAudit}
+                className={`px-6 py-2.5 rounded text-xs font-bold uppercase tracking-wider transition-all shadow-sm flex items-center gap-2 border cursor-pointer ${
+                  isUploading || currentUser?.role === 'viewer'
+                    ? 'bg-slate-800 text-slate-500 border-slate-700 cursor-not-allowed'
+                    : 'bg-sky-600 hover:bg-sky-500 text-white border-sky-500 active:scale-[0.98]'
+                }`}
+              >
+                {isUploading ? (
+                  <>
+                    <span className="inline-block w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></span>
+                    <span>Executing Deterministic Audit...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Execute Deterministic Audit</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Recent Audits Table Section (Fetched live from GET /api/ledger) */}
-      <div className="bg-slate-900 border border-slate-700 rounded">
+      {/* ── SECTION 3: AUDIT REPOSITORY & LEDGER TIMELINE (GET /api/ledger) ── */}
+      <div className="bg-slate-900 border border-slate-700 rounded-lg shadow-sm">
         <div className="px-5 py-3.5 border-b border-slate-700 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <span className="w-2 h-2 rounded-full bg-slate-400"></span>
-            <h3 className="text-xs font-bold text-slate-200">
-              Recent Audits Log (Ledger Source of Truth)
+            <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider">
+              3. Recent Audits Log (Cryptographic Ledger Source of Truth)
             </h3>
           </div>
           <button
@@ -906,7 +1087,6 @@ export const UploadScreen: React.FC<UploadScreenProps> = ({
             Failed to load ledger records: {ledgerError}
           </div>
         ) : ledgerEntries.length === 0 ? (
-          /* UX Copy Empty State Pattern */
           <div className="p-10 text-center space-y-2">
             <div className="w-10 h-10 rounded bg-slate-800 border border-slate-700 text-slate-400 mx-auto flex items-center justify-center">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -915,10 +1095,10 @@ export const UploadScreen: React.FC<UploadScreenProps> = ({
             </div>
             <h4 className="text-sm font-bold text-slate-300">No Prior Audits in Ledger</h4>
             <p className="text-xs text-slate-400 max-w-md mx-auto">
-              The cryptographic ledger (<code className="font-mono text-slate-300">audit_log.jsonl</code>) has no entries yet because no compliance scans have been finalized.
+              The cryptographic ledger (<code className="font-mono text-slate-300">audit_log.jsonl</code>) has no entries recorded yet.
             </p>
             <p className="text-xs text-sky-400 font-mono pt-1">
-              Upload a Cisco IOS-XE configuration file above or click "Load Canonical Test Config" to execute your first audit.
+              Select one of the canonical reference configurations above and click "Execute Deterministic Audit".
             </p>
           </div>
         ) : (
@@ -936,7 +1116,7 @@ export const UploadScreen: React.FC<UploadScreenProps> = ({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-700/60 font-sans text-xs">
-                {ledgerEntries.map((entry, idx) => {
+                {ledgerEntries.map((entry) => {
                   const results = entry.audit_results || {};
                   const passCount = Object.values(results).filter((v) => v === 'Pass').length;
                   const failCount = Object.values(results).filter((v) => v === 'Fail').length;
@@ -949,55 +1129,55 @@ export const UploadScreen: React.FC<UploadScreenProps> = ({
                       ? 'NEEDS-REVIEW'
                       : 'COMPLIANT';
 
-                  const statusColor =
-                    overallStatus === 'COMPLIANT'
-                      ? 'bg-emerald-950 text-emerald-300 border-emerald-800'
-                      : overallStatus === 'NON-COMPLIANT'
-                      ? 'bg-rose-950 text-rose-300 border-rose-800'
-                      : 'bg-amber-950 text-amber-300 border-amber-800';
-
                   return (
-                    <tr key={entry.entry_id || idx} className="hover:bg-slate-800/40 transition-colors">
-                      <td className="py-3 px-4 font-mono font-bold text-sky-400">
-                        #{idx + 1} <span className="text-slate-300 text-[11px] font-normal">{entry.entry_id}</span>
+                    <tr key={entry.entry_id} className="hover:bg-slate-800/40 transition-colors">
+                      <td className="py-2.5 px-4 font-mono font-medium text-slate-200">
+                        {entry.entry_id}
                       </td>
-                      <td className="py-3 px-4 font-mono font-semibold text-slate-200">
-                        {entry.device_hostname || 'unknown'}
+                      <td className="py-2.5 px-4 font-mono font-semibold text-sky-400">
+                        {entry.device_hostname}
                       </td>
-                      <td className="py-3 px-4 text-slate-300 font-mono text-[11px]">
-                        <span title={`Canonical UTC: ${entry.timestamp}`}>{formatToIST(entry.timestamp)}</span>
+                      <td className="py-2.5 px-4 font-mono text-slate-400">
+                        {formatToIST(entry.timestamp)}
                       </td>
-                      <td className="py-3 px-4 font-mono text-[11px] text-slate-400">
-                        <span title={entry.config_file_hash}>
-                          {(entry.config_file_hash || '').substring(0, 16)}...
+                      <td className="py-2.5 px-4 font-mono text-slate-400">
+                        <span title={entry.config_file_hash} className="select-all">
+                          {entry.config_file_hash
+                            ? `${entry.config_file_hash.substring(0, 8)}...${entry.config_file_hash.substring(
+                                entry.config_file_hash.length - 6
+                              )}`
+                            : 'N/A'}
                         </span>
                       </td>
-                      <td className="py-3 px-4 font-mono">
-                        <div className="flex items-center space-x-2 text-[11px]">
-                          <span className="text-emerald-400 font-semibold" title="Pass">
-                            {passCount}P
-                          </span>
+                      <td className="py-2.5 px-4 font-mono">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-emerald-400 font-bold">{passCount}P</span>
                           <span className="text-slate-600">/</span>
-                          <span className="text-rose-400 font-semibold" title="Fail">
-                            {failCount}F
-                          </span>
+                          <span className="text-rose-400 font-bold">{failCount}F</span>
                           <span className="text-slate-600">/</span>
-                          <span className="text-amber-400 font-semibold" title="Unknown">
-                            {unknownCount}U
-                          </span>
+                          <span className="text-amber-400 font-bold">{unknownCount}U</span>
                         </div>
                       </td>
-                      <td className="py-3 px-4">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-semibold border ${statusColor}`}>
+                      <td className="py-2.5 px-4">
+                        <span
+                          className={`inline-block px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${
+                            overallStatus === 'COMPLIANT'
+                              ? 'bg-emerald-950 text-emerald-300 border-emerald-800'
+                              : overallStatus === 'NON-COMPLIANT'
+                              ? 'bg-rose-950 text-rose-300 border-rose-800'
+                              : 'bg-amber-950 text-amber-300 border-amber-800'
+                          }`}
+                        >
                           {overallStatus}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-right">
+                      <td className="py-2.5 px-4 text-right">
                         <button
+                          type="button"
                           onClick={onNavigateToLedger}
-                          className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-sky-400 text-xs font-mono transition-colors border border-slate-700 cursor-pointer"
+                          className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded text-xs font-mono border border-slate-700 hover:border-sky-500/50 transition-colors cursor-pointer"
                         >
-                          View in Ledger &rarr;
+                          View Report
                         </button>
                       </td>
                     </tr>

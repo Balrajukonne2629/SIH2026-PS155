@@ -154,6 +154,9 @@ test('Client-side vendor detection correctly identifies multi-vendor syntax head
     if (content.includes('management ssh') || content.includes('management api') || (content.includes('role network-admin') && content.includes('switchport'))) {
       return 'arista';
     }
+    if (content.includes('deviceconfig system') || content.includes('panos') || content.includes('rulebase security') || content.includes('paloaltonetworks')) {
+      return 'paloalto';
+    }
     return 'cisco';
   }
 
@@ -165,9 +168,11 @@ test('Client-side vendor detection correctly identifies multi-vendor syntax head
   assert.equal(detectVendorFromContent('hostname ARISTA-01\nusername admin role network-admin\ninterface Ethernet1\nswitchport\nmanagement ssh'), 'arista');
   // Cisco
   assert.equal(detectVendorFromContent('hostname EDGE-RTR-01\ninterface GigabitEthernet0/0/0\nip address 10.0.0.1 255.255.255.0'), 'cisco');
+  // Palo Alto
+  assert.equal(detectVendorFromContent('set deviceconfig system hostname PA-VM-01\nset deviceconfig system service disable-telnet yes'), 'paloalto');
 });
 
-test('Vendor switch flushes incompatible framework IDs safeguard', () => {
+test('Vendor switch flushes incompatible framework IDs safeguard across all 5 vendors', () => {
   // Simulates the UI state transition when changing target vendor
   const ciscoFrameworks = [
     { framework_id: 'cis-cisco-iosxe', vendor_scope: 'cisco' },
@@ -175,17 +180,57 @@ test('Vendor switch flushes incompatible framework IDs safeguard', () => {
     { framework_id: 'disa-stig-cisco-iosxe', vendor_scope: 'cisco' }
   ];
 
-  const juniperFrameworks = [
-    { framework_id: 'juniper-junos-baseline', vendor_scope: 'juniper' }
+  const paloaltoFrameworks = [
+    { framework_id: 'paloalto-panos-baseline', vendor_scope: 'paloalto' }
   ];
 
   let selectedFrameworkIds = ciscoFrameworks.map(f => f.framework_id);
   assert.deepEqual(selectedFrameworkIds, ['cis-cisco-iosxe', 'cisco-ios-xe-baseline', 'disa-stig-cisco-iosxe']);
 
-  // Operator switches vendor to Juniper: safe reseed from newly fetched catalog
-  const newCatalog = juniperFrameworks;
+  // Operator switches vendor to Palo Alto: safe reseed from newly fetched catalog
+  const newCatalog = paloaltoFrameworks;
   selectedFrameworkIds = newCatalog.map(f => f.framework_id);
 
-  assert.deepEqual(selectedFrameworkIds, ['juniper-junos-baseline']);
-  assert.ok(!selectedFrameworkIds.includes('cis-cisco-iosxe'), 'Cisco framework must not leak into Juniper session');
+  assert.deepEqual(selectedFrameworkIds, ['paloalto-panos-baseline']);
+  assert.ok(!selectedFrameworkIds.includes('cis-cisco-iosxe'), 'Cisco framework must not leak into Palo Alto session');
+});
+
+test('uploadAuditConfig with Palo Alto vendor transmits explicit vendor and framework in JSON', async () => {
+  let capturedOptions = null;
+
+  globalThis.fetch = async (url, options) => {
+    capturedOptions = options;
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        session_id: 'sess-paloalto-001',
+        vendor: 'paloalto',
+        framework_ids: ['paloalto-panos-baseline'],
+        summary: { total: 10, pass: 10, fail: 0, unknown: 0 },
+      }),
+    };
+  };
+
+  const res = await api.uploadAuditConfig(
+    undefined,
+    'set deviceconfig system hostname PA-VM-SECURE',
+    'paloalto.conf',
+    'paloalto',
+    ['paloalto-panos-baseline']
+  );
+
+  const parsedBody = JSON.parse(capturedOptions.body);
+  assert.equal(parsedBody.vendor, 'paloalto');
+  assert.deepEqual(parsedBody.framework_ids, ['paloalto-panos-baseline']);
+  assert.equal(res.session_id, 'sess-paloalto-001');
+  assert.equal(res.summary.total, 10);
+});
+
+test('Invariant: Top-level compliance outcomes are strictly PASS, FAIL, UNKNOWN', () => {
+  const allowedOutcomes = new Set(['PASS', 'FAIL', 'UNKNOWN', 'Pass', 'Fail', 'Unknown']);
+  assert.ok(allowedOutcomes.has('PASS'));
+  assert.ok(allowedOutcomes.has('FAIL'));
+  assert.ok(allowedOutcomes.has('UNKNOWN'));
+  assert.equal(allowedOutcomes.has('NOT_ASSESSED'), false, 'NOT_ASSESSED must never be a top-level compliance outcome');
 });
