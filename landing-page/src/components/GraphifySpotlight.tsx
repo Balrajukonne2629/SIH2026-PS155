@@ -95,7 +95,6 @@ export const GraphifySpotlight: React.FC = () => {
               src="./interactive/graph.html"
               title="NTRO PS26155 Codebase Knowledge Graph"
               className="w-full h-full border-0"
-              loading="lazy"
             />
           </div>
         </div>

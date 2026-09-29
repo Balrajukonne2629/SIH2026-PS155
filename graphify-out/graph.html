@@ -921,9 +921,33 @@ function filterCommunityList() {
   document.getElementById('legend-visible-count').textContent = matchCount + ' / ' + LEGEND.length;
 }
 
-// Initial load
-refreshGraph();
-resetViewport();
+// Initial load with URL params and responsive resize handler
+const urlParams = new URLSearchParams(window.location.search);
+const initialMode = urlParams.get('mode');
+if (initialMode && ['arch', 'arch_detailed', 'arch_test', 'full'].includes(initialMode)) {
+  setExplorationMode(initialMode);
+} else {
+  refreshGraph();
+  resetViewport();
+}
+
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    if (network) {
+      network.redraw();
+      network.fit();
+    }
+  }, 100);
+});
+
+if (window.ResizeObserver) {
+  const ro = new ResizeObserver(() => {
+    if (network) {
+      network.redraw();
+    }
+  });
+  ro.observe(container);
+}
 </script>
 </body>
 </html>

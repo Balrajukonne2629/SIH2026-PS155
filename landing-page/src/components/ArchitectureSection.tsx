@@ -15,26 +15,26 @@ export const ArchitectureSection: React.FC = () => {
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-sky-50 border border-sky-200 text-[11px] font-mono tracking-wider uppercase text-sky-700 font-semibold mb-3">
               <Layers className="w-3.5 h-3.5 text-sky-600" />
-              <span>Architectural Blueprint · Archify Engine v7.0</span>
+              <span>Architectural Blueprint · Verified 4-Tier Pipeline</span>
             </div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold font-display text-slate-900 tracking-tight">
               Master System Architecture & Isolation Boundaries
             </h2>
             <p className="mt-4 text-sm sm:text-base text-slate-600 leading-relaxed font-sans">
-              A strictly decoupled, 7-layer pipeline designed for sub-millisecond evaluation, air-gapped critical network compliance, 
-              modular multi-vendor expansion, and mathematical non-repudiation. Inspect live data flow, AST sandboxes, and state transitions.
+              A strictly decoupled 4-tier pipeline designed for sub-millisecond evaluation, air-gapped critical network compliance, 
+              modular multi-vendor expansion, and mathematical non-repudiation. Inspect live directed data flows, AST sandboxes, and drill into 2,744 verified implementation nodes.
             </p>
           </div>
 
           {/* Quick Action Buttons */}
           <div className="flex items-center gap-2.5 shrink-0">
             <a
-              href="./interactive/v7_system_architecture.html"
+              href="./interactive/graph.html"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white hover:bg-slate-50 text-xs font-semibold text-slate-800 border border-slate-300 shadow-sm transition-all group"
             >
-              <span>Dedicated Archify Canvas</span>
+              <span>Dedicated Architecture Canvas</span>
               <Maximize2 className="w-3.5 h-3.5 text-sky-600 group-hover:scale-110 transition-transform" />
             </a>
             <a
@@ -60,7 +60,7 @@ export const ArchitectureSection: React.FC = () => {
               }`}
             >
               <Sparkles className="w-3.5 h-3.5" />
-              <span>Interactive Canvas (Pan / Zoom / Trace)</span>
+              <span>Interactive Pipeline (Pan / Zoom / Drill-Down)</span>
             </button>
 
             <button
@@ -111,10 +111,9 @@ export const ArchitectureSection: React.FC = () => {
             <div className="relative w-full h-[680px]">
               <iframe
                 key={iframeKey}
-                src="./interactive/v7_system_architecture.html?embed=1&theme=dark"
+                src="./interactive/graph.html?mode=arch"
                 title="NTRO PS26155 Interactive System Architecture"
                 className="w-full h-full border-0"
-                loading="lazy"
               />
             </div>
           )}

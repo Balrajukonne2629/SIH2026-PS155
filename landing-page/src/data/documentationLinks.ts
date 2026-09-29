@@ -21,14 +21,14 @@ export const DOCUMENTATION_RESOURCES: DocumentationResource[] = [
     id: "v7-interactive-arch",
     category: "Architecture",
     title: "Master System Architecture (Interactive)",
-    subtitle: "Standalone Archify SVG Visualizer with 3 Switchable Views",
+    subtitle: "Interactive 4-Tier Architecture Pipeline & AST Knowledge Graph",
     format: "HTML / Interactive",
     status: "Interactive Viewer",
-    path: "docs/v7_system_architecture.html",
+    path: "graphify-out/graph.html",
     targetBlank: true,
-    description: "Features 3 interactive views: Deterministic Pipeline, Human-in-the-Loop AI Advisory Loop, and Audit Integrity. Supports Dark/Light themes, trace motion, and SVG export.",
+    description: "Features clean 4-tier functional pipeline with 13 directed dataflow highways, progressive disclosure AST drill-down, and 4 exploration modes (Flow, Detailed Topology, +Verification, Full Evidence).",
     primaryActionLabel: "Launch Interactive Architecture",
-    primaryActionUrl: "./interactive/v7_system_architecture.html"
+    primaryActionUrl: "./interactive/graph.html"
   },
   {
     id: "arch-2pager",

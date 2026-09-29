@@ -55,7 +55,7 @@ export const Footer: React.FC = () => {
             <ul className="space-y-2 text-slate-400 text-xs font-sans">
               <li>
                 <a href="#architecture" className="hover:text-sky-300 transition-colors">
-                  Archify Interactive Architecture
+                  Interactive Architecture Pipeline
                 </a>
               </li>
               <li>

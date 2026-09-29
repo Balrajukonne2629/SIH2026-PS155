@@ -30,7 +30,7 @@ export const Navbar: React.FC = () => {
     { id: 'overview', label: 'Executive Overview', icon: Shield, href: '#' },
     { id: 'pillars', label: '3 Invariant Pillars', icon: Cpu, href: '#pillars' },
     { id: 'workflow', label: '7-Layer Pipeline', icon: Workflow, href: '#workflow' },
-    { id: 'architecture', label: 'Archify Master Topology', icon: Layers, href: '#architecture' },
+    { id: 'architecture', label: 'Master Architecture Pipeline', icon: Layers, href: '#architecture' },
     { id: 'ai-governance', label: 'AI Safety & HITL Queue', icon: Cpu, href: '#ai-governance' },
     { id: 'multi-vendor', label: 'Multi-Vendor Standards', icon: Server, href: '#multi-vendor' },
     { id: 'evidence', label: 'SHA-256 Ledger Proof', icon: CheckCircle2, href: '#evidence' },
