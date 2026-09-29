@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NTRO PS26155 — Presentation Deck Architecture Slide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0f17;
+      --card-bg: rgba(17, 24, 39, 0.85);
+      --card-border: #1e293b;
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      --text-muted: #64748b;
+      --cyan: #38bdf8;
+      --cyan-glow: rgba(56, 189, 248, 0.15);
+      --emerald: #34d399;
+      --emerald-glow: rgba(52, 211, 153, 0.15);
+      --amber: #fbbf24;
+      --amber-glow: rgba(251, 191, 36, 0.15);
+      --indigo: #818cf8;
+      --indigo-glow: rgba(129, 140, 248, 0.15);
+      --rose: #fb7185;
+      --purple: #c084fc;
+      --font-sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'IBM Plex Mono', monospace;
+    }
+
+    [data-theme="light"] {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --card-border: #cbd5e1;
+      --text-main: #0f172a;
+      --text-sub: #475569;
+      --text-muted: #64748b;
+      --cyan: #0284c7;
+      --cyan-glow: rgba(2, 132, 199, 0.1);
+      --emerald: #059669;
+      --emerald-glow: rgba(5, 150, 105, 0.1);
+      --amber: #d97706;
+      --amber-glow: rgba(217, 119, 6, 0.1);
+      --indigo: #4f46e5;
+      --indigo-glow: rgba(79, 70, 229, 0.1);
+      --rose: #e11d48;
+      --purple: #9333ea;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      background: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      overflow-x: auto;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    /* 16:9 Presentation Slide Canvas */
+    .slide-canvas {
+      width: 1360px;
+      height: 765px;
+      background: var(--bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      position: relative;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+      padding: 32px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(52, 211, 153, 0.05) 0%, transparent 40%);
+    }
+
+    /* Header Bar */
+    .slide-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 16px;
+    }
+    .slide-tagline {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--cyan);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .slide-title {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+    }
+    .badge-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .pill {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pill-green { color: var(--emerald); border-color: rgba(52, 211, 153, 0.3); background: var(--emerald-glow); }
+    .pill-cyan { color: var(--cyan); border-color: rgba(56, 189, 248, 0.3); background: var(--cyan-glow); }
+    .pill-amber { color: var(--amber); border-color: rgba(251, 191, 36, 0.3); background: var(--amber-glow); }
+
+    /* Main Architecture Grid */
+    .arch-flow {
+      display: grid;
+      grid-template-columns: 240px 40px 300px 40px 320px 40px 240px;
+      align-items: center;
+      margin: 20px 0;
+      height: 480px;
+    }
+
+    .column-box {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 14px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    .card:hover {
+      border-color: var(--cyan);
+      transform: translateY(-2px);
+    }
+
+    .card-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--text-main);
+    }
+    .card-desc {
+      font-size: 11px;
+      color: var(--text-sub);
+      line-height: 1.4;
+    }
+    .card-features {
+      margin-top: 8px;
+      list-style: none;
+      font-size: 10px;
+      color: var(--text-sub);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      font-family: var(--font-mono);
+    }
+    .card-features li::before {
+      content: "▸ ";
+      color: var(--cyan);
+    }
+
+    /* Specialized card accents */
+    .card-accent-cyan { border-left: 3px solid var(--cyan); }
+    .card-accent-emerald { border-left: 3px solid var(--emerald); }
+    .card-accent-amber { border-left: 3px solid var(--amber); }
+    .card-accent-indigo { border-left: 3px solid var(--indigo); }
+    .card-accent-purple { border-left: 3px solid var(--purple); }
+
+    /* Connectors */
+    .flow-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+    }
+    .flow-arrow svg {
+      width: 28px;
+      height: 28px;
+      stroke: var(--cyan);
+      filter: drop-shadow(0 0 6px var(--cyan-glow));
+    }
+
+    /* Bottom KPI Footer */
+    .slide-footer {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      border-top: 1px solid var(--card-border);
+      padding-top: 16px;
+    }
+    .kpi-card {
+      background: rgba(17, 24, 39, 0.4);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+    }
+    .kpi-val {
+      font-family: var(--font-mono);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--cyan);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .kpi-name {
+      font-size: 11px;
+      color: var(--text-sub);
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    /* Presentation Controls */
+    .toolbar {
+      margin-top: 16px;
+      display: flex;
+      gap: 12px;
+    }
+    .btn {
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 6px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .btn:hover {
+      background: var(--card-border);
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+
+    @media print {
+      body { background: white; padding: 0; }
+      .toolbar { display: none; }
+      .slide-canvas { border: none; box-shadow: none; width: 100vw; height: 100vh; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Slide Canvas (16:9 Presentation Frame) -->
+  <div class="slide-canvas" id="slideFrame">
+    
+    <!-- Header -->
+    <header class="slide-header">
+      <div>
+        <div class="slide-tagline">NTRO PS26155 · High-Assurance Architecture</div>
+        <h1 class="slide-title">End-to-End Multi-Vendor Security Compliance Pipeline</h1>
+      </div>
+      <div class="badge-group">
+        <span class="pill pill-cyan">⚡ &lt;10ms Deterministic Core</span>
+        <span class="pill pill-green">🔒 Air-Gapped / Zero Egress</span>
+        <span class="pill pill-amber">🛡️ SHA-256 Non-Repudiation</span>
+      </div>
+    </header>
+
+    <!-- Main Architecture Layout -->
+    <main class="arch-flow">
+      
+      <!-- Col 1: Ingestion & Adapters -->
+      <div class="column-box">
+        <div class="card card-accent-cyan" style="height: 48%;">
+          <div class="card-label" style="color: var(--cyan);">Layer 1 · Ingestion</div>
+          <div class="card-title">Guarded Multi-Format Ingest</div>
+          <p class="card-desc">Single file, multi-file batch, and guarded ZIP archives processed in-memory.</p>
+          <ul class="card-features">
+            <li>AST safety blocks sockets & SSH</li>
+            <li>Zip-bomb & traversal rejection</li>
+            <li>Per-file error isolation in bulk</li>
+          </ul>
+        </div>
+        <div class="card card-accent-cyan" style="height: 48%;">
+          <div class="card-label" style="color: var(--cyan);">Layer 2 · Detection & ID</div>
+          <div class="card-title">Fail-Closed Vendor Adapters</div>
+          <p class="card-desc">Heuristic vendor dispatch and hardware identity extraction without guessing.</p>
+          <ul class="card-features">
+            <li>Cisco, Junos, Arista, PAN-OS</li>
+            <li>Hardware, serial, OS, mgmt IP</li>
+            <li>Display-time 'Not In Config'</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Connector 1 -->
+      <div class="flow-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="4" y1="12" x2="20" y2="12"></line>
+          <polyline points="14 6 20 12 14 18"></polyline>
+        </svg>
+      </div>
+
+      <!-- Col 2: CSM Normalization & AI Advisory Loop -->
+      <div class="column-box">
+        <div class="card card-accent-indigo" style="height: 48%;">
+          <div class="card-label" style="color: var(--indigo);">Canonical Abstraction</div>
+          <div class="card-title">Common Security Model (CSM)</div>
+          <p class="card-desc">Normalized JSON state schema eliminating M×N scanner combinatorial explosion.</p>
+          <ul class="card-features">
+            <li>interfaces, services, aaa, logging</li>
+            <li>ntp, routing, snmp, device ID</li>
+            <li>Unmapped syntax isolated for AI</li>
+          </ul>
+        </div>
+        <div class="card card-accent-amber" style="height: 48%;">
+          <div class="card-label" style="color: var(--amber);">Advisory Loop (HITL)</div>
+          <div class="card-title">Local AI & Review Queue</div>
+          <p class="card-desc">Local DistilBERT & Ollama SLMs advise; human security officer approves.</p>
+          <ul class="card-features">
+            <li>Zero AI compliance authority</li>
+            <li>Learns stored rules, not weights</li>
+            <li>Deterministic template fallback</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Connector 2 -->
+      <div class="flow-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="4" y1="12" x2="20" y2="12"></line>
+          <polyline points="14 6 20 12 14 18"></polyline>
+        </svg>
+      </div>
+
+      <!-- Col 3: Compliance Evaluators & Central Remediation -->
+      <div class="column-box">
+        <div class="card card-accent-emerald" style="height: 48%;">
+          <div class="card-label" style="color: var(--emerald);">Deterministic Core</div>
+          <div class="card-title">Multi-Framework Evaluator</div>
+          <p class="card-desc">Pure Python rules + Crosswalk Evaluator over baseline rules.</p>
+          <ul class="card-features">
+            <li>CIS Benchmark & DISA-STIG</li>
+            <li>NIST SP 800-53 & ISO 27001 Crosswalk</li>
+            <li>PASS / FAIL / UNKNOWN (+ NOT_ASSESSED)</li>
+          </ul>
+        </div>
+        <div class="card card-accent-purple" style="height: 48%;">
+          <div class="card-label" style="color: var(--purple);">Central Remediation</div>
+          <div class="card-title">Registry & Conflict Check</div>
+          <p class="card-desc">Central baseline CLI registry replacing template files; display-only preview.</p>
+          <ul class="card-features">
+            <li>BASELINE_REMEDIATION_REGISTRY</li>
+            <li>CIS & STIG resolve to baseline</li>
+            <li>Static conflict checks (zero live exec)</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Connector 3 -->
+      <div class="flow-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="4" y1="12" x2="20" y2="12"></line>
+          <polyline points="14 6 20 12 14 18"></polyline>
+        </svg>
+      </div>
+
+      <!-- Col 4: Cryptographic Ledger & Canonical Reporting -->
+      <div class="column-box">
+        <div class="card card-accent-emerald" style="height: 48%;">
+          <div class="card-label" style="color: var(--emerald);">Cryptographic Proof</div>
+          <div class="card-title">SHA-256 Audit Ledger</div>
+          <p class="card-desc">Append-only cryptographic hash chaining in SQLite for mathematical non-repudiation.</p>
+          <ul class="card-features">
+            <li>H(n) = SHA256(Block + H(n-1))</li>
+            <li>Tamper-evident chain verification</li>
+            <li>Frozen historical integrity</li>
+          </ul>
+        </div>
+        <div class="card card-accent-cyan" style="height: 48%;">
+          <div class="card-label" style="color: var(--cyan);">Canonical Reporting</div>
+          <div class="card-title">Report API & RBAC Roles</div>
+          <p class="card-desc">Certified PDF/DOCX exporter & role-isolated interfaces (Viewer, Uploader, Reviewer).</p>
+          <ul class="card-features">
+            <li>report_exporter.py canonical engine</li>
+            <li>Immutable verdicts vs editable notes</li>
+            <li>JWT RBAC & anti-enumeration</li>
+          </ul>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Footer Stats / Guarantees -->
+    <footer class="slide-footer">
+      <div class="kpi-card">
+        <div class="kpi-val">3.2 ms</div>
+        <div class="kpi-name">Core Evaluation Latency / Device</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-val" style="color: var(--emerald);">100% Deterministic</div>
+        <div class="kpi-name">Zero AI In Decision Path (Zero Hallucination)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-val" style="color: var(--amber);">0 KB Outbound</div>
+        <div class="kpi-name">Air-Gapped Sovereign Network Isolation</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-val" style="color: var(--purple);">SHA-256 Chained</div>
+        <div class="kpi-name">Mathematical Forensic Non-Repudiation</div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Interactive Controls for Slide Preparation -->
+  <div class="toolbar">
+    <button class="btn" onclick="toggleTheme()">🌓 Toggle Dark / Light</button>
+    <button class="btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
+    <button class="btn" onclick="copySlideMarkdown()">📋 Copy Slide Notes</button>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      html.setAttribute('data-theme', current === 'light' ? 'dark' : 'light');
+    }
+
+    function copySlideMarkdown() {
+      const notes = `## NTRO PS26155: System Architecture Slide Talking Points
+- Problem: Heterogeneous multi-vendor network compliance under strict air-gapped sovereign defense constraints.
+- Pillar 1: Common Security Model (CSM) eliminates M×N rule duplication across Cisco, Juniper, and Arista.
+- Pillar 2: Two-Hemisphere Design — 100% deterministic Python core (<10ms) prevents AI hallucinations; advisory local AI assists with unmapped syntax via Human-in-the-Loop review.
+- Pillar 3: Cryptographic Non-Repudiation — Append-only SHA-256 hash-chained ledger and vector QR verification ensure tamper detection.
+- Pillar 4: Safe Remediation — Jinja2 CLI template generation protected by static AST sandboxing (blocks code injection).`;
+      navigator.clipboard.writeText(notes).then(() => {
+        alert("Speaker notes copied to clipboard!");
+      });
+    }
+  </script>
+</body>
+</html>

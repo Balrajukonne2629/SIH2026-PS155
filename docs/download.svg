@@ -1,0 +1,268 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1038.2042499999998 3678.697" width="1038.2042499999998" height="3678.697" style="--bg:#1F1F1F;--fg:#CCCCCC;--line:#CCCCCC;--accent:#0078D4;--muted:#CCCCCCCC;--surface:#181818;--border:#CCCCCC;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<g class="subgraph" data-id="INGESTION" data-label="1. Ingestion &amp; Detection Layer (AST-Guarded)">
+  <rect x="316.95387499999987" y="40" width="389.16299999999995" height="620.7629999999999" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="316.95387499999987" y="40" width="389.16299999999995" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="328.95387499999987" y="54" font-size="12" font-weight="600" fill="var(--_text-sec)" dy="4.199999999999999">1. Ingestion &amp; Detection Layer (AST-Guarded)</text>
+</g>
+<g class="subgraph" data-id="NORMALIZATION" data-label="2. Normalization &amp; Identity Layer">
+  <rect x="179.12387500000006" y="720.7629999999999" width="605.1724999999998" height="331.40000000000003" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="179.12387500000006" y="720.7629999999999" width="605.1724999999998" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="191.12387500000006" y="734.7629999999999" font-size="12" font-weight="600" fill="var(--_text-sec)" dy="4.199999999999999">2. Normalization &amp; Identity Layer</text>
+</g>
+<g class="subgraph" data-id="ENGINE" data-label="3. Deterministic Compliance Engine">
+  <rect x="262.69024999999993" y="2090.197" width="735.5139999999999" height="402.3" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="262.69024999999993" y="2090.197" width="735.5139999999999" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="274.69024999999993" y="2104.197" font-size="12" font-weight="600" fill="var(--_text-sec)" dy="4.199999999999999">3. Deterministic Compliance Engine</text>
+</g>
+<g class="subgraph" data-id="HITL" data-label="4. Advisory AI &amp; Human Review (HITL)">
+  <rect x="399.0872499999999" y="1112.163" width="569.9749999999999" height="849.7339999999999" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="399.0872499999999" y="1112.163" width="569.9749999999999" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="411.0872499999999" y="1126.163" font-size="12" font-weight="600" fill="var(--_text-sec)" dy="4.199999999999999">4. Advisory AI &amp; Human Review (HITL)</text>
+</g>
+<g class="subgraph" data-id="REMEDIATION" data-label="5. Central Remediation &amp; Conflict Analysis">
+  <rect x="280.06850000000003" y="2552.497" width="396.28499999999985" height="317.40000000000003" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="280.06850000000003" y="2552.497" width="396.28499999999985" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="292.06850000000003" y="2566.497" font-size="12" font-weight="600" fill="var(--_text-sec)" dy="4.199999999999999">5. Central Remediation &amp; Conflict Analysis</text>
+</g>
+<g class="subgraph" data-id="PROOF" data-label="6. Cryptographic Ledger &amp; Audit Non-Repudiation">
+  <rect x="381.17575" y="2929.897" width="430.2417499999999" height="331.40000000000003" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="381.17575" y="2929.897" width="430.2417499999999" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="393.17575" y="2943.897" font-size="12" font-weight="600" fill="var(--_text-sec)" dy="4.199999999999999">6. Cryptographic Ledger &amp; Audit Non-Repudiation</text>
+</g>
+<g class="subgraph" data-id="PRESENTATION" data-label="7. Canonical Reporting &amp; RBAC Interfaces">
+  <rect x="40" y="3321.297" width="726.326" height="317.40000000000003" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="40" y="3321.297" width="726.326" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="52" y="3335.297" font-size="12" font-weight="600" fill="var(--_text-sec)" dy="4.199999999999999">7. Canonical Reporting &amp; RBAC Interfaces</text>
+</g>
+<polyline class="edge" data-from="DETECT" data-to="ADAPTER" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="511.5353749999998,644.7629999999999 511.5353749999999,764.7629999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="CSM" data-to="BASELINE" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="370.22687499999995,1036.163 370.22687499999995,2072.197 388.0872499999999,2072.197 388.0872499999999,2072.197 541.2045833333332,2072.197 541.2045833333333,2134.197" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="UNMAPPED" data-to="LOCAL_AI" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="652.8438749999999,920.3629999999999 652.8438749999998,1094.163 634.9834999999998,1094.163 634.9834999999999,1156.163" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="TRUSTED" data-to="BASELINE" data-style="dotted" data-arrow-start="false" data-arrow-end="true" data-label="Future Audits" points="776.4772499999998,1945.897 776.4772499999999,2072.197 623.3599166666665,2072.197 623.3599166666665,2134.197" fill="none" stroke="var(--_line)" stroke-width="1" stroke-dasharray="4 4" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="AGG" data-to="RESOLVE" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="582.28225,2476.4970000000003 582.28225,2536.4970000000003 478.21099999999996,2536.4970000000003 478.21099999999996,2596.497" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="AGG" data-to="BLOCK" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="582.28225,2476.4970000000003 582.28225,2536.4970000000003 582.28225,2536.4970000000003 582.28225,2973.897" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="DIFF" data-to="BLOCK" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="478.21099999999996,2853.897 478.21099999999996,2911.897 520.5800833333333,2911.897 520.5800833333333,2973.897" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="BLOCK" data-to="API" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="582.28225,3027.697 582.28225,3051.697 429.46849999999995,3051.697 429.46849999999995,3467.097" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="RAW" data-to="AST_GUARD" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="511.5353749999998,137.8 511.5353749999998,185.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="AST_GUARD" data-to="DETECT" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="511.5353749999998,542.963 511.5353749999998,590.963" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ADAPTER" data-to="DEVID" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="511.53537499999993,818.5629999999999 511.53537499999993,842.5629999999999 370.22687499999995,842.5629999999999 370.22687499999995,866.5629999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="DEVID" data-to="CSM" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="370.22687499999995,920.3629999999999 370.22687499999995,968.3629999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ADAPTER" data-to="UNMAPPED" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="511.53537499999993,818.5629999999999 511.53537499999993,842.5629999999999 652.8438749999999,842.5629999999999 652.8438749999999,866.5629999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="BASELINE" data-to="REGISTRY" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="582.28225,2187.9970000000003 582.28225,2235.9970000000003" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="REGISTRY" data-to="CIS" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="582.2822499999999,2272.8970000000004 582.2822499999999,2296.897 375.2472499999999,2296.897 375.2472499999999,2320.897" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="REGISTRY" data-to="STIG" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="582.2822499999999,2272.8970000000004 582.2822499999999,2296.897 582.28225,2296.897 582.28225,2320.897" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="REGISTRY" data-to="CROSSWALK" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="582.2822499999999,2272.8970000000004 582.2822499999999,2296.897 837.4822499999999,2296.897 837.4822499999999,2320.897" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="CIS" data-to="AGG" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="375.2472499999999,2374.697 375.2472499999999,2398.697 582.28225,2398.697 582.28225,2422.697" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="STIG" data-to="AGG" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="582.28225,2374.697 582.28225,2398.697 582.28225,2398.697 582.28225,2422.697" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="CROSSWALK" data-to="AGG" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="837.4822499999999,2374.697 837.4822499999999,2398.697 582.28225,2398.697 582.28225,2422.697" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="LOCAL_AI" data-to="FALLBACK" data-style="dotted" data-arrow-start="false" data-arrow-end="true" data-label="On Refusal / Timeout" points="582.9143333333333,1209.963 582.9143333333333,1221.963 581.5197499999999,1221.963 581.5197499999999,1326.263" fill="none" stroke="var(--_line)" stroke-width="1" stroke-dasharray="4 4" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="LOCAL_AI" data-to="PENDING" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="634.9834999999999,1209.963 634.9834999999999,1404.063 634.9834999999999,1404.063 634.9834999999999,1428.063" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="FALLBACK" data-to="PENDING" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="581.5197499999999,1380.0629999999999 581.5197499999999,1404.063 634.9834999999999,1404.063 634.9834999999999,1428.063" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="PENDING" data-to="PORTAL" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="634.9834999999999,1481.863 634.9834999999999,1529.863" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="PORTAL" data-to="TRUSTED" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="Approved / Corrected" points="673.6391666666666,1723.1413333333333 673.6391666666666,1773.797 776.4772499999999,1773.797 776.4772499999999,1878.097" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="PORTAL" data-to="DISCARD" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="Rejected" points="596.3278333333333,1723.1413333333333 596.3278333333333,1773.797 493.48974999999996,1773.797 493.48974999999996,1878.097" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="RESOLVE" data-to="REG_REMED" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="478.21099999999996,2650.297 478.21099999999996,2698.297" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="REG_REMED" data-to="DIFF" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="478.21099999999996,2752.0969999999998 478.21099999999996,2800.0969999999998" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="BLOCK" data-to="DB" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="582.28225,3027.697 582.28225,3051.697 656.9939999999999,3051.697 656.9939999999999,3075.697" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="DB" data-to="VERIFY" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="656.9939999999999,3143.497 656.9939999999999,3191.497" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="REPORT_MODEL" data-to="API" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="351.3665,3419.097 351.3665,3431.097 383.3273333333333,3431.097 383.3273333333333,3467.097" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="API" data-to="UI" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="429.46849999999995,3520.8970000000004 429.46849999999995,3544.897 248.88699999999997,3544.897 248.88699999999997,3568.897" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="API" data-to="DOCS" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="429.46849999999995,3520.8970000000004 429.46849999999995,3544.897 610.05,3544.897 610.05,3568.897" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="edge-label" data-from="TRUSTED" data-to="BASELINE" data-label="Future Audits">
+  <rect x="735.4772499999998" y="2010.897" width="81.20800000000001" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="776.0812499999998" y="2026.047" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">Future Audits</text>
+</g>
+<g class="edge-label" data-from="LOCAL_AI" data-to="FALLBACK" data-label="On Refusal / Timeout">
+  <rect x="525.5197499999999" y="1252.963" width="111.50200000000004" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="581.2707499999999" y="1268.113" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">On Refusal / Timeout</text>
+</g>
+<g class="edge-label" data-from="PORTAL" data-to="TRUSTED" data-label="Approved / Corrected">
+  <rect x="715.9772499999999" y="1804.797" width="120.41200000000003" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="776.1832499999999" y="1819.9470000000001" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">Approved / Corrected</text>
+</g>
+<g class="edge-label" data-from="PORTAL" data-to="DISCARD" data-label="Rejected">
+  <rect x="463.48974999999996" y="1804.797" width="59.230000000000004" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="493.10474999999997" y="1819.9470000000001" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">Rejected</text>
+</g>
+<g class="node" data-id="RAW" data-label="Raw Config Upload
+Single / Multi-File / Guarded ZIP" data-shape="rectangle">
+  <rect x="399.7878749999999" y="84" width="223.49499999999998" height="53.800000000000004" rx="0" ry="0" fill="#1e293b" stroke="#475569" stroke-width="2px" />
+  <text x="511.5353749999999" y="110.9" text-anchor="middle" font-size="13" font-weight="500" fill="#f8fafc"><tspan x="511.5353749999999" dy="-3.9000000000000012">Raw Config Upload</tspan><tspan x="511.5353749999999" dy="16.900000000000002">Single / Multi-File / Guarded ZIP</tspan></text>
+</g>
+<g class="node" data-id="AST_GUARD" data-label="Static AST Safety Sandbox
+Zero Sockets / Zero Paramiko / Zero Subprocess" data-shape="diamond">
+  <polygon points="511.5353749999998,185.79999999999998 690.1168749999998,364.38149999999996 511.5353749999998,542.963 332.9538749999998,364.38149999999996" fill="#1e293b" stroke="#475569" stroke-width="2px" />
+  <text x="511.5353749999998" y="364.38149999999996" text-anchor="middle" font-size="13" font-weight="500" fill="#f8fafc"><tspan x="511.5353749999998" dy="-3.9000000000000012">Static AST Safety Sandbox</tspan><tspan x="511.5353749999998" dy="16.900000000000002">Zero Sockets / Zero Paramiko / Zero Subprocess</tspan></text>
+</g>
+<g class="node" data-id="DETECT" data-label="Fail-Closed Vendor Detector
+(Cisco / Junos / Arista / Palo Alto)" data-shape="rectangle">
+  <rect x="394.97137499999985" y="590.963" width="233.12799999999996" height="53.800000000000004" rx="0" ry="0" fill="#0369a1" stroke="#0284c7" stroke-width="2px" />
+  <text x="511.5353749999998" y="617.8629999999999" text-anchor="middle" font-size="13" font-weight="500" fill="#ffffff"><tspan x="511.5353749999998" dy="-3.9000000000000012">Fail-Closed Vendor Detector</tspan><tspan x="511.5353749999998" dy="16.900000000000002">(Cisco / Junos / Arista / Palo Alto)</tspan></text>
+</g>
+<g class="node" data-id="ADAPTER" data-label="Vendor Adapter Registry
+Cisco IOS-XE / Junos / EOS (reuse) / PAN-OS" data-shape="rectangle">
+  <rect x="359.773875" y="764.7629999999999" width="303.52299999999997" height="53.800000000000004" rx="0" ry="0" fill="#0369a1" stroke="#0284c7" stroke-width="2px" />
+  <text x="511.53537499999993" y="791.6629999999999" text-anchor="middle" font-size="13" font-weight="500" fill="#ffffff"><tspan x="511.53537499999993" dy="-3.9000000000000012">Vendor Adapter Registry</tspan><tspan x="511.53537499999993" dy="16.900000000000002">Cisco IOS-XE / Junos / EOS (reuse) / PAN-OS</tspan></text>
+</g>
+<g class="node" data-id="DEVID" data-label="Device Identity Extractor
+Serial, Model, OS, Mgmt IP ('Not In Config')" data-shape="rectangle">
+  <rect x="231.06237500000003" y="866.5629999999999" width="278.3289999999999" height="53.800000000000004" rx="0" ry="0" fill="#0369a1" stroke="#0284c7" stroke-width="2px" />
+  <text x="370.22687499999995" y="893.4629999999999" text-anchor="middle" font-size="13" font-weight="500" fill="#ffffff"><tspan x="370.22687499999995" dy="-3.9000000000000012">Device Identity Extractor</tspan><tspan x="370.22687499999995" dy="16.900000000000002">Serial, Model, OS, Mgmt IP (&#39;Not In Config&#39;)</tspan></text>
+</g>
+<g class="node" data-id="CSM" data-label="Common Security Model (CSM v7 JSON Schema)
+interfaces, services, aaa, logging, ntp, routing, device" data-shape="cylinder">
+  <rect x="195.12387500000006" y="975.3629999999999" width="350.20599999999985" height="53.80000000000001" fill="#0f766e" stroke="none" />
+  <line x1="195.12387500000006" y1="975.3629999999999" x2="195.12387500000006" y2="1029.163" stroke="#14b8a6" stroke-width="2px" />
+  <line x1="545.3298749999999" y1="975.3629999999999" x2="545.3298749999999" y2="1029.163" stroke="#14b8a6" stroke-width="2px" />
+  <ellipse cx="370.22687499999995" cy="1029.163" rx="175.10299999999992" ry="7" fill="#0f766e" stroke="#14b8a6" stroke-width="2px" />
+  <ellipse cx="370.22687499999995" cy="975.3629999999999" rx="175.10299999999992" ry="7" fill="#0f766e" stroke="#14b8a6" stroke-width="2px" />
+  <text x="370.22687499999995" y="1002.2629999999999" text-anchor="middle" font-size="13" font-weight="500" fill="#ffffff"><tspan x="370.22687499999995" dy="-3.9000000000000012">Common Security Model (CSM v7 JSON Schema)</tspan><tspan x="370.22687499999995" dy="16.900000000000002">interfaces, services, aaa, logging, ntp, routing, device</tspan></text>
+</g>
+<g class="node" data-id="UNMAPPED" data-label="Unmapped Syntax Lines
+(Unknown / Vendor-Specific CLI)" data-shape="rectangle">
+  <rect x="537.3913749999999" y="866.5629999999999" width="230.90499999999994" height="53.800000000000004" rx="0" ry="0" fill="#854d0e" stroke="#eab308" stroke-width="2px" />
+  <text x="652.8438749999999" y="893.4629999999999" text-anchor="middle" font-size="13" font-weight="500" fill="#ffffff"><tspan x="652.8438749999999" dy="-3.9000000000000012">Unmapped Syntax Lines</tspan><tspan x="652.8438749999999" dy="16.900000000000002">(Unknown / Vendor-Specific CLI)</tspan></text>
+</g>
+<g class="node" data-id="BASELINE" data-label="Vendor Baseline Rules
+(Cisco 10, Junos 10, Arista, PAN-OS)" data-shape="rectangle">
+  <rect x="459.0492499999999" y="2134.197" width="246.46599999999995" height="53.800000000000004" rx="0" ry="0" fill="#4338ca" stroke="#6366f1" stroke-width="2px" />
+  <text x="582.2822499999999" y="2161.097" text-anchor="middle" font-size="13" font-weight="500" fill="#ffffff"><tspan x="582.2822499999999" dy="-3.9000000000000012">Vendor Baseline Rules</tspan><tspan x="582.2822499999999" dy="16.900000000000002">(Cisco 10, Junos 10, Arista, PAN-OS)</tspan></text>
+</g>
+<g class="node" data-id="REGISTRY" data-label="Framework Registry &amp; Evaluators" data-shape="rectangle">
+  <rect x="462.3837499999999" y="2235.9970000000003" width="239.797" height="36.900000000000006" rx="0" ry="0" fill="#4338ca" stroke="#6366f1" stroke-width="2px" />
+  <text x="582.2822499999999" y="2254.447" text-anchor="middle" font-size="13" font-weight="500" fill="#ffffff" dy="4.55">Framework Registry &amp; Evaluators</text>
+</g>
+<g class="node" data-id="CIS" data-label="CIS Benchmark Evaluator
+(v2.2.1 Controls)" data-shape="rectangle">
+  <rect x="278.69024999999993" y="2320.897" width="193.11399999999998" height="53.800000000000004" rx="0" ry="0" fill="#4338ca" stroke="#6366f1" stroke-width="2px" />
+  <text x="375.2472499999999" y="2347.797" text-anchor="middle" font-size="13" font-weight="500" fill="#ffffff"><tspan x="375.2472499999999" dy="-3.9000000000000012">CIS Benchmark Evaluator</tspan><tspan x="375.2472499999999" dy="16.900000000000002">(v2.2.1 Controls)</tspan></text>
+</g>
+<g class="node" data-id="STIG" data-label="DISA-STIG Evaluator
+(V3R7 Controls)" data-shape="rectangle">
+  <rect x="499.8042499999999" y="2320.897" width="164.95600000000002" height="53.800000000000004" rx="0" ry="0" fill="#4338ca" stroke="#6366f1" stroke-width="2px" />
+  <text x="582.28225" y="2347.797" text-anchor="middle" font-size="13" font-weight="500" fill="#ffffff"><tspan x="582.28225" dy="-3.9000000000000012">DISA-STIG Evaluator</tspan><tspan x="582.28225" dy="16.900000000000002">(V3R7 Controls)</tspan></text>
+</g>
+<g class="node" data-id="CROSSWALK" data-label="Generic Crosswalk Evaluator
+NIST SP 800-53 rev5 &amp; ISO/IEC 27001:2022" data-shape="rectangle">
+  <rect x="692.7602499999999" y="2320.897" width="289.4439999999999" height="53.800000000000004" rx="0" ry="0" fill="#4338ca" stroke="#6366f1" stroke-width="2px" />
+  <text x="837.4822499999999" y="2347.797" text-anchor="middle" font-size="13" font-weight="500" fill="#ffffff"><tspan x="837.4822499999999" dy="-3.9000000000000012">Generic Crosswalk Evaluator</tspan><tspan x="837.4822499999999" dy="16.900000000000002">NIST SP 800-53 rev5 &amp; ISO/IEC 27001:2022</tspan></text>
+</g>
+<g class="node" data-id="AGG" data-label="Compliance Aggregator &amp; Roll-Up
+PASS / FAIL / UNKNOWN (+ NOT_ASSESSED)" data-shape="rectangle">
+  <rect x="426.07474999999994" y="2422.697" width="312.41499999999996" height="53.800000000000004" rx="0" ry="0" fill="#4338ca" stroke="#6366f1" stroke-width="2px" />
+  <text x="582.28225" y="2449.597" text-anchor="middle" font-size="13" font-weight="500" fill="#ffffff"><tspan x="582.28225" dy="-3.9000000000000012">Compliance Aggregator &amp; Roll-Up</tspan><tspan x="582.28225" dy="16.900000000000002">PASS / FAIL / UNKNOWN (+ NOT_ASSESSED)</tspan></text>
+</g>
+<g class="node" data-id="LOCAL_AI" data-label="Advisory Local AI Engine
+DistilBERT (Mapping) + Ollama SLM (Rationale)" data-shape="rectangle">
+  <rect x="478.77599999999995" y="1156.163" width="312.4149999999999" height="53.800000000000004" rx="0" ry="0" fill="#854d0e" stroke="#eab308" stroke-width="2px" />
+  <text x="634.9834999999999" y="1183.063" text-anchor="middle" font-size="13" font-weight="500" fill="#ffffff"><tspan x="634.9834999999999" dy="-3.9000000000000012">Advisory Local AI Engine</tspan><tspan x="634.9834999999999" dy="16.900000000000002">DistilBERT (Mapping) + Ollama SLM (Rationale)</tspan></text>
+</g>
+<g class="node" data-id="FALLBACK" data-label="Deterministic Fallback
+(Zero AI Verdict Authority)" data-shape="rectangle">
+  <rect x="484.5922499999999" y="1326.263" width="193.855" height="53.800000000000004" rx="0" ry="0" fill="#854d0e" stroke="#eab308" stroke-width="2px" />
+  <text x="581.5197499999999" y="1353.163" text-anchor="middle" font-size="13" font-weight="500" fill="#ffffff"><tspan x="581.5197499999999" dy="-3.9000000000000012">Deterministic Fallback</tspan><tspan x="581.5197499999999" dy="16.900000000000002">(Zero AI Verdict Authority)</tspan></text>
+</g>
+<g class="node" data-id="PENDING" data-label="Pending Suggestions Queue
+(pending_suggestions in SQLite)" data-shape="rectangle">
+  <rect x="519.1605" y="1428.063" width="231.64599999999996" height="53.800000000000004" rx="0" ry="0" fill="#854d0e" stroke="#eab308" stroke-width="2px" />
+  <text x="634.9834999999999" y="1454.9630000000002" text-anchor="middle" font-size="13" font-weight="500" fill="#ffffff"><tspan x="634.9834999999999" dy="-3.9000000000000012">Pending Suggestions Queue</tspan><tspan x="634.9834999999999" dy="16.900000000000002">(pending_suggestions in SQLite)</tspan></text>
+</g>
+<g class="node" data-id="PORTAL" data-label="Authorized Human Reviewer
+Approve / Correct / Reject" data-shape="diamond">
+  <polygon points="634.9834999999999,1529.8629999999998 750.9504999999999,1645.83 634.9834999999999,1761.797 519.0165,1645.83" fill="#854d0e" stroke="#eab308" stroke-width="2px" />
+  <text x="634.9834999999999" y="1645.83" text-anchor="middle" font-size="13" font-weight="500" fill="#ffffff"><tspan x="634.9834999999999" dy="-3.9000000000000012">Authorized Human Reviewer</tspan><tspan x="634.9834999999999" dy="16.900000000000002">Approve / Correct / Reject</tspan></text>
+</g>
+<g class="node" data-id="TRUSTED" data-label="Trusted Rule Library
+trusted_mappings (Learns Stored Rules, Not Weights)" data-shape="cylinder">
+  <rect x="599.8922499999999" y="1885.097" width="353.1699999999999" height="53.80000000000001" fill="#0f766e" stroke="none" />
+  <line x1="599.8922499999999" y1="1885.097" x2="599.8922499999999" y2="1938.897" stroke="#14b8a6" stroke-width="2px" />
+  <line x1="953.0622499999997" y1="1885.097" x2="953.0622499999997" y2="1938.897" stroke="#14b8a6" stroke-width="2px" />
+  <ellipse cx="776.4772499999998" cy="1938.897" rx="176.58499999999995" ry="7" fill="#0f766e" stroke="#14b8a6" stroke-width="2px" />
+  <ellipse cx="776.4772499999998" cy="1885.097" rx="176.58499999999995" ry="7" fill="#0f766e" stroke="#14b8a6" stroke-width="2px" />
+  <text x="776.4772499999998" y="1911.997" text-anchor="middle" font-size="13" font-weight="500" fill="#ffffff"><tspan x="776.4772499999998" dy="-3.9000000000000012">Trusted Rule Library</tspan><tspan x="776.4772499999998" dy="16.900000000000002">trusted_mappings (Learns Stored Rules, Not Weights)</tspan></text>
+</g>
+<g class="node" data-id="DISCARD" data-label="Discard &amp; Audit Log" data-shape="rectangle">
+  <rect x="415.0872499999999" y="1878.097" width="156.805" height="36.900000000000006" rx="0" ry="0" fill="#854d0e" stroke="#eab308" stroke-width="2px" />
+  <text x="493.48974999999996" y="1896.547" text-anchor="middle" font-size="13" font-weight="500" fill="#ffffff" dy="4.55">Discard &amp; Audit Log</text>
+</g>
+<g class="node" data-id="REG_REMED" data-label="Central Remediation Registry
+(BASELINE_REMEDIATION_REGISTRY - Display Only)" data-shape="rectangle">
+  <rect x="296.06850000000003" y="2698.297" width="364.28499999999985" height="53.800000000000004" rx="0" ry="0" fill="#7c2d12" stroke="#ea580c" stroke-width="2px" />
+  <text x="478.21099999999996" y="2725.197" text-anchor="middle" font-size="13" font-weight="500" fill="#ffffff"><tspan x="478.21099999999996" dy="-3.9000000000000012">Central Remediation Registry</tspan><tspan x="478.21099999999996" dy="16.900000000000002">(BASELINE_REMEDIATION_REGISTRY - Display Only)</tspan></text>
+</g>
+<g class="node" data-id="RESOLVE" data-label="Rule-to-Baseline Resolver
+(CIS &amp; STIG Map to Baseline Fixes)" data-shape="rectangle">
+  <rect x="356.8305" y="2596.497" width="242.76099999999994" height="53.800000000000004" rx="0" ry="0" fill="#7c2d12" stroke="#ea580c" stroke-width="2px" />
+  <text x="478.21099999999996" y="2623.397" text-anchor="middle" font-size="13" font-weight="500" fill="#ffffff"><tspan x="478.21099999999996" dy="-3.9000000000000012">Rule-to-Baseline Resolver</tspan><tspan x="478.21099999999996" dy="16.900000000000002">(CIS &amp; STIG Map to Baseline Fixes)</tspan></text>
+</g>
+<g class="node" data-id="DIFF" data-label="Static Conflict Analyzer
+Contradiction, Shadowing, Overlap Checks" data-shape="rectangle">
+  <rect x="332.3775" y="2800.0969999999998" width="291.6669999999999" height="53.800000000000004" rx="0" ry="0" fill="#7c2d12" stroke="#ea580c" stroke-width="2px" />
+  <text x="478.21099999999996" y="2826.997" text-anchor="middle" font-size="13" font-weight="500" fill="#ffffff"><tspan x="478.21099999999996" dy="-3.9000000000000012">Static Conflict Analyzer</tspan><tspan x="478.21099999999996" dy="16.900000000000002">Contradiction, Shadowing, Overlap Checks</tspan></text>
+</g>
+<g class="node" data-id="BLOCK" data-label="Append-Only Ledger Engine
+SHA-256 Hash Chaining: H(n) = SHA256(Block_n + H(n-1))" data-shape="rectangle">
+  <rect x="397.17575" y="2973.897" width="370.2129999999999" height="53.800000000000004" rx="0" ry="0" fill="#064e3b" stroke="#10b981" stroke-width="2px" />
+  <text x="582.28225" y="3000.797" text-anchor="middle" font-size="13" font-weight="500" fill="#ffffff"><tspan x="582.28225" dy="-3.9000000000000012">Append-Only Ledger Engine</tspan><tspan x="582.28225" dy="16.900000000000002">SHA-256 Hash Chaining: H(n) = SHA256(Block_n + H(n-1))</tspan></text>
+</g>
+<g class="node" data-id="DB" data-label="SQLite Audit Store
+audit_ledger Table" data-shape="cylinder">
+  <rect x="580.8145" y="3082.697" width="152.359" height="53.80000000000001" fill="#064e3b" stroke="none" />
+  <line x1="580.8145" y1="3082.697" x2="580.8145" y2="3136.4970000000003" stroke="#10b981" stroke-width="2px" />
+  <line x1="733.1735" y1="3082.697" x2="733.1735" y2="3136.4970000000003" stroke="#10b981" stroke-width="2px" />
+  <ellipse cx="656.9939999999999" cy="3136.4970000000003" rx="76.1795" ry="7" fill="#064e3b" stroke="#10b981" stroke-width="2px" />
+  <ellipse cx="656.9939999999999" cy="3082.697" rx="76.1795" ry="7" fill="#064e3b" stroke="#10b981" stroke-width="2px" />
+  <text x="656.9939999999999" y="3109.597" text-anchor="middle" font-size="13" font-weight="500" fill="#ffffff"><tspan x="656.9939999999999" dy="-3.9000000000000012">SQLite Audit Store</tspan><tspan x="656.9939999999999" dy="16.900000000000002">audit_ledger Table</tspan></text>
+</g>
+<g class="node" data-id="VERIFY" data-label="Cryptographic Non-Repudiation Verifier
+Instant Bit-Level Tamper Detection (&lt;1ms)" data-shape="rectangle">
+  <rect x="518.5704999999999" y="3191.497" width="276.847" height="53.800000000000004" rx="0" ry="0" fill="#064e3b" stroke="#10b981" stroke-width="2px" />
+  <text x="656.9939999999999" y="3218.397" text-anchor="middle" font-size="13" font-weight="500" fill="#ffffff"><tspan x="656.9939999999999" dy="-3.9000000000000012">Cryptographic Non-Repudiation Verifier</tspan><tspan x="656.9939999999999" dy="16.900000000000002">Instant Bit-Level Tamper Detection (&lt;1ms)</tspan></text>
+</g>
+<g class="node" data-id="REPORT_MODEL" data-label="Canonical Editable Report Model
+Immutable Verdicts vs Editable Commentary" data-shape="rectangle">
+  <rect x="205.16250000000005" y="3365.297" width="292.4079999999999" height="53.800000000000004" rx="0" ry="0" fill="#18181b" stroke="#71717a" stroke-width="2px" />
+  <text x="351.3665" y="3392.197" text-anchor="middle" font-size="13" font-weight="500" fill="#f4f4f5"><tspan x="351.3665" dy="-3.9000000000000012">Canonical Editable Report Model</tspan><tspan x="351.3665" dy="16.900000000000002">Immutable Verdicts vs Editable Commentary</tspan></text>
+</g>
+<g class="node" data-id="API" data-label="FastAPI REST &amp; Report API
+JWT RBAC: Viewer, Uploader, Reviewer" data-shape="rectangle">
+  <rect x="291.04499999999996" y="3467.097" width="276.847" height="53.800000000000004" rx="0" ry="0" fill="#18181b" stroke="#71717a" stroke-width="2px" />
+  <text x="429.46849999999995" y="3493.9970000000003" text-anchor="middle" font-size="13" font-weight="500" fill="#f4f4f5"><tspan x="429.46849999999995" dy="-3.9000000000000012">FastAPI REST &amp; Report API</tspan><tspan x="429.46849999999995" dy="16.900000000000002">JWT RBAC: Viewer, Uploader, Reviewer</tspan></text>
+</g>
+<g class="node" data-id="DOCS" data-label="Canonical Exporter (report_exporter.py)
+Certified PDF &amp; DOCX Dossiers" data-shape="rectangle">
+  <rect x="469.774" y="3568.897" width="280.552" height="53.800000000000004" rx="0" ry="0" fill="#18181b" stroke="#71717a" stroke-width="2px" />
+  <text x="610.05" y="3595.797" text-anchor="middle" font-size="13" font-weight="500" fill="#f4f4f5"><tspan x="610.05" dy="-3.9000000000000012">Canonical Exporter (report_exporter.py)</tspan><tspan x="610.05" dy="16.900000000000002">Certified PDF &amp; DOCX Dossiers</tspan></text>
+</g>
+<g class="node" data-id="UI" data-label="Role-Based Web Interface
+Viewer Dashboard | Uploader Batch | Reviewer Workspace" data-shape="rectangle">
+  <rect x="56" y="3568.897" width="385.77399999999994" height="53.800000000000004" rx="0" ry="0" fill="#18181b" stroke="#71717a" stroke-width="2px" />
+  <text x="248.88699999999997" y="3595.797" text-anchor="middle" font-size="13" font-weight="500" fill="#f4f4f5"><tspan x="248.88699999999997" dy="-3.9000000000000012">Role-Based Web Interface</tspan><tspan x="248.88699999999997" dy="16.900000000000002">Viewer Dashboard | Uploader Batch | Reviewer Workspace</tspan></text>
+</g>
+</svg>

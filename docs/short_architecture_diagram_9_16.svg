@@ -1,0 +1,275 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="100%" height="100%">
+  <defs>
+    <!-- Fonts -->
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap');
+      
+      .title { font-family: 'IBM Plex Sans', -apple-system, sans-serif; font-weight: 700; fill: #f8fafc; font-size: 38px; letter-spacing: -0.02em; }
+      .subtitle { font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 600; fill: #38bdf8; letter-spacing: 0.14em; text-transform: uppercase; }
+      .pill-text { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; }
+      .stage-tag { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+      .card-header { font-family: 'IBM Plex Sans', sans-serif; font-weight: 700; font-size: 24px; fill: #f8fafc; letter-spacing: -0.01em; }
+      .body-text { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; fill: #94a3b8; line-height: 1.5; }
+      .bullet-text { font-family: 'IBM Plex Mono', monospace; font-size: 14.5px; fill: #cbd5e1; }
+      .kpi-val { font-family: 'IBM Plex Mono', monospace; font-weight: 700; font-size: 28px; }
+      .kpi-lbl { font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; fill: #64748b; font-weight: 500; }
+    </style>
+
+    <!-- Gradients -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#06090e"/>
+      <stop offset="50%" stop-color="#0c121d"/>
+      <stop offset="100%" stop-color="#06090e"/>
+    </linearGradient>
+
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#131b29"/>
+      <stop offset="100%" stop-color="#0e1522"/>
+    </linearGradient>
+
+    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#fbbf24"/>
+    </linearGradient>
+
+    <linearGradient id="indigoGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4f46e5"/>
+      <stop offset="100%" stop-color="#818cf8"/>
+    </linearGradient>
+
+    <!-- Shadow -->
+    <filter id="cardShadow" x="-10%" y="-5%" width="120%" height="110%">
+      <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
+
+    <!-- Arrow Marker -->
+    <marker id="downArrow" viewBox="0 0 10 10" refX="5" refY="6" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 1 0 L 5 8 L 9 0 z" fill="#38bdf8" />
+    </marker>
+    <marker id="downArrowEmerald" viewBox="0 0 10 10" refX="5" refY="6" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 1 0 L 5 8 L 9 0 z" fill="#34d399" />
+    </marker>
+  </defs>
+
+  <!-- 9:16 Canvas Background -->
+  <rect width="1080" height="1920" fill="url(#bgGrad)"/>
+
+  <!-- Subtle Ambient Glow -->
+  <circle cx="200" cy="300" r="280" fill="#0284c7" opacity="0.04" filter="blur(60px)"/>
+  <circle cx="880" cy="1100" r="320" fill="#059669" opacity="0.04" filter="blur(60px)"/>
+  <circle cx="540" cy="1700" r="260" fill="#818cf8" opacity="0.04" filter="blur(60px)"/>
+
+  <!-- ==================== HEADER ==================== -->
+  <g transform="translate(70, 70)">
+    <text class="subtitle" x="0" y="26">NTRO PS26155 · High-Assurance Architecture</text>
+    <text class="title" x="0" y="74">System Architecture</text>
+    <text class="body-text" x="0" y="112" font-size="17px">AI-Driven Multi-Vendor Network Compliance Platform</text>
+    
+    <!-- Pills -->
+    <g transform="translate(0, 134)">
+      <!-- Pill 1 -->
+      <rect x="0" y="0" width="168" height="34" rx="8" fill="#064e3b" stroke="#059669" stroke-width="1.2"/>
+      <text class="pill-text" x="14" y="22" fill="#34d399">⚡ &lt;10ms Core</text>
+
+      <!-- Pill 2 -->
+      <rect x="180" y="0" width="180" height="34" rx="8" fill="#082f49" stroke="#0284c7" stroke-width="1.2"/>
+      <text class="pill-text" x="14" y="22" transform="translate(180, 0)" fill="#38bdf8">🔒 Air-Gapped</text>
+
+      <!-- Pill 3 -->
+      <rect x="372" y="0" width="170" height="34" rx="8" fill="#451a03" stroke="#d97706" stroke-width="1.2"/>
+      <text class="pill-text" x="14" y="22" transform="translate(372, 0)" fill="#fbbf24">🛡️ SHA-256</text>
+    </g>
+  </g>
+
+  <line x1="70" y1="265" x2="1010" y2="265" stroke="#1e293b" stroke-width="1.5"/>
+
+  <!-- ==================== STAGE 1: INGESTION ==================== -->
+  <g transform="translate(70, 290)">
+    <rect width="940" height="260" rx="16" fill="url(#cardGrad)" stroke="#1e293b" stroke-width="1.5" filter="url(#cardShadow)"/>
+    <rect x="0" y="0" width="6" height="260" rx="3" fill="url(#cyanGrad)"/>
+
+    <text class="stage-tag" x="34" y="44" fill="#38bdf8">Stage 01 · Ingestion Layer</text>
+    <text class="card-header" x="34" y="80">Multi-Vendor Configuration Ingest</text>
+    <text class="body-text" x="34" y="112">Parses raw device CLI across heterogeneous vendor equipment.</text>
+
+    <!-- Inner 2 Columns -->
+    <g transform="translate(34, 134)">
+      <!-- Left Box -->
+      <rect width="420" height="100" rx="8" fill="#0a0f17" stroke="#1e293b" stroke-width="1"/>
+      <text class="bullet-text" x="20" y="34" fill="#38bdf8">▸ Cisco IOS-XE</text>
+      <text class="body-text" x="175" y="34" font-size="13.5px">17.x CLI Text &amp; JSON</text>
+      
+      <text class="bullet-text" x="20" y="62" fill="#38bdf8">▸ Juniper Junos</text>
+      <text class="body-text" x="175" y="62" font-size="13.5px">Hierarchical Curly Syntax</text>
+      
+      <text class="bullet-text" x="20" y="90" fill="#38bdf8">▸ Arista EOS</text>
+      <text class="body-text" x="175" y="90" font-size="13.5px">Declarative CLI Dumps</text>
+
+      <!-- Right Box -->
+      <rect x="445" y="0" width="420" height="100" rx="8" fill="#0c1829" stroke="#0284c7" stroke-width="1"/>
+      <text class="stage-tag" x="465" y="32" fill="#38bdf8">VendorRegistry Dispatch</text>
+      <text class="body-text" x="465" y="58" font-size="13.5px">Automatic syntax heuristic profiling &amp;</text>
+      <text class="body-text" x="465" y="80" font-size="13.5px">zero-coupling adapter registration.</text>
+    </g>
+  </g>
+
+  <!-- Down Connector 1 -> 2 -->
+  <g transform="translate(540, 555)">
+    <line x1="0" y1="0" x2="0" y2="40" stroke="#38bdf8" stroke-width="3" stroke-dasharray="4,4" marker-end="url(#downArrow)"/>
+  </g>
+
+  <!-- ==================== STAGE 2: NORMALIZATION ==================== -->
+  <g transform="translate(70, 605)">
+    <rect width="940" height="290" rx="16" fill="url(#cardGrad)" stroke="#1e293b" stroke-width="1.5" filter="url(#cardShadow)"/>
+    <rect x="0" y="0" width="6" height="290" rx="3" fill="url(#indigoGrad)"/>
+
+    <text class="stage-tag" x="34" y="44" fill="#818cf8">Stage 02 · Normalization Layer</text>
+    <text class="card-header" x="34" y="80">Common Security Model (CSM JSON)</text>
+    <text class="body-text" x="34" y="112">Vendor-neutral schema eliminating M×N scanner combinatorial explosion.</text>
+
+    <!-- Schema Badges Grid -->
+    <g transform="translate(34, 134)">
+      <!-- Row 1 -->
+      <rect x="0" y="0" width="280" height="60" rx="8" fill="#0c111c" stroke="#1e293b" stroke-width="1"/>
+      <text class="bullet-text" x="16" y="28" fill="#c084fc">.services</text>
+      <text class="body-text" x="16" y="50" font-size="12.5px">SSH v2, Telnet off, HTTPS</text>
+
+      <rect x="295" y="0" width="280" height="60" rx="8" fill="#0c111c" stroke="#1e293b" stroke-width="1"/>
+      <text class="bullet-text" x="16" y="28" fill="#c084fc">.interfaces</text>
+      <text class="body-text" x="16" y="50" font-size="12.5px">Admin shut, unused ports</text>
+
+      <rect x="590" y="0" width="280" height="60" rx="8" fill="#0c111c" stroke="#1e293b" stroke-width="1"/>
+      <text class="bullet-text" x="16" y="28" fill="#c084fc">.aaa</text>
+      <text class="body-text" x="16" y="50" font-size="12.5px">Auth, TACACS+, RADIUS</text>
+
+      <!-- Row 2 -->
+      <rect x="0" y="74" width="280" height="60" rx="8" fill="#0c111c" stroke="#1e293b" stroke-width="1"/>
+      <text class="bullet-text" x="16" y="28" fill="#c084fc">.logging</text>
+      <text class="body-text" x="16" y="50" font-size="12.5px">Syslog host, traps, levels</text>
+
+      <rect x="295" y="74" width="280" height="60" rx="8" fill="#0c111c" stroke="#1e293b" stroke-width="1"/>
+      <text class="bullet-text" x="16" y="28" fill="#c084fc">.ntp</text>
+      <text class="body-text" x="16" y="50" font-size="12.5px">Peers, MD5/SHA authentication</text>
+
+      <rect x="590" y="74" width="280" height="60" rx="8" fill="#1f1406" stroke="#d97706" stroke-width="1"/>
+      <text class="bullet-text" x="16" y="28" fill="#fbbf24">unmapped_lines</text>
+      <text class="body-text" x="16" y="50" font-size="12.5px">Isolated for Advisory AI</text>
+    </g>
+  </g>
+
+  <!-- Down Connector 2 -> 3 -->
+  <g transform="translate(540, 900)">
+    <line x1="0" y1="0" x2="0" y2="40" stroke="#34d399" stroke-width="3" marker-end="url(#downArrowEmerald)"/>
+  </g>
+
+  <!-- ==================== STAGE 3: TWO-HEMISPHERE ENGINE ==================== -->
+  <g transform="translate(70, 950)">
+    <rect width="940" height="420" rx="16" fill="url(#cardGrad)" stroke="#1e293b" stroke-width="1.5" filter="url(#cardShadow)"/>
+    <rect x="0" y="0" width="6" height="420" rx="3" fill="url(#emeraldGrad)"/>
+
+    <text class="stage-tag" x="34" y="44" fill="#34d399">Stage 03 · Dual-Hemisphere Core</text>
+    <text class="card-header" x="34" y="80">Deterministic Compliance &amp; Advisory AI</text>
+    <text class="body-text" x="34" y="112">Strict separation of authoritative compliance logic from advisory assistance.</text>
+
+    <!-- Sub-Box A: Deterministic Core -->
+    <g transform="translate(34, 134)">
+      <rect width="872" height="126" rx="10" fill="#051f18" stroke="#059669" stroke-width="1.5"/>
+      <text class="stage-tag" x="24" y="32" fill="#34d399">HEMISPHERE A · DETERMINISTIC CORE (&lt;10ms)</text>
+      <text class="body-text" x="24" y="58" font-size="14px">Pure Python rule condition evaluation. Zero LLMs in PASS/FAIL decisions.</text>
+
+      <g transform="translate(24, 76)">
+        <rect x="0" y="0" width="250" height="34" rx="6" fill="#021410"/>
+        <text class="bullet-text" x="14" y="23" fill="#f8fafc">▸ CIS Benchmark v2.2.1</text>
+
+        <rect x="270" y="0" width="250" height="34" rx="6" fill="#021410"/>
+        <text class="bullet-text" x="14" y="23" fill="#f8fafc">▸ DISA-STIG NDM V3R7</text>
+
+        <rect x="540" y="0" width="280" height="34" rx="6" fill="#021410"/>
+        <text class="bullet-text" x="14" y="23" fill="#f8fafc">▸ NIST SP 800-53 rev5 CCIs</text>
+      </g>
+    </g>
+
+    <!-- Sub-Box B: Advisory AI + HITL -->
+    <g transform="translate(34, 276)">
+      <rect width="872" height="120" rx="10" fill="#1c1406" stroke="#d97706" stroke-width="1.5"/>
+      <text class="stage-tag" x="24" y="32" fill="#fbbf24">HEMISPHERE B · ADVISORY AI + HUMAN-IN-THE-LOOP (HITL)</text>
+      <text class="body-text" x="24" y="56" font-size="14px">Local DistilBERT / SLM parses unmapped lines; zero write-access without review.</text>
+
+      <g transform="translate(24, 72)">
+        <text class="bullet-text" x="0" y="22" fill="#fbbf24">1. Suggests Rule Mapping</text>
+        <text class="bullet-text" x="270" y="22" fill="#fbbf24">2. Human Reviewer Approves</text>
+        <text class="bullet-text" x="550" y="22" fill="#34d399">3. Active in trusted_mappings</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Down Connector 3 -> 4 -->
+  <g transform="translate(540, 1375)">
+    <line x1="0" y1="0" x2="0" y2="40" stroke="#38bdf8" stroke-width="3" marker-end="url(#downArrow)"/>
+  </g>
+
+  <!-- ==================== STAGE 4: PROOF & DELIVERABLES ==================== -->
+  <g transform="translate(70, 1425)">
+    <rect width="940" height="260" rx="16" fill="url(#cardGrad)" stroke="#1e293b" stroke-width="1.5" filter="url(#cardShadow)"/>
+    <rect x="0" y="0" width="6" height="260" rx="3" fill="url(#cyanGrad)"/>
+
+    <text class="stage-tag" x="34" y="44" fill="#38bdf8">Stage 04 · Trust &amp; Output Layer</text>
+    <text class="card-header" x="34" y="80">Cryptographic Ledger &amp; Deliverables</text>
+    <text class="body-text" x="34" y="112">Mathematical non-repudiation and executive compliance certification.</text>
+
+    <!-- Sub-Boxes -->
+    <g transform="translate(34, 134)">
+      <!-- Left: Ledger -->
+      <rect width="420" height="100" rx="8" fill="#051f18" stroke="#059669" stroke-width="1"/>
+      <text class="stage-tag" x="18" y="28" fill="#34d399">SHA-256 HASH-CHAINED LEDGER</text>
+      <text class="bullet-text" x="18" y="56" fill="#34d399">H(n) = SHA256(Block + H(n-1))</text>
+      <text class="body-text" x="18" y="82" font-size="13px">SQLite immutable store with instant tamper test</text>
+
+      <!-- Right: Deliverables -->
+      <rect x="445" y="0" width="420" height="100" rx="8" fill="#0a121f" stroke="#1e293b" stroke-width="1"/>
+      <text class="stage-tag" x="465" y="28" fill="#38bdf8">EXECUTIVE DELIVERABLES</text>
+      <text class="bullet-text" x="465" y="56">▸ PDF Certificates + Vector QR</text>
+      <text class="bullet-text" x="465" y="82">▸ FastAPI + React 18 Dashboard</text>
+    </g>
+  </g>
+
+  <!-- ==================== FOOTER / KPI BAR ==================== -->
+  <line x1="70" y1="1725" x2="1010" y2="1725" stroke="#1e293b" stroke-width="1.5"/>
+
+  <g transform="translate(70, 1755)">
+    <!-- KPI 1 -->
+    <g transform="translate(10, 0)">
+      <text class="kpi-val" x="0" y="30" fill="#38bdf8">3.2 ms</text>
+      <text class="kpi-lbl" x="0" y="56">Audit Latency / Device</text>
+    </g>
+
+    <!-- KPI 2 -->
+    <g transform="translate(260, 0)">
+      <text class="kpi-val" x="0" y="30" fill="#34d399">100%</text>
+      <text class="kpi-lbl" x="0" y="56">Deterministic Verdicts</text>
+    </g>
+
+    <!-- KPI 3 -->
+    <g transform="translate(500, 0)">
+      <text class="kpi-val" x="0" y="30" fill="#fbbf24">0 KB</text>
+      <text class="kpi-lbl" x="0" y="56">Outbound Egress (Air-Gap)</text>
+    </g>
+
+    <!-- KPI 4 -->
+    <g transform="translate(730, 0)">
+      <text class="kpi-val" x="0" y="30" fill="#c084fc">SHA-256</text>
+      <text class="kpi-lbl" x="0" y="56">Cryptographic Ledger</text>
+    </g>
+  </g>
+
+</svg>

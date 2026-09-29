@@ -307,3 +307,65 @@ export interface MultiFrameworkAuditResult {
   timestamp: string | null;
 }
 
+export interface VersionDeltaInfo {
+  status: 'comparable' | 'no_comparable_baseline';
+  reason?: string;
+  delta_score: number | null;
+  improved_count: number;
+  regressed_count: number;
+  unchanged_count: number;
+  newly_evaluated_count: number;
+  retired_count: number;
+  improved_rules: string[];
+  regressed_rules: string[];
+  unchanged_rules: string[];
+  newly_evaluated_rules: string[];
+  retired_rules: string[];
+}
+
+export interface ConfigurationProgressionAuditEntry {
+  entry_id: string;
+  session_id?: string;
+  timestamp: string;
+  device_hostname: string;
+  config_file_hash: string;
+  audit_results: Record<string, string>;
+  remediation_summary: any;
+  prevEntryHash: string;
+  entryHash: string;
+  has_canonical_report?: boolean;
+  report_id?: string | null;
+  pass_count: number;
+  fail_count: number;
+  unknown_count: number;
+  total_controls: number;
+  is_evaluated: boolean;
+  compliance_score: number | null;
+}
+
+export interface ConfigurationVersionNode {
+  version_id: string;
+  config_hash: string;
+  device_hostname: string;
+  first_audited: string;
+  latest_audited: string;
+  audit_count: number;
+  latest_compliance_score: number | null;
+  pass_count: number;
+  fail_count: number;
+  unknown_count: number;
+  total_controls: number;
+  is_evaluated: boolean;
+  latest_audit_is_evaluated?: boolean;
+  latest_evaluated_entry_id?: string | null;
+  audit_entries: ConfigurationProgressionAuditEntry[];
+  delta_from_previous: VersionDeltaInfo | null;
+}
+
+export interface ConfigurationProgressionResponse {
+  versions: ConfigurationVersionNode[];
+  total_versions: number;
+  total_audits: number;
+  device_hostname: string | null;
+}
+

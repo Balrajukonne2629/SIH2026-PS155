@@ -3,7 +3,7 @@
  * Endpoints at http://127.0.0.1:8000
  */
 
-import type { LoginResponse, UserIdentity, ModelStatus, ModelModeUpdateRequest, ModelModeUpdateResponse, TrustedMappingItem, SuggestionQueueItem, FrameworksListResponse, MultiFrameworkAuditResult, AuditLedgerItem, AuditSessionSummary, AuditWorkflowStatus } from './types';
+import type { LoginResponse, UserIdentity, ModelStatus, ModelModeUpdateRequest, ModelModeUpdateResponse, TrustedMappingItem, SuggestionQueueItem, FrameworksListResponse, MultiFrameworkAuditResult, AuditLedgerItem, AuditSessionSummary, AuditWorkflowStatus, ConfigurationProgressionResponse } from './types';
 
 // Use relative path '' so Vite dev proxy forwards /api -> http://127.0.0.1:8000
 export const API_BASE = '';
@@ -390,5 +390,13 @@ export async function exportCanonicalReportBlob(
     throw new ApiError(res.status, msg);
   }
   return res.blob();
+}
+
+// 18. GET /api/configurations/progression — Chronological configuration progression
+export async function getConfigurationProgression(deviceHostname?: string): Promise<ConfigurationProgressionResponse> {
+  const params = new URLSearchParams();
+  if (deviceHostname) params.append('device_hostname', deviceHostname);
+  const qs = params.toString() ? `?${params.toString()}` : '';
+  return request<ConfigurationProgressionResponse>(`/api/configurations/progression${qs}`);
 }
 

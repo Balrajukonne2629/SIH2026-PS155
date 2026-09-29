@@ -1,0 +1,458 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="100%" height="100%">
+  <defs>
+    <!-- Fonts -->
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap');
+      
+      .title { font-family: 'IBM Plex Sans', -apple-system, sans-serif; font-weight: 700; fill: #f8fafc; font-size: 28px; letter-spacing: -0.02em; }
+      .subtitle { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; fill: #38bdf8; letter-spacing: 0.12em; text-transform: uppercase; }
+      .pill-text { font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; font-weight: 600; }
+      .card-header { font-family: 'IBM Plex Sans', sans-serif; font-weight: 700; font-size: 16px; fill: #f8fafc; }
+      .card-sub { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+      .body-text { font-family: 'IBM Plex Sans', sans-serif; font-size: 12px; fill: #94a3b8; line-height: 1.4; }
+      .bullet-text { font-family: 'IBM Plex Mono', monospace; font-size: 11px; fill: #cbd5e1; }
+      .kpi-num { font-family: 'IBM Plex Mono', monospace; font-weight: 700; font-size: 20px; }
+      .kpi-label { font-family: 'IBM Plex Sans', sans-serif; font-size: 11px; fill: #64748b; font-weight: 500; }
+      .tag-text { font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; font-weight: 600; }
+    </style>
+
+    <!-- Gradients -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#080b11"/>
+      <stop offset="50%" stop-color="#0d131f"/>
+      <stop offset="100%" stop-color="#080b11"/>
+    </linearGradient>
+
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#141c2b"/>
+      <stop offset="100%" stop-color="#0f1724"/>
+    </linearGradient>
+
+    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#fbbf24"/>
+    </linearGradient>
+
+    <linearGradient id="indigoGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4f46e5"/>
+      <stop offset="100%" stop-color="#818cf8"/>
+    </linearGradient>
+
+    <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#c2410c"/>
+      <stop offset="100%" stop-color="#fb923c"/>
+    </linearGradient>
+
+    <!-- Filters -->
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+
+    <!-- Arrow Markers -->
+    <marker id="arrow-cyan" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#38bdf8"/>
+    </marker>
+    <marker id="arrow-indigo" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#818cf8"/>
+    </marker>
+    <marker id="arrow-emerald" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#34d399"/>
+    </marker>
+    <marker id="arrow-amber" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#fbbf24"/>
+    </marker>
+    <marker id="arrow-orange" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#fb923c"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1600" height="900" fill="url(#bgGrad)"/>
+
+  <!-- Subtle Blueprint Tech Grid -->
+  <g opacity="0.04" stroke="#38bdf8" stroke-width="1">
+    <line x1="0" y1="120" x2="1600" y2="120"/>
+    <line x1="0" y1="450" x2="1600" y2="450"/>
+    <line x1="0" y1="780" x2="1600" y2="780"/>
+    <line x1="410" y1="0" x2="410" y2="900"/>
+    <line x1="810" y1="0" x2="810" y2="900"/>
+    <line x1="1210" y1="0" x2="1210" y2="900"/>
+  </g>
+
+  <!-- ==================== HEADER ZONE (16:9) ==================== -->
+  <g transform="translate(60, 40)">
+    <text class="subtitle" x="0" y="20">NTRO PS26155 · High-Assurance Architecture · PRD v7.0</text>
+    <text class="title" x="0" y="56">AI-Driven Multi-Vendor Compliance Auditor: 7-Layer Pipeline</text>
+    
+    <!-- Top Status Badges -->
+    <g transform="translate(970, 24)">
+      <!-- Pill 1: Deterministic -->
+      <rect x="0" y="0" width="118" height="28" rx="6" fill="#064e3b" stroke="#059669" stroke-width="1.2" opacity="0.9"/>
+      <text class="pill-text" x="10" y="19" fill="#34d399">⚡ &lt;10ms Core</text>
+
+      <!-- Pill 2: Air-Gapped -->
+      <rect x="128" y="0" width="134" height="28" rx="6" fill="#082f49" stroke="#0284c7" stroke-width="1.2" opacity="0.9"/>
+      <text class="pill-text" x="138" y="19" fill="#38bdf8">🔒 AST Air-Gapped</text>
+
+      <!-- Pill 3: Non-Repudiation -->
+      <rect x="272" y="0" width="128" height="28" rx="6" fill="#451a03" stroke="#d97706" stroke-width="1.2" opacity="0.9"/>
+      <text class="pill-text" x="282" y="19" fill="#fbbf24">🛡️ SHA-256 Block</text>
+
+      <!-- Pill 4: Zero AI Verdicts -->
+      <rect x="410" y="0" width="140" height="28" rx="6" fill="#312e81" stroke="#6366f1" stroke-width="1.2" opacity="0.9"/>
+      <text class="pill-text" x="420" y="19" fill="#a5b4fc">⚖️ 0% AI Verdicts</text>
+    </g>
+  </g>
+
+  <line x1="60" y1="115" x2="1540" y2="115" stroke="#1e293b" stroke-width="1.5"/>
+
+  <!-- ==================== TOP ROW: AUTHORITATIVE PIPELINE ==================== -->
+
+  <!-- ===== 1. INGESTION & VENDOR DETECTION (Col 1, Row 1) ===== -->
+  <g transform="translate(60, 135)">
+    <rect width="335" height="315" rx="12" fill="url(#cardGrad)" stroke="#1e293b" stroke-width="1.5" filter="url(#cardShadow)"/>
+    <rect x="0" y="0" width="335" height="4" rx="2" fill="url(#cyanGrad)"/>
+    
+    <text class="card-sub" x="20" y="28" fill="#38bdf8">LAYER 1 &amp; 2 · INGESTION &amp; DETECTION</text>
+    <text class="card-header" x="20" y="54">Guarded Ingest &amp; Adapters</text>
+    <text class="body-text" x="20" y="74">Multi-format in-memory upload with AST safety.</text>
+
+    <!-- Sub-Block A: Ingestion Formats -->
+    <g transform="translate(16, 92)">
+      <rect width="303" height="96" rx="7" fill="#0b1019" stroke="#1e293b" stroke-width="1"/>
+      <text class="card-sub" x="12" y="20" fill="#64748b">UNIFIED INGESTION (AST-GUARDED)</text>
+      
+      <circle cx="18" cy="42" r="3.5" fill="#38bdf8"/>
+      <text class="bullet-text" x="30" y="46">Single File (.cfg / .txt / .conf)</text>
+      
+      <circle cx="18" cy="65" r="3.5" fill="#38bdf8"/>
+      <text class="bullet-text" x="30" y="69">Multi-File Batch (POST /bulk)</text>
+
+      <circle cx="18" cy="86" r="3.5" fill="#38bdf8"/>
+      <text class="bullet-text" x="30" y="90">Guarded ZIP (Zip-bomb &amp; traversal safe)</text>
+    </g>
+
+    <!-- Sub-Block B: Vendor Adapters -->
+    <g transform="translate(16, 198)">
+      <rect width="303" height="100" rx="7" fill="#0b1019" stroke="#1e293b" stroke-width="1"/>
+      <text class="card-sub" x="12" y="20" fill="#64748b">FAIL-CLOSED VENDOR ADAPTERS</text>
+      
+      <rect x="12" y="32" width="64" height="22" rx="4" fill="#0c2338" stroke="#0284c7" stroke-width="0.8"/>
+      <text class="tag-text" x="18" y="47" fill="#38bdf8">Cisco XE</text>
+
+      <rect x="82" y="32" width="62" height="22" rx="4" fill="#0c2338" stroke="#0284c7" stroke-width="0.8"/>
+      <text class="tag-text" x="88" y="47" fill="#38bdf8">Junos</text>
+
+      <rect x="150" y="32" width="68" height="22" rx="4" fill="#0c2338" stroke="#0284c7" stroke-width="0.8"/>
+      <text class="tag-text" x="156" y="47" fill="#38bdf8">EOS (reuse)</text>
+
+      <rect x="224" y="32" width="66" height="22" rx="4" fill="#0c2338" stroke="#0284c7" stroke-width="0.8"/>
+      <text class="tag-text" x="230" y="47" fill="#38bdf8">PAN-OS</text>
+
+      <text class="body-text" x="12" y="78" font-size="11.5px">AST Safety Test: 0 Sockets · 0 Subprocesses</text>
+      <text class="body-text" x="12" y="93" font-size="11.5px" fill="#38bdf8">Zero Netmiko / Zero Live Paramiko</text>
+    </g>
+  </g>
+
+  <!-- Flow Connector 1 -> 2 -->
+  <g transform="translate(395, 292)">
+    <line x1="5" y1="0" x2="35" y2="0" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#arrow-cyan)"/>
+  </g>
+
+  <!-- ===== 2. NORMALIZATION & IDENTITY (Col 2, Row 1) ===== -->
+  <g transform="translate(440, 135)">
+    <rect width="335" height="315" rx="12" fill="url(#cardGrad)" stroke="#1e293b" stroke-width="1.5" filter="url(#cardShadow)"/>
+    <rect x="0" y="0" width="335" height="4" rx="2" fill="url(#indigoGrad)"/>
+    
+    <text class="card-sub" x="20" y="28" fill="#818cf8">LAYER 3 · NORMALIZATION &amp; IDENTITY</text>
+    <text class="card-header" x="20" y="54">Common Security Model</text>
+    <text class="body-text" x="20" y="74">Normalizes heterogeneous configuration into CSM.</text>
+
+    <!-- Sub-Block A: CSM Facets -->
+    <g transform="translate(16, 92)">
+      <rect width="303" height="118" rx="7" fill="#0b1019" stroke="#1e293b" stroke-width="1"/>
+      <text class="card-sub" x="12" y="20" fill="#64748b">CANONICAL CSM SCHEMA v7</text>
+      
+      <text class="bullet-text" x="14" y="42" fill="#c084fc">.interfaces</text>
+      <text class="body-text" x="96" y="42" font-size="11.5px">Admin shutdown, unrouted ports</text>
+
+      <text class="bullet-text" x="14" y="64" fill="#c084fc">.services</text>
+      <text class="body-text" x="96" y="64" font-size="11.5px">SSH v2, Telnet off, HTTPS server</text>
+
+      <text class="bullet-text" x="14" y="86" fill="#c084fc">.aaa / .log</text>
+      <text class="body-text" x="96" y="86" font-size="11.5px">TACACS+, Syslog traps, buffers</text>
+
+      <text class="bullet-text" x="14" y="108" fill="#c084fc">.ntp / .snmp</text>
+      <text class="body-text" x="96" y="108" font-size="11.5px">Auth peers, v3 SHA/AES users</text>
+    </g>
+
+    <!-- Sub-Block B: Device Identity -->
+    <g transform="translate(16, 220)">
+      <rect width="303" height="78" rx="7" fill="#0f172a" stroke="#334155" stroke-width="1"/>
+      <text class="card-sub" x="12" y="20" fill="#38bdf8">DEVICE IDENTITY EXTRACTION</text>
+      <text class="bullet-text" x="12" y="42" fill="#cbd5e1">Serial · Hardware Model · OS Version</text>
+      <text class="bullet-text" x="12" y="62" fill="#38bdf8">Management IP <tspan fill="#64748b">(Loopback0/Mgmt)</tspan></text>
+      <text class="tag-text" x="200" y="62" fill="#94a3b8">"Not In Config"</text>
+    </g>
+  </g>
+
+  <!-- Flow Connector 2 -> 3 -->
+  <g transform="translate(775, 292)">
+    <line x1="5" y1="0" x2="35" y2="0" stroke="#818cf8" stroke-width="2.5" marker-end="url(#arrow-indigo)"/>
+  </g>
+
+  <!-- ===== 3. DETERMINISTIC ENGINE (Col 3, Row 1) ===== -->
+  <g transform="translate(820, 135)">
+    <rect width="355" height="315" rx="12" fill="url(#cardGrad)" stroke="#1e293b" stroke-width="1.5" filter="url(#cardShadow)"/>
+    <rect x="0" y="0" width="355" height="4" rx="2" fill="url(#emeraldGrad)"/>
+    
+    <text class="card-sub" x="20" y="28" fill="#34d399">LAYER 4 · DETERMINISTIC COMPLIANCE</text>
+    <text class="card-header" x="20" y="54">Multi-Framework Evaluator</text>
+    <text class="body-text" x="20" y="74">Pure Python logic · Zero LLM hallucination in verdicts.</text>
+
+    <!-- Sub-Block A: Baseline & Native -->
+    <g transform="translate(16, 92)">
+      <rect width="323" height="106" rx="7" fill="#051912" stroke="#059669" stroke-width="1"/>
+      <text class="card-sub" x="12" y="20" fill="#34d399">NATIVE BENCHMARK EVALUATORS</text>
+      
+      <circle cx="18" cy="40" r="3.5" fill="#34d399"/>
+      <text class="bullet-text" x="30" y="44">Vendor Baseline Rules (Cisco 10, Junos 10)</text>
+
+      <circle cx="18" cy="64" r="3.5" fill="#34d399"/>
+      <text class="bullet-text" x="30" y="68">CIS Benchmark v2.2.1 (7 Controls)</text>
+
+      <circle cx="18" cy="88" r="3.5" fill="#34d399"/>
+      <text class="bullet-text" x="30" y="92">DISA-STIG NDM V3R7 (10 Controls)</text>
+    </g>
+
+    <!-- Sub-Block B: Crosswalk Engine -->
+    <g transform="translate(16, 208)">
+      <rect width="323" height="90" rx="7" fill="#0b1019" stroke="#1e293b" stroke-width="1"/>
+      <text class="card-sub" x="12" y="20" fill="#818cf8">CROSSWALK EVALUATOR (NEW v7)</text>
+      <text class="bullet-text" x="12" y="42" fill="#f8fafc">▸ NIST SP 800-53 rev5 CCIs</text>
+      <text class="bullet-text" x="12" y="62" fill="#f8fafc">▸ ISO/IEC 27001:2022 Controls</text>
+      <text class="tag-text" x="12" y="80" fill="#fbbf24">Rollup: FAIL &gt; UNKNOWN &gt; PASS | NOT_ASSESSED</text>
+    </g>
+  </g>
+
+  <!-- Flow Connector 3 -> 4 -->
+  <g transform="translate(1175, 292)">
+    <line x1="5" y1="0" x2="35" y2="0" stroke="#34d399" stroke-width="2.5" marker-end="url(#arrow-emerald)"/>
+  </g>
+
+  <!-- ===== 4. REMEDIATION & CONFLICT (Col 4, Row 1) ===== -->
+  <g transform="translate(1220, 135)">
+    <rect width="320" height="315" rx="12" fill="url(#cardGrad)" stroke="#1e293b" stroke-width="1.5" filter="url(#cardShadow)"/>
+    <rect x="0" y="0" width="320" height="4" rx="2" fill="url(#orangeGrad)"/>
+    
+    <text class="card-sub" x="20" y="28" fill="#fb923c">LAYER 5 · REMEDIATION &amp; SAFETY</text>
+    <text class="card-header" x="20" y="54">Central Remediation</text>
+    <text class="body-text" x="20" y="74">Central registry · Strictly display-only preview.</text>
+
+    <!-- Sub-Block A: Central Registry -->
+    <g transform="translate(16, 92)">
+      <rect width="288" height="106" rx="7" fill="#180e05" stroke="#ea580c" stroke-width="1"/>
+      <text class="card-sub" x="12" y="20" fill="#fb923c">BASELINE REMEDIATION REGISTRY</text>
+      <text class="bullet-text" x="12" y="42" fill="#f8fafc">Keyed by baseline rule ID</text>
+      <text class="bullet-text" x="12" y="64" fill="#fb923c">CIS &amp; STIG resolve to baseline</text>
+      <text class="bullet-text" x="12" y="86" fill="#94a3b8">Jinja templates fully retired (v7)</text>
+    </g>
+
+    <!-- Sub-Block B: Static Conflict -->
+    <g transform="translate(16, 208)">
+      <rect width="288" height="90" rx="7" fill="#0b1019" stroke="#1e293b" stroke-width="1"/>
+      <text class="card-sub" x="12" y="20" fill="#64748b">STATIC CONFLICT ANALYZER</text>
+      <text class="body-text" x="12" y="42" font-size="11px">Taxonomy: Contradiction, Shadowing,</text>
+      <text class="body-text" x="12" y="58" font-size="11px">Overlap, Redundancy (NTP checks)</text>
+      <text class="bullet-text" x="12" y="78" fill="#34d399">✓ 100% Display-Only · 0 Execution</text>
+    </g>
+  </g>
+
+
+  <!-- ==================== VERTICAL & CROSS-ROW CONNECTORS ==================== -->
+
+  <!-- Unmapped Lines: From Col 2 (CSM) Down to Col 1-2 Lower (AI) -->
+  <path d="M 607 450 L 607 475 L 227 475 L 227 500" fill="none" stroke="#fbbf24" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrow-amber)"/>
+  <rect x="360" y="465" width="130" height="20" rx="4" fill="#1c1608" stroke="#d97706" stroke-width="0.8"/>
+  <text class="card-sub" x="368" y="479" fill="#fbbf24">UNMAPPED SYNTAX</text>
+
+  <!-- Compliance Verdicts & Fixes to Audit Ledger & Presentation -->
+  <path d="M 997 450 L 997 500" fill="none" stroke="#34d399" stroke-width="2" marker-end="url(#arrow-emerald)"/>
+  <path d="M 1380 450 L 1380 500" fill="none" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow-cyan)"/>
+
+
+  <!-- ==================== BOTTOM ROW: TRUST, PROOF & RBAC ==================== -->
+
+  <!-- ===== 5. ADVISORY AI & HITL LOOP (Col 1 & 2 Lower) ===== -->
+  <g transform="translate(60, 510)">
+    <rect width="520" height="260" rx="12" fill="url(#cardGrad)" stroke="#1e293b" stroke-width="1.5" filter="url(#cardShadow)"/>
+    <rect x="0" y="0" width="520" height="4" rx="2" fill="url(#amberGrad)"/>
+    
+    <text class="card-sub" x="20" y="26" fill="#fbbf24">LAYER 6 · ADVISORY AI &amp; HUMAN-IN-THE-LOOP (HITL) WORKFLOW</text>
+    <text class="card-header" x="20" y="50">Local AI Interpretation &amp; Trusted Rule Library</text>
+    <text class="body-text" x="20" y="70">AI interprets novel syntax · Human approves · System learns stored rules, not weights.</text>
+
+    <!-- Sub-Panel 1: Advisory Inference -->
+    <g transform="translate(16, 84)">
+      <rect width="235" height="158" rx="7" fill="#1c1608" stroke="#d97706" stroke-width="1"/>
+      <text class="card-sub" x="12" y="20" fill="#fbbf24">LOCAL ADVISORY INFERENCE</text>
+      
+      <circle cx="18" cy="42" r="3" fill="#fbbf24"/>
+      <text class="bullet-text" x="28" y="46">DistilBERT (Mapping Similarity)</text>
+      
+      <circle cx="18" cy="66" r="3" fill="#fbbf24"/>
+      <text class="bullet-text" x="28" y="70">Ollama SLM (Llama 3.2 / Qwen 2.5)</text>
+
+      <circle cx="18" cy="90" r="3" fill="#fbbf24"/>
+      <text class="bullet-text" x="28" y="94">4 Modes: Auto, Fast, Quality, Det</text>
+
+      <rect x="12" y="110" width="211" height="36" rx="4" fill="#0f0c05"/>
+      <text class="tag-text" x="18" y="125" fill="#f8fafc">Deterministic Fallback:</text>
+      <text class="tag-text" x="18" y="138" fill="#94a3b8">Ollama Refusal → Template Fallback</text>
+    </g>
+
+    <!-- Sub-Panel 2: HITL Review & Stored Library -->
+    <g transform="translate(265, 84)">
+      <rect width="238" height="158" rx="7" fill="#0b1019" stroke="#1e293b" stroke-width="1"/>
+      <text class="card-sub" x="12" y="20" fill="#64748b">HUMAN REVIEW &amp; RULE STORE</text>
+      
+      <rect x="12" y="32" width="214" height="48" rx="5" fill="#161f30" stroke="#0284c7" stroke-width="0.8"/>
+      <text class="tag-text" x="18" y="48" fill="#38bdf8">1. Pending Suggestions Queue</text>
+      <text class="bullet-text" x="18" y="66" fill="#f8fafc">Approve · Correct · Reject</text>
+
+      <rect x="12" y="88" width="214" height="58" rx="5" fill="#051912" stroke="#059669" stroke-width="0.8"/>
+      <text class="tag-text" x="18" y="104" fill="#34d399">2. Trusted Rule Library</text>
+      <text class="bullet-text" x="18" y="122" fill="#cbd5e1">Saved to trusted_mappings</text>
+      <text class="tag-text" x="18" y="137" fill="#34d399">→ Auto-injected to Future Audits</text>
+    </g>
+  </g>
+
+  <!-- Dynamic Feedback Loop: From Trusted Rule Library Back Up to Engine -->
+  <path d="M 580 635 L 795 635 L 795 380 L 820 380" fill="none" stroke="#34d399" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrow-emerald)"/>
+  <rect x="620" y="625" width="160" height="20" rx="4" fill="#051912" stroke="#059669" stroke-width="0.8"/>
+  <text class="card-sub" x="626" y="639" fill="#34d399">APPLY TO LATER AUDITS</text>
+
+
+  <!-- ===== 6. CRYPTOGRAPHIC PROOF (Col 3 Lower) ===== -->
+  <g transform="translate(605, 510)">
+    <rect width="375" height="260" rx="12" fill="url(#cardGrad)" stroke="#1e293b" stroke-width="1.5" filter="url(#cardShadow)"/>
+    <rect x="0" y="0" width="375" height="4" rx="2" fill="url(#emeraldGrad)"/>
+    
+    <text class="card-sub" x="20" y="26" fill="#34d399">LAYER 7 · CRYPTOGRAPHIC AUDIT LEDGER</text>
+    <text class="card-header" x="20" y="50">Mathematical Non-Repudiation</text>
+    <text class="body-text" x="20" y="70">SHA-256 hash-chained immutable audit ledger in SQLite.</text>
+
+    <!-- Sub-Box: Hash Chain Structure -->
+    <g transform="translate(16, 84)">
+      <rect width="343" height="158" rx="7" fill="#051912" stroke="#059669" stroke-width="1"/>
+      <text class="card-sub" x="12" y="20" fill="#34d399">CHAIN FORMULA &amp; INTEGRITY</text>
+      
+      <rect x="12" y="32" width="319" height="34" rx="4" fill="#02100b"/>
+      <text class="bullet-text" x="18" y="53" fill="#34d399">H(n) = SHA256( Block_n + H(n-1) )</text>
+
+      <text class="bullet-text" x="12" y="86" fill="#f8fafc">▸ Canonical JSON deterministic ordering</text>
+      <text class="bullet-text" x="12" y="106" fill="#f8fafc">▸ Instant bit-level tamper test (&lt;1ms)</text>
+      <text class="bullet-text" x="12" y="126" fill="#f8fafc">▸ Historical seals preserved across updates</text>
+      
+      <rect x="12" y="134" width="319" height="16" fill="none"/>
+      <text class="tag-text" x="12" y="146" fill="#64748b">Protected Tables: audit_ledger · audit_reports · audit_edits</text>
+    </g>
+  </g>
+
+  <!-- Flow Connector 6 -> 7 -->
+  <g transform="translate(985, 635)">
+    <line x1="5" y1="0" x2="25" y2="0" stroke="#34d399" stroke-width="2" marker-end="url(#arrow-emerald)"/>
+  </g>
+
+  <!-- ===== 7. CANONICAL REPORTING & RBAC (Col 4 Lower) ===== -->
+  <g transform="translate(1015, 510)">
+    <rect width="525" height="260" rx="12" fill="url(#cardGrad)" stroke="#1e293b" stroke-width="1.5" filter="url(#cardShadow)"/>
+    <rect x="0" y="0" width="525" height="4" rx="2" fill="url(#cyanGrad)"/>
+    
+    <text class="card-sub" x="20" y="26" fill="#38bdf8">LAYER 8 · CANONICAL REPORTING &amp; RBAC</text>
+    <text class="card-header" x="20" y="50">Report API &amp; Role-Isolated Surfaces</text>
+    <text class="body-text" x="20" y="70">One canonical editable report data model with certified export.</text>
+
+    <!-- Sub-Box 1: Canonical Report Engine -->
+    <g transform="translate(16, 84)">
+      <rect width="238" height="158" rx="7" fill="#0b1019" stroke="#1e293b" stroke-width="1"/>
+      <text class="card-sub" x="12" y="20" fill="#38bdf8">CANONICAL REPORT API</text>
+      
+      <text class="bullet-text" x="12" y="40" fill="#f8fafc">GET / PATCH /api/reports/{id}</text>
+      <text class="body-text" x="12" y="58" font-size="11.5px"><tspan fill="#34d399">Immutable:</tspan> Verdicts, Evidence, Hashes</text>
+      <text class="body-text" x="12" y="74" font-size="11.5px"><tspan fill="#fbbf24">Editable:</tspan> Exec Summary, Notes</text>
+
+      <rect x="12" y="86" width="214" height="60" rx="4" fill="#082f49" stroke="#0284c7" stroke-width="0.8"/>
+      <text class="tag-text" x="18" y="104" fill="#38bdf8">Canonical Exporter:</text>
+      <text class="bullet-text" x="18" y="122" fill="#f8fafc">report_exporter.py</text>
+      <text class="tag-text" x="18" y="137" fill="#94a3b8">Certified PDF + DOCX Export</text>
+    </g>
+
+    <!-- Sub-Box 2: 3-Role RBAC Surfaces -->
+    <g transform="translate(268, 84)">
+      <rect width="241" height="158" rx="7" fill="#0b1019" stroke="#1e293b" stroke-width="1"/>
+      <text class="card-sub" x="12" y="20" fill="#64748b">ROLE-BASED UX SURFACES (JWT)</text>
+      
+      <!-- Viewer -->
+      <rect x="10" y="30" width="221" height="34" rx="4" fill="#141c2b" stroke="#334155" stroke-width="0.8"/>
+      <text class="tag-text" x="16" y="46" fill="#38bdf8">VIEWER:</text>
+      <text class="bullet-text" x="65" y="46" fill="#cbd5e1">Read-only Compliance KPI</text>
+      <text class="body-text" x="16" y="59" font-size="10px">No AI, no remediation, no diagnostics</text>
+
+      <!-- Uploader -->
+      <rect x="10" y="72" width="221" height="34" rx="4" fill="#141c2b" stroke="#334155" stroke-width="0.8"/>
+      <text class="tag-text" x="16" y="88" fill="#fbbf24">UPLOADER:</text>
+      <text class="bullet-text" x="78" y="88" fill="#cbd5e1">Upload &amp; Batch History</text>
+      <text class="body-text" x="16" y="101" font-size="10px">Per-file status &amp; score cards</text>
+
+      <!-- Reviewer -->
+      <rect x="10" y="114" width="221" height="34" rx="4" fill="#141c2b" stroke="#334155" stroke-width="0.8"/>
+      <text class="tag-text" x="16" y="130" fill="#34d399">REVIEWER:</text>
+      <text class="bullet-text" x="78" y="130" fill="#cbd5e1">Full Audit Workspace</text>
+      <text class="body-text" x="16" y="143" font-size="10px">Queue, AI Review, Remediation, Edits</text>
+    </g>
+  </g>
+
+
+  <!-- ==================== FOOTER KPI ZONE (16:9) ==================== -->
+  <g transform="translate(60, 795)">
+    <!-- KPI 1 -->
+    <g transform="translate(0, 0)">
+      <rect width="335" height="70" rx="8" fill="#0f1724" stroke="#1e293b" stroke-width="1"/>
+      <text class="kpi-num" x="20" y="34" fill="#38bdf8">3.2 ms</text>
+      <text class="kpi-label" x="20" y="54">Core Evaluation Latency / Device</text>
+    </g>
+
+    <!-- KPI 2 -->
+    <g transform="translate(365, 0)">
+      <rect width="365" height="70" rx="8" fill="#0f1724" stroke="#1e293b" stroke-width="1"/>
+      <text class="kpi-num" x="20" y="34" fill="#34d399">100% Deterministic</text>
+      <text class="kpi-label" x="20" y="54">Authoritative Compliance Rules (0% AI Verdicts)</text>
+    </g>
+
+    <!-- KPI 3 -->
+    <g transform="translate(760, 0)">
+      <rect width="345" height="70" rx="8" fill="#0f1724" stroke="#1e293b" stroke-width="1"/>
+      <text class="kpi-num" x="20" y="34" fill="#fbbf24">0 KB Outbound</text>
+      <text class="kpi-label" x="20" y="54">Strict Air-Gap Sovereign Network Isolation</text>
+    </g>
+
+    <!-- KPI 4 -->
+    <g transform="translate(1135, 0)">
+      <rect width="345" height="70" rx="8" fill="#0f1724" stroke="#1e293b" stroke-width="1"/>
+      <text class="kpi-num" x="20" y="34" fill="#a855f7">SHA-256 Chained</text>
+      <text class="kpi-label" x="20" y="54">Mathematical Non-Repudiation &amp; Bit-Level Verification</text>
+    </g>
+  </g>
+
+</svg>

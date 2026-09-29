@@ -205,8 +205,8 @@ def test_d_compliance_evaluate_api_with_raw_config(uploader_token):
 def test_e_unsupported_vendor_raises_in_ingest():
     """Test E1: Explicit unsupported vendor raises UnsupportedVendorError."""
     with pytest.raises(UnsupportedVendorError) as exc_info:
-        ingest_configuration("hostname RTR-01", vendor="fortinet")
-    assert "Vendor 'fortinet' is not supported" in str(exc_info.value)
+        ingest_configuration("hostname RTR-01", vendor="f5")
+    assert "Vendor 'f5' is not supported" in str(exc_info.value)
     assert "Supported vendors:" in str(exc_info.value)
 
 
@@ -215,11 +215,11 @@ def test_e_unsupported_vendor_api_returns_422(uploader_token):
     headers = {"Authorization": f"Bearer {uploader_token}"}
     res = client.post(
         "/api/audit/upload",
-        data={"raw_config": "hostname RTR-01", "vendor": "fortinet"},
+        data={"raw_config": "hostname RTR-01", "vendor": "f5"},
         headers=headers,
     )
     assert res.status_code == 422
-    assert "Vendor 'fortinet' is not supported" in res.json()["detail"]
+    assert "Vendor 'f5' is not supported" in res.json()["detail"]
 
 
 def test_e_undetermined_vendor_without_signature_raises_in_ingest():

@@ -247,6 +247,40 @@ class TestFrameworkCrosswalkGap:
         assert res.status == ComplianceStatus.NOT_ASSESSED
         assert res.reason == "not assessed: no vendor rules mapped to this control"
 
+    def test_detect_vendor_rejects_unknown_and_detects_all_vendors(self):
+        """Verifies detect_vendor returns correct vendor and never defaults unknown to cisco."""
+        from src.framework_crosswalk import detect_vendor
+        assert detect_vendor({"device": {"vendor": "cisco", "platform": "IOS-XE"}}) == "cisco"
+        assert detect_vendor({"device": {"vendor": "juniper", "platform": "Junos"}}) == "juniper"
+        assert detect_vendor({"device": {"vendor": "fortinet", "platform": "FortiOS"}}) == "fortinet"
+        assert detect_vendor({"device": {"vendor": "paloalto", "platform": "PAN-OS"}}) == "paloalto"
+        assert detect_vendor({"device": {"vendor": "arista", "platform": "EOS"}}) == "arista"
+
+        # Unknown / unrecognized must NEVER default to cisco
+        assert detect_vendor({"device": {"vendor": "unknown"}}) == "unknown"
+        assert detect_vendor({"device": {}}) == "unknown"
+        assert detect_vendor({}) == "unknown"
+        assert detect_vendor({"device": {"vendor": "vyos"}}) == "vyos"
+
+    def test_unknown_vendor_fails_soft_without_inheriting_cisco_rules(self):
+        """Unknown or unsupported vendors must NOT inherit Cisco framework mappings."""
+        reg = get_default_registry()
+        evaluator = reg.get_evaluator(NIST_SP_800_53_REV5_FRAMEWORK_ID)
+
+        # Create CSM with unknown vendor
+        csm_unknown = {
+            "device": {"vendor": "unknown", "platform": "unknown"},
+            "services": {"ssh": True, "ssh_version": 2},
+            "raw_evidence": []
+        }
+        results = evaluator.evaluate(csm_unknown)
+        assert len(results) > 0
+        for r in results:
+            assert r.status == ComplianceStatus.NOT_ASSESSED
+            assert "unknown" in r.reason or "not supported" in r.reason
+            # Assert Cisco rules are nowhere in observed or expected values
+            assert "CISCO-" not in str(r.observed_value)
+
     def test_rollup_logic_fail_unknown_pass(self):
         """Verifies roll-up logic: any FAIL -> FAIL; else any UNKNOWN -> UNKNOWN; else PASS."""
         reg = get_default_registry()

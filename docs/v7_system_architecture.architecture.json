@@ -1,0 +1,267 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "NTRO PS26155 v7 — Master System Architecture",
+    "output": "v7_system_architecture.html",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "deterministic-pipeline",
+        "label": "Authoritative deterministic pipeline",
+        "focus": ["ingestion", "adapters", "csm", "engine", "remediation", "reporting"],
+        "note": "Follows the core path from raw file ingestion through CSM normalization, deterministic evaluation, and canonical reporting."
+      },
+      {
+        "id": "hitl-advisory-ai",
+        "label": "Human-in-the-loop AI advisory loop",
+        "focus": ["adapters", "ai_manager", "hitl_queue", "trusted_lib", "engine"],
+        "note": "Unmapped CLI syntax is routed to local DistilBERT/SLM for suggestions, requiring human approval before persisting as deterministic rules."
+      },
+      {
+        "id": "audit-integrity",
+        "label": "Audit integrity and non-repudiation",
+        "focus": ["engine", "ledger", "reporting"],
+        "note": "Finalized audit sessions commit SHA-256 hash chains to an append-only ledger guaranteeing mathematical non-repudiation."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "ingestion",
+      "type": "external",
+      "label": "Unified Ingestion",
+      "sublabel": "Single / Multi / ZIP",
+      "pos": [40, 250],
+      "size": [136, 60],
+      "tag": "AST Guarded"
+    },
+    {
+      "id": "adapters",
+      "type": "backend",
+      "label": "Vendor Adapters",
+      "sublabel": "Cisco / Junos / EOS / PAN",
+      "pos": [220, 250],
+      "size": [136, 60],
+      "tag": "Fail-Closed"
+    },
+    {
+      "id": "csm",
+      "type": "backend",
+      "label": "CSM Normalizer",
+      "sublabel": "Schema + Device ID",
+      "pos": [400, 250],
+      "size": [136, 60],
+      "tag": "JSON Schema"
+    },
+    {
+      "id": "engine",
+      "type": "backend",
+      "label": "Compliance Engine",
+      "sublabel": "Baseline & Frameworks",
+      "pos": [580, 250],
+      "size": [136, 60],
+      "tag": "Zero AI Verdicts"
+    },
+    {
+      "id": "crosswalk",
+      "type": "backend",
+      "label": "Crosswalk Evaluator",
+      "sublabel": "NIST 800-53 & ISO 27001",
+      "pos": [580, 100],
+      "size": [136, 60],
+      "tag": "Dynamic Mapping"
+    },
+    {
+      "id": "remediation",
+      "type": "security",
+      "label": "Remediation Registry",
+      "sublabel": "Baseline Fixes",
+      "pos": [760, 100],
+      "size": [136, 60],
+      "tag": "Display-Only"
+    },
+    {
+      "id": "conflict",
+      "type": "security",
+      "label": "Conflict Analyzer",
+      "sublabel": "Static CLI Conflict",
+      "pos": [760, 250],
+      "size": [136, 60],
+      "tag": "Rule Scoped"
+    },
+    {
+      "id": "ai_manager",
+      "type": "backend",
+      "label": "Advisory Local AI",
+      "sublabel": "DistilBERT + Local SLM",
+      "pos": [220, 400],
+      "size": [136, 60],
+      "tag": "Advisory Only"
+    },
+    {
+      "id": "hitl_queue",
+      "type": "security",
+      "label": "HITL Review Queue",
+      "sublabel": "Pending Suggestions",
+      "pos": [400, 400],
+      "size": [136, 60],
+      "tag": "Human Sign-Off"
+    },
+    {
+      "id": "trusted_lib",
+      "type": "database",
+      "label": "Trusted Rule Library",
+      "sublabel": "Stored Rules",
+      "pos": [580, 400],
+      "size": [136, 60],
+      "tag": "No Weight Retraining"
+    },
+    {
+      "id": "ledger",
+      "type": "database",
+      "label": "Audit Ledger",
+      "sublabel": "SHA-256 Hash Chain",
+      "pos": [760, 400],
+      "size": [136, 60],
+      "tag": "Non-Repudiation"
+    },
+    {
+      "id": "reporting",
+      "type": "frontend",
+      "label": "Canonical Reporting",
+      "sublabel": "Report API + Export",
+      "pos": [940, 250],
+      "size": [136, 60],
+      "tag": "RBAC Roles"
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Air-Gapped Sovereign Enclave (Zero Cloud Egress / No Live Sockets)",
+      "wraps": ["adapters", "csm", "engine", "crosswalk", "remediation", "conflict", "ledger", "ai_manager", "hitl_queue", "trusted_lib", "reporting"],
+      "pad": 16
+    },
+    {
+      "kind": "security-group",
+      "label": "Deterministic Core & Proof",
+      "wraps": ["engine", "crosswalk", "remediation", "conflict", "ledger"],
+      "pad": 10
+    },
+    {
+      "kind": "security-group",
+      "label": "Advisory HITL Subsystem",
+      "wraps": ["ai_manager", "hitl_queue", "trusted_lib"],
+      "pad": 10
+    }
+  ],
+  "connections": [
+    {
+      "id": "ingest-to-adapters",
+      "from": "ingestion",
+      "to": "adapters",
+      "label": "upload",
+      "variant": "emphasis"
+    },
+    {
+      "id": "adapters-to-csm",
+      "from": "adapters",
+      "to": "csm"
+    },
+    {
+      "id": "adapters-to-ai",
+      "from": "adapters",
+      "to": "ai_manager",
+      "label": "unmapped",
+      "variant": "dashed",
+      "labelDy": 24
+    },
+    {
+      "id": "csm-to-engine",
+      "from": "csm",
+      "to": "engine"
+    },
+    {
+      "id": "engine-to-crosswalk",
+      "from": "engine",
+      "to": "crosswalk",
+      "label": "crosswalk"
+    },
+    {
+      "id": "engine-to-remediation",
+      "from": "engine",
+      "to": "remediation",
+      "label": "CLI fix"
+    },
+    {
+      "id": "engine-to-conflict",
+      "from": "engine",
+      "to": "conflict"
+    },
+    {
+      "id": "engine-to-ledger",
+      "from": "engine",
+      "to": "ledger",
+      "variant": "security"
+    },
+    {
+      "id": "ai-to-hitl",
+      "from": "ai_manager",
+      "to": "hitl_queue",
+      "label": "suggest"
+    },
+    {
+      "id": "hitl-to-trusted",
+      "from": "hitl_queue",
+      "to": "trusted_lib",
+      "variant": "security"
+    },
+    {
+      "id": "trusted-to-engine",
+      "from": "trusted_lib",
+      "to": "engine",
+      "variant": "dashed"
+    },
+    {
+      "id": "conflict-to-reporting",
+      "from": "conflict",
+      "to": "reporting"
+    },
+    {
+      "id": "ledger-to-reporting",
+      "from": "ledger",
+      "to": "reporting",
+      "variant": "security"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Ingestion & Normalization",
+      "items": [
+        "Single, Multi-file, and Guarded ZIP ingestion with AST safety sandbox",
+        "Fail-closed detection across Cisco IOS-XE, Junos, Arista EOS, PAN-OS",
+        "CSM schema normalization with hardware model, serial, and OS extraction"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Deterministic Compliance Core",
+      "items": [
+        "100% deterministic evaluation (sub-10ms) yielding PASS / FAIL / UNKNOWN",
+        "Native CIS & STIG evaluators + Crosswalk Evaluator for NIST & ISO",
+        "Central Remediation Registry (display-only) and static conflict checks"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Advisory AI & Cryptographic Proof",
+      "items": [
+        "DistilBERT & local Ollama SLMs advise on unmapped syntax (zero AI verdicts)",
+        "Human review queue: learns stored deterministic mappings, not model weights",
+        "SHA-256 hash-chained ledger and certified canonical reporting (PDF/DOCX)"
+      ]
+    }
+  ]
+}

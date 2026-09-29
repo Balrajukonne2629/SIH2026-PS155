@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NTRO PS26155 — Visual Architecture 2-Pager (Jury Edition)</title>
+  <style>
+    :root {
+      --bg: #070a10;
+      --card-bg: #0f1623;
+      --card-border: #1e293b;
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      --text-dim: #64748b;
+      --cyan: #38bdf8;
+      --cyan-dark: #0284c7;
+      --emerald: #34d399;
+      --emerald-dark: #059669;
+      --amber: #fbbf24;
+      --amber-dark: #d97706;
+      --indigo: #818cf8;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.4;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .toolbar {
+      width: 100%;
+      max-width: 1080px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #0d131f;
+      border: 1px solid var(--card-border);
+      padding: 12px 24px;
+      border-radius: 12px;
+    }
+
+    .toolbar-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge-defense {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--emerald-dark);
+      color: var(--emerald);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-print {
+      background: #1e293b;
+      color: var(--text-main);
+      border: 1px solid #334155;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-print:hover {
+      background: var(--cyan-dark);
+      border-color: var(--cyan);
+      color: #ffffff;
+    }
+
+    /* Page container */
+    .document {
+      width: 100%;
+      max-width: 1080px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .sheet {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 30px 36px;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.6);
+      position: relative;
+    }
+
+    /* Header */
+    .doc-header {
+      border-bottom: 2px solid var(--card-border);
+      padding-bottom: 14px;
+      margin-bottom: 16px;
+    }
+
+    .meta-bar {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+
+    .doc-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+    }
+
+    .doc-subtitle {
+      font-size: 13px;
+      color: var(--cyan);
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    /* Jury KPI Ribbon */
+    .kpi-ribbon {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin: 14px 0 18px 0;
+    }
+
+    .kpi-card {
+      background: #090e17;
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: 10px 14px;
+      text-align: center;
+    }
+
+    .kpi-card .val {
+      font-family: var(--font-mono);
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 2px;
+    }
+
+    .kpi-card .lbl {
+      font-size: 11px;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .kpi-cyan .val { color: var(--cyan); }
+    .kpi-emerald .val { color: var(--emerald); }
+    .kpi-amber .val { color: var(--amber); }
+    .kpi-indigo .val { color: var(--indigo); }
+
+    /* SVG Architecture Container */
+    .svg-diagram-wrapper {
+      width: 100%;
+      border: 1px solid #1e293b;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #080b11;
+      margin: 14px 0;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+
+    .svg-diagram-wrapper object, 
+    .svg-diagram-wrapper img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* Headings */
+    h2 {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: #ffffff;
+      margin: 14px 0 8px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: -0.01em;
+      border-bottom: 1px solid #1e293b;
+      padding-bottom: 4px;
+    }
+
+    h2 .num {
+      background: #1e293b;
+      color: var(--cyan);
+      font-size: 10.5px;
+      font-family: var(--font-mono);
+      padding: 1px 6px;
+      border-radius: 4px;
+      border: 1px solid #334155;
+    }
+
+    /* Diagram Panels for Page 2 */
+    .diagram-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin: 12px 0;
+    }
+
+    .diag-panel {
+      background: #090e17;
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .diag-panel h3 {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .diag-panel p {
+      font-size: 11px;
+      color: var(--text-sub);
+      line-height: 1.4;
+      margin-bottom: 8px;
+    }
+
+    .code-canvas {
+      background: #04070d;
+      border: 1px solid #1a2333;
+      border-radius: 6px;
+      padding: 10px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      line-height: 1.35;
+      color: #93c5fd;
+      overflow-x: auto;
+      flex-grow: 1;
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0;
+      font-size: 10.5px;
+    }
+
+    th {
+      background: #0c121d;
+      color: #cbd5e1;
+      text-align: left;
+      padding: 6px 10px;
+      border-bottom: 1px solid #334155;
+      font-weight: 600;
+    }
+
+    td {
+      padding: 6px 10px;
+      border-bottom: 1px solid #1a2333;
+      color: var(--text-sub);
+      vertical-align: top;
+    }
+
+    td strong { color: #f1f5f9; }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      background: #1e293b;
+      color: var(--cyan);
+      padding: 1px 4px;
+      border-radius: 3px;
+    }
+
+    .page-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid #1e293b;
+      margin-top: 18px;
+      padding-top: 8px;
+      font-size: 10px;
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+    }
+
+    /* Print styling */
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #111827 !important;
+        padding: 0 !important;
+      }
+      .toolbar { display: none !important; }
+      .document { max-width: 100% !important; gap: 0 !important; }
+      .sheet {
+        background: #ffffff !important;
+        border: none !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        padding: 12mm 16mm !important;
+        page-break-after: always !important;
+        height: 100vh !important;
+        box-sizing: border-box !important;
+      }
+      .sheet:last-child { page-break-after: avoid !important; }
+      .doc-title { color: #0f172a !important; font-size: 18pt !important; }
+      .doc-subtitle { color: #0284c7 !important; }
+      h2 { color: #0f172a !important; border-bottom: 1px solid #cbd5e1 !important; }
+      h2 .num { background: #e2e8f0 !important; color: #0284c7 !important; border-color: #cbd5e1 !important; }
+      .kpi-card { background: #f8fafc !important; border-color: #cbd5e1 !important; }
+      .diag-panel { background: #f8fafc !important; border-color: #cbd5e1 !important; }
+      .diag-panel h3 { color: #0f172a !important; }
+      .code-canvas { background: #f1f5f9 !important; border-color: #cbd5e1 !important; color: #0369a1 !important; }
+      th { background: #f1f5f9 !important; color: #0f172a !important; border-bottom: 1.5pt solid #94a3b8 !important; }
+      td { border-bottom: 0.5pt solid #e2e8f0 !important; color: #334155 !important; }
+      td strong { color: #0f172a !important; }
+      code { background: #f1f5f9 !important; color: #0369a1 !important; }
+      .svg-diagram-wrapper { border-color: #cbd5e1 !important; }
+      .page-footer { border-top: 1pt solid #cbd5e1 !important; color: #64748b !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="toolbar">
+    <div class="toolbar-title">
+      <span>NTRO PS26155 — Architecture Dossier</span>
+      <span class="badge-defense">Jury Briefing Edition · Visual-First</span>
+    </div>
+    <button class="btn-print" onclick="window.print()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      Print / Export 2-Page PDF
+    </button>
+  </div>
+
+  <div class="document">
+
+    <!-- ========================================================================== -->
+    <!-- SHEET 1: SYSTEM OVERVIEW & PRIMARY ARCHITECTURE DIAGRAM                    -->
+    <!-- ========================================================================== -->
+    <div class="sheet">
+      <div class="doc-header">
+        <div class="meta-bar">
+          <span>NTRO PROBLEM STATEMENT: PS26155</span>
+          <span>AIR-GAPPED SOVEREIGN NETWORK COMPLIANCE</span>
+          <span>EVALUATION TIME: &lt;10ms DETERMINISTIC</span>
+        </div>
+        <h1 class="doc-title">System Architecture: AI-Driven Multi-Vendor Compliance Auditor</h1>
+        <div class="doc-subtitle">Decoupled Dual-Hemisphere Architecture with Cryptographic SHA-256 Non-Repudiation</div>
+      </div>
+
+      <!-- 4 Jury Badges -->
+      <div class="kpi-ribbon">
+        <div class="kpi-card kpi-cyan">
+          <div class="val">&lt; 10ms</div>
+          <div class="lbl">Deterministic Core Latency</div>
+        </div>
+        <div class="kpi-card kpi-emerald">
+          <div class="val">100% Air-Gap</div>
+          <div class="lbl">Zero Cloud / Telemetry Egress</div>
+        </div>
+        <div class="kpi-card kpi-amber">
+          <div class="val">SHA-256</div>
+          <div class="lbl">Immutable Chained Ledger</div>
+        </div>
+        <div class="kpi-card kpi-indigo">
+          <div class="val">515+ Tests</div>
+          <div class="lbl">100% Passing Automated Suite</div>
+        </div>
+      </div>
+
+      <h2><span class="num">01</span> Master System Architecture (End-to-End Decoupled Pipeline)</h2>
+      
+      <!-- Vector Architecture Diagram (short_architecture_diagram.svg) -->
+      <div class="svg-diagram-wrapper">
+        <img src="short_architecture_diagram.svg" alt="NTRO PS26155 Master Architecture Diagram">
+      </div>
+
+      <h2><span class="num">02</span> Pipeline Stages &amp; Core Architectural Invariants</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Pipeline Stage</th>
+            <th>Modules</th>
+            <th>Technology</th>
+            <th>Architectural Invariant</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1. Ingest &amp; Normalize</strong></td>
+            <td><code>vendor_adapter.py</code>, <code>cisco_auditor.py</code></td>
+            <td>Python AST, CSM Schema</td>
+            <td>Normalizes heterogeneous syntax to CSM JSON; isolates unmapped syntax.</td>
+          </tr>
+          <tr>
+            <td><strong>2. Deterministic Core</strong></td>
+            <td><code>compliance_framework.py</code>, <code>cis_benchmark_*</code></td>
+            <td>Pure Python stdlib</td>
+            <td>Sub-10ms evaluation; zero LLM hallucination; strictly preserves UNKNOWN.</td>
+          </tr>
+          <tr>
+            <td><strong>3. Advisory AI (HITL)</strong></td>
+            <td><code>ai_model_manager.py</code>, <code>ai_suggester.py</code></td>
+            <td>DistilBERT (66M), Local Ollama</td>
+            <td>Classifies unmapped lines into pending queue; zero AI write authority.</td>
+          </tr>
+          <tr>
+            <td><strong>4. Safe Remediation</strong></td>
+            <td><code>remediation_engine.py</code>, <code>ast_safety.py</code></td>
+            <td>Jinja2, Static AST Sandbox</td>
+            <td>Inspects AST to block code injection (<code>eval</code>, <code>exec</code>); display-only preview.</td>
+          </tr>
+          <tr>
+            <td><strong>5. Cryptographic Proof</strong></td>
+            <td><code>audit_log.py</code>, <code>database.py</code></td>
+            <td>SQLite, SHA-256 Hash Chain</td>
+            <td>Append-only ledger; &lt;1ms tamper detection; binds physical QR to block hash.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="page-footer">
+        <span>NTRO PS26155 — ARCHITECTURE SPECIFICATION (JURY BRIEFING)</span>
+        <span>PAGE 1 OF 2</span>
+      </div>
+    </div>
+
+    <!-- ========================================================================== -->
+    <!-- SHEET 2: SUBSYSTEM MECHANISM DIAGRAMS & ADR MATRIX                         -->
+    <!-- ========================================================================== -->
+    <div class="sheet">
+      <h2><span class="num">03</span> Subsystem Mechanism Diagrams (Deep Dive)</h2>
+
+      <div class="diagram-grid">
+        
+        <!-- Panel 1: Vendor Decoupling -->
+        <div class="diag-panel">
+          <h3>📐 Diagram A: M × N Vendor Decoupling</h3>
+          <p>Vendors normalize to a single Common Security Model (CSM), avoiding 9 separate scanners.</p>
+          <div class="code-canvas">
+[Cisco IOS-XE]  --\
+[Juniper Junos] ---> [Vendor Adapter] ---> [ CSM JSON ]
+[Arista EOS]    --/   (Normalization)      (Contract)
+                                               |
+                     +-------------------------+
+                     v                         v
+           [CIS Benchmark v2.2.1]    [DISA-STIG V3R7]
+          </div>
+          <p style="margin-top: 6px; font-size: 10px; color: #64748b;">
+            • Evaluators query only normalized dot-paths (<code>services.ssh.version</code>).<br/>
+            • Adding a vendor requires 1 adapter; compliance evaluators stay unchanged.
+          </p>
+        </div>
+
+        <!-- Panel 2: HITL AI Workflow -->
+        <div class="diag-panel">
+          <h3>🤖 Diagram B: Human-in-the-Loop AI Boundary</h3>
+          <p>AI is strictly advisory; unmapped syntax requires authenticated human sign-off.</p>
+          <div class="code-canvas">
+Unmapped Line (Parser)
+       │
+       ▼
+Local AI Suggester (DistilBERT/SLM)
+       │
+       ▼ (Draft Rule)
+pending_suggestions.json [Staging Queue]
+       │
+       ▼
+[Human Security Officer]
+       ├── [REJECT]   ──> Discard &amp; Audit Log
+       └── [APPROVE]  ──> trusted_mappings.json ──> Active Rules
+          </div>
+          <p style="margin-top: 6px; font-size: 10px; color: #64748b;">
+            • Zero AI auto-promotion. AI cannot approve its own suggestions.<br/>
+            • UNKNOWN status is preserved until human reviewer confirms rule.
+          </p>
+        </div>
+
+        <!-- Panel 3: SHA-256 Non-Repudiation -->
+        <div class="diag-panel">
+          <h3>🛡️ Diagram C: SHA-256 Hash Chaining</h3>
+          <p>Each block recursively hashes the predecessor block, guaranteeing bit-level tamper proof.</p>
+          <div class="code-canvas">
+BLOCK #1 (Genesis)             BLOCK #2
++------------------------+     +------------------------+
+| Prev: 0000000000000... |     | Prev: 8f3a9e1b2c4d5... |
+| Config: 4a2b6c8d...    | ==&gt; | Config: 9b1c3d5e...    |
+| Hash: 8f3a9e1b2c4d5... |     | Hash: a1b2c3d4e5f60... |
++------------------------+     +------------------------+
+                                           │
+                                           ▼
+                                 [Vector QR Code on PDF]
+          </div>
+          <p style="margin-top: 6px; font-size: 10px; color: #64748b;">
+            • <code>H(n) = SHA256(Canonical_JSON(Block_n || H(n-1)))</code><br/>
+            • Tamper detection runs in &lt;1ms; invalidates all downstream blocks.
+          </p>
+        </div>
+
+        <!-- Panel 4: AST Sandboxing -->
+        <div class="diag-panel">
+          <h3>⚡ Diagram D: Static AST Sandboxing</h3>
+          <p>AST analysis blocks code injection before Jinja2 template execution.</p>
+          <div class="code-canvas">
+Remediation Template (.j2)
+       │
+       ▼
+[ ast_safety.py (Static AST Safety Guard) ]
+  ├── BLOCKS Builtins: eval, exec, __import__, open
+  ├── BLOCKS Modules : os, sys, subprocess, socket
+  └── BLOCKS Dunders : __globals__, __subclasses__
+       │
+       ▼ PASS
+Display-Only CLI Preview (Zero Side-Effects on Network)
+          </div>
+          <p style="margin-top: 6px; font-size: 10px; color: #64748b;">
+            • Zero Remote Code Execution (RCE) surface.<br/>
+            • Remediations generate display-only preview CLI blocks.
+          </p>
+        </div>
+
+      </div>
+
+      <h2><span class="num">04</span> Architecture Decision Records (ADR) Summary Matrix</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>ADR ID</th>
+            <th>Scope</th>
+            <th>Adopted Architecture</th>
+            <th>Why Chosen Over Alternatives</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>ADR-001</strong></td>
+            <td>Evaluation Core</td>
+            <td>100% Deterministic Python rules on CSM (&lt;10ms).</td>
+            <td>Eliminates LLM hallucination, drift, and non-reproducibility.</td>
+          </tr>
+          <tr>
+            <td><strong>ADR-002</strong></td>
+            <td>Multi-Vendor</td>
+            <td>Common Security Model (CSM) normalization.</td>
+            <td>Replaces $M \times N$ regex explosion with a single $M+N$ contract.</td>
+          </tr>
+          <tr>
+            <td><strong>ADR-003</strong></td>
+            <td>Unmapped Lines</td>
+            <td>HITL staged queue with Human Reviewer sign-off.</td>
+            <td>Prevents unvetted AI rules from corrupting production scanners.</td>
+          </tr>
+          <tr>
+            <td><strong>ADR-004</strong></td>
+            <td>Non-Repudiation</td>
+            <td>Append-only SHA-256 hash-chained SQLite ledger.</td>
+            <td>Zero-overhead mathematical proof without heavy blockchain bloat.</td>
+          </tr>
+          <tr>
+            <td><strong>ADR-005</strong></td>
+            <td>Air-Gap Safety</td>
+            <td>Local SLMs + Static AST Sandboxing (<code>ast_safety.py</code>).</td>
+            <td>Guarantees zero cloud data exfiltration and zero code injection.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="page-footer">
+        <span>NTRO PS26155 — ARCHITECTURE SPECIFICATION (JURY BRIEFING)</span>
+        <span>PAGE 2 OF 2</span>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

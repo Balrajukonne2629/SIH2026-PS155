@@ -326,8 +326,8 @@ def test_default_vendor_registry_includes_juniper():
     """Verify process-level default registry contains both Cisco and Juniper."""
     reg = get_default_vendor_registry()
     assert reg.has("cisco")
-    assert reg.has("juniper")
-    assert sorted(reg.list_vendor_ids()) == ["cisco", "juniper"]
+    assert "cisco" in reg.list_vendor_ids()
+    assert "juniper" in reg.list_vendor_ids()
 
 
 # --- B & C. Vendor Detection ---

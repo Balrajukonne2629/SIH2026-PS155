@@ -29,12 +29,17 @@ An offline, air-gapped, multi-vendor network security compliance auditing engine
 │   ├── report_generator.py     # Legacy PDF certificate generator with QR codes
 │   ├── vendor_adapter.py       # Vendor adapter interface (Cisco, Juniper)
 │   └── vendor_registry.py      # Dynamic plug-and-play vendor registry
-├── frontend/                   # Canonical frontend application (React + Vite + TS)
+├── landing-page/               # Standalone Evaluator-Facing Product Landing Page (Port 3001)
+│   ├── src/                    # Landing page presentation components and data
+│   ├── public/                 # Static assets, diagrams, interactive iframe blueprints
+│   ├── package.json            # Scripts: dev, build, preview
+│   └── vite.config.ts
+├── frontend/                   # Canonical operational frontend console (Port 3000)
 │   ├── src/                    # Screens, components, contexts, and API client
 │   ├── tests/                  # Frontend unit and contract test suites
 │   ├── package.json            # Scripts: dev, build, preview, test
 │   └── vite.config.ts
-├── tests/                      # Automated test suites (27 test files)
+├── tests/                      # Automated test suites (34 test files, 700+ backend tests)
 │   ├── conftest.py             # Pytest session setup and module identity bridge
 │   ├── test_api_compliance.py  # REST API compliance endpoints verification
 │   ├── test_api_full_loop.py   # 11-stage API full-loop parity test
@@ -55,15 +60,12 @@ An offline, air-gapped, multi-vendor network security compliance auditing engine
 │   ├── Cisco/                  # Cisco IOS-XE configurations
 │   └── Juniper/                # Juniper Junos configurations
 ├── docs/                       # Project specifications and architectural records
+│   ├── SYSTEM_ARCHITECTURE.md  # Comprehensive system architecture & deck guide
+│   ├── decisions/              # Architecture Decision Records (ADR-001 to ADR-007)
 │   ├── NTRO_PS26155_PRD_v4_Addendum.md # Authoritative PRD Addendum
 │   ├── MULTI_FRAMEWORK_COMPLIANCE_ARCHITECTURE.md
-│   ├── ARCHITECTURE_NOTES.md
 │   └── ...
 ├── references/                 # Upstream compliance standards and research
-│   ├── standards/              # CIS, DISA STIG, NIST SP 800-53 catalog
-│   ├── parsers/                # Parser reference specifications
-│   ├── mappings/               # Framework cross-mappings
-│   └── scanners/               # Upstream scanner packages
 ├── reports/                    # Historical verification and audit milestone reports
 ├── artifacts/                  # Visual checks and architectural diagrams
 ├── templates/                  # Jinja2 remediation templates
@@ -76,27 +78,35 @@ An offline, air-gapped, multi-vendor network security compliance auditing engine
 
 ---
 
-## Quickstart & Execution
+## Quickstart & Evaluation Workflow
 
-### 1. Backend Service
-Run via the canonical entrypoint:
+### 1. Evaluator Presentation Landing Page (Port 3001)
+Explore the complete product presentation, verified benchmarks, 7-stage pipeline contracts, interactive architecture, and offline download package:
+```bash
+cd landing-page
+npm install
+npm run dev
+# Running on http://localhost:3001
+```
+
+### 2. Operational Backend Service (Port 8000)
+Run the zero-telemetry FastAPI compliance engine:
 ```bash
 python -m uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
-```
-Or via the root backward-compatible wrapper:
-```bash
-uvicorn main:app --reload
+# API Swagger Docs available at http://localhost:8000/docs
 ```
 
-### 2. Frontend Application
+### 3. Operational Frontend Auditor Console (Port 3000)
+Launch the primary operator console for multi-vendor audits and human-in-the-loop reviews:
 ```bash
 cd frontend
 npm install
 npm run dev
+# Running on http://localhost:3000
 ```
 
-### 3. Running Automated Tests
-Run the entire test suite (515 passed, 12 skipped):
+### 4. Running Automated Tests (780+ Total Tests)
+Run the complete backend test suite (700+ tests verifying AST safety, cryptographic hash-chaining, RBAC, and multi-framework evaluation):
 ```bash
 pytest
 ```
@@ -109,9 +119,9 @@ python tests/test_step5_full_loop.py
 # FastAPI 11-Stage Full-Loop Parity & AST Safety Verification
 python tests/test_api_full_loop.py
 
-# Frontend Test Suite (57 passed)
+# Operational Frontend Test Suite (96 tests passing in 686ms)
 cd frontend && npm test
 
-# Frontend Production Build
-cd frontend && npm run build
+# Landing Page Production Build & Verification
+cd landing-page && npm run build
 ```

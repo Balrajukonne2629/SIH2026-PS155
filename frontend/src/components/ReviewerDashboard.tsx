@@ -7,6 +7,7 @@ import {
   verifyLedger,
   getComplianceFrameworks,
   getAuditSessions,
+  getConfigurationProgression,
 } from '../api';
 import { formatToIST, formatToISTParts } from '../utils';
 import {
@@ -19,6 +20,8 @@ import {
   FrameworkMetadataItem,
   TrustedMappingItem,
   AuditSessionSummary,
+  ConfigurationVersionNode,
+  ConfigurationProgressionResponse,
 } from '../types';
 
 interface ReviewerDashboardProps {
@@ -27,15 +30,13 @@ interface ReviewerDashboardProps {
   onOpenAudit: (sessionId: string, initialTab?: AuditWorkspaceTab) => void;
 }
 
-interface HoveredPoint {
+interface VersionGraphPoint {
+  version: ConfigurationVersionNode;
   x: number;
   y: number;
-  entry: AuditLedgerItem;
-  rate: number;
-  passCount: number;
-  failCount: number;
-  unknownCount: number;
-  totalControls: number;
+  rate: number | null;
+  isEvaluated: boolean;
+  passScore: number | null;
 }
 
 export const ReviewerDashboard: React.FC<ReviewerDashboardProps> = ({
@@ -52,11 +53,16 @@ export const ReviewerDashboard: React.FC<ReviewerDashboardProps> = ({
   const [frameworks, setFrameworks] = useState<FrameworkMetadataItem[]>([]);
   const [submittedSessions, setSubmittedSessions] = useState<AuditSessionSummary[]>([]);
 
+  // Progression & Evolution States
+  const [progression, setProgression] = useState<ConfigurationProgressionResponse | null>(null);
+  const [progressionLoading, setProgressionLoading] = useState<boolean>(true);
+  const [hoveredVersion, setHoveredVersion] = useState<{ node: ConfigurationVersionNode; x: number; y: number } | null>(null);
+  const [selectedVersion, setSelectedVersion] = useState<ConfigurationVersionNode | null>(null);
+
   // UI Interactive States
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [hoveredPoint, setHoveredPoint] = useState<HoveredPoint | null>(null);
   const [auditSearchQuery, setAuditSearchQuery] = useState<string>('');
   const [auditStatusFilter, setAuditStatusFilter] = useState<'ALL' | 'COMPLIANT' | 'NON-COMPLIANT' | 'NEEDS-REVIEW'>('ALL');
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
@@ -71,7 +77,7 @@ export const ReviewerDashboard: React.FC<ReviewerDashboardProps> = ({
     let success = false;
 
     try {
-      const [ledgerRes, suggestionsRes, modelRes, trustedRes, verifyRes, frameworksRes, submittedRes] =
+      const [ledgerRes, suggestionsRes, modelRes, trustedRes, verifyRes, frameworksRes, submittedRes, progressionRes] =
         await Promise.allSettled([
           getLedger(),
           getPendingSuggestions(undefined, 'pending'),
@@ -80,10 +86,21 @@ export const ReviewerDashboard: React.FC<ReviewerDashboardProps> = ({
           verifyLedger(),
           getComplianceFrameworks('cisco'),
           getAuditSessions('submitted'),
+          getConfigurationProgression(),
         ]);
 
       if (ledgerRes.status === 'fulfilled' && Array.isArray(ledgerRes.value)) {
         setLedgerEntries(ledgerRes.value);
+      }
+      if (progressionRes.status === 'fulfilled' && progressionRes.value?.versions) {
+        setProgression(progressionRes.value);
+        if (progressionRes.value.versions.length > 0) {
+          setSelectedVersion((prev) => {
+            if (!prev) return progressionRes.value.versions[progressionRes.value.versions.length - 1];
+            const match = progressionRes.value.versions.find((v) => v.version_id === prev.version_id);
+            return match || progressionRes.value.versions[progressionRes.value.versions.length - 1];
+          });
+        }
       }
       if (submittedRes.status === 'fulfilled' && Array.isArray(submittedRes.value)) {
         setSubmittedSessions(submittedRes.value);
@@ -109,6 +126,7 @@ export const ReviewerDashboard: React.FC<ReviewerDashboardProps> = ({
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
+      setProgressionLoading(false);
       if (refresh && success) {
         setSyncSuccess(true);
         setTimeout(() => setSyncSuccess(false), 1800);
@@ -190,38 +208,36 @@ export const ReviewerDashboard: React.FC<ReviewerDashboardProps> = ({
     };
   }, [ledgerEntries]);
 
-  // Historical Progression Trend points (sorted chronologically)
-  const trendPoints = useMemo(() => {
-    if (ledgerEntries.length < 2) return [];
-    const sorted = [...ledgerEntries].sort(
-      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-    );
+  // Configuration Progression Graph Points (authoritative from backend)
+  const versionPoints = useMemo<VersionGraphPoint[]>(() => {
+    const versions = progression?.versions || [];
+    if (versions.length === 0) return [];
 
-    // Limit to latest 15 audits if many exist for clean visual spacing
-    const sliced = sorted.slice(-15);
+    const total = versions.length;
+    return versions.map((v, idx) => {
+      // 520x160 viewBox with 35px left and right margins for clear node display
+      const x = total === 1 ? 260 : 35 + (idx / (total - 1)) * 450;
+      let y = 140;
+      let rate: number | null = null;
 
-    return sliced.map((entry, idx) => {
-      const results = entry.audit_results || {};
-      const p = Object.values(results).filter((v) => v === 'Pass').length;
-      const f = Object.values(results).filter((v) => v === 'Fail').length;
-      const u = Object.values(results).filter((v) => v === 'Unknown').length;
-      const tot = p + f + u || 1;
-      const rate = p / tot;
-      // Coordinates normalized to 520x160 viewBox with 20px padding
-      const x = 30 + (idx / (sliced.length - 1)) * 460;
-      const y = 140 - rate * 115;
+      if (v.is_evaluated && typeof v.latest_compliance_score === 'number') {
+        rate = v.latest_compliance_score / 100.0;
+        y = 140 - rate * 115; // 0% -> 140, 100% -> 25
+      } else {
+        rate = null;
+        y = 82; // visual center for unevaluated
+      }
+
       return {
+        version: v,
         x,
         y,
         rate,
-        entry,
-        passCount: p,
-        failCount: f,
-        unknownCount: u,
-        totalControls: tot,
+        isEvaluated: v.is_evaluated,
+        passScore: v.latest_compliance_score,
       };
     });
-  }, [ledgerEntries]);
+  }, [progression]);
 
   // Filtered recent audits for the enterprise table
   const filteredAudits = useMemo(() => {
@@ -787,31 +803,40 @@ export const ReviewerDashboard: React.FC<ReviewerDashboardProps> = ({
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-sky-500"></span>
                   <h2 id="compliance-trend-heading" className="text-xs font-bold uppercase tracking-wider text-slate-200">
-                    Historical Compliance Progression
+                    Configuration Compliance Progression
                   </h2>
                 </div>
                 <span className="text-xs text-slate-400 font-mono tabular-nums">
-                  {trendPoints.length >= 2 ? `${trendPoints.length} chronological data points` : 'Historical Ledger'}
+                  {progressionLoading
+                    ? 'Loading progression...'
+                    : progression
+                    ? `${progression.total_versions} configuration states · ${progression.total_audits} audit runs`
+                    : 'Historical Ledger'}
                 </span>
               </div>
 
-              {trendPoints.length < 2 ? (
+              {progressionLoading ? (
+                <div className="py-12 px-4 text-center space-y-2">
+                  <div className="inline-block w-6 h-6 border-2 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
+                  <div className="text-xs text-slate-400">Loading chronological configuration progression...</div>
+                </div>
+              ) : versionPoints.length === 0 ? (
                 <div className="py-12 px-4 text-center space-y-1.5">
                   <div className="text-xs font-medium text-slate-300">
                     Insufficient historical data for progression curve
                   </div>
                   <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                    At least two completed audits are required in the cryptographic ledger to establish a compliance trajectory.
+                    At least one completed audit is required in the cryptographic ledger to establish a configuration evolution state.
                   </p>
                 </div>
               ) : (
                 <div className="space-y-3 pt-1">
                   {/* Interactive SVG Chart */}
-                  <div className="h-44 w-full relative">
-                    <svg className="w-full h-full overflow-visible" viewBox="0 0 520 160" preserveAspectRatio="none">
+                  <div className="h-48 w-full relative">
+                    <svg className="w-full h-full overflow-visible" viewBox="0 0 520 170" preserveAspectRatio="none">
                       <defs>
                         {/* Smooth area fill gradient */}
-                        <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
+                        <linearGradient id="progressionGradient" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="0%" stopColor="#0284C7" stopOpacity="0.35" />
                           <stop offset="100%" stopColor="#0284C7" stopOpacity="0.0" />
                         </linearGradient>
@@ -826,7 +851,7 @@ export const ReviewerDashboard: React.FC<ReviewerDashboardProps> = ({
                       </g>
 
                       {/* Y-Axis Value Labels */}
-                      <g className="text-[10px] font-mono fill-current text-slate-400">
+                      <g className="text-[10px] font-mono fill-current text-slate-400 select-none">
                         <text x="5" y="28">100%</text>
                         <text x="5" y="68">65%</text>
                         <text x="5" y="108">30%</text>
@@ -834,88 +859,431 @@ export const ReviewerDashboard: React.FC<ReviewerDashboardProps> = ({
                       </g>
 
                       {(() => {
-                        // Build SVG paths for line and area fill
+                        // Build SVG paths for evaluated line and area fill
+                        const evaluatedPts = versionPoints.filter((p) => p.isEvaluated && p.rate !== null);
                         const areaD =
-                          trendPoints.reduce((acc, pt, i) => `${acc} ${i === 0 ? 'M' : 'L'} ${pt.x} ${pt.y}`, '') +
-                          ` L ${trendPoints[trendPoints.length - 1].x} 140 L ${trendPoints[0].x} 140 Z`;
+                          evaluatedPts.length > 0
+                            ? evaluatedPts.reduce((acc, pt, i) => `${acc} ${i === 0 ? 'M' : 'L'} ${pt.x} ${pt.y}`, '') +
+                              ` L ${evaluatedPts[evaluatedPts.length - 1].x} 140 L ${evaluatedPts[0].x} 140 Z`
+                            : '';
 
-                        const lineD = trendPoints.reduce(
-                          (acc, pt, i) => `${acc} ${i === 0 ? 'M' : 'L'} ${pt.x} ${pt.y}`,
-                          ''
-                        );
+                        const lineD =
+                          evaluatedPts.length > 0
+                            ? evaluatedPts.reduce((acc, pt, i) => `${acc} ${i === 0 ? 'M' : 'L'} ${pt.x} ${pt.y}`, '')
+                            : '';
 
                         return (
                           <g>
                             {/* Area Fill */}
-                            <path d={areaD} fill="url(#trendGradient)" />
+                            {areaD && <path d={areaD} fill="url(#progressionGradient)" />}
 
-                            {/* Crisp Line */}
-                            <path
-                              d={lineD}
-                              fill="none"
-                              stroke="#0284C7"
-                              strokeWidth="2.5"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
+                            {/* Crisp Progression Line */}
+                            {lineD && (
+                              <path
+                                d={lineD}
+                                fill="none"
+                                stroke="#0284C7"
+                                strokeWidth="2.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            )}
 
                             {/* Data Point Nodes */}
-                            {trendPoints.map((pt, i) => {
-                              const isHovered = hoveredPoint?.entry.entry_id === pt.entry.entry_id;
+                            {versionPoints.map((pt) => {
+                              const isSelected = selectedVersion?.version_id === pt.version.version_id;
+                              const isHovered = hoveredVersion?.node.version_id === pt.version.version_id;
+
+                              if (!pt.isEvaluated) {
+                                // Unevaluated point (Data Unavailable)
+                                return (
+                                  <g
+                                    key={pt.version.version_id}
+                                    className="cursor-pointer"
+                                    onMouseEnter={() => setHoveredVersion({ node: pt.version, x: pt.x, y: pt.y })}
+                                    onMouseLeave={() => setHoveredVersion(null)}
+                                    onClick={() =>
+                                      setSelectedVersion((prev) =>
+                                        prev?.version_id === pt.version.version_id ? null : pt.version
+                                      )
+                                    }
+                                  >
+                                    <circle
+                                      cx={pt.x}
+                                      cy={pt.y}
+                                      r={isSelected ? '7' : isHovered ? '6' : '4.5'}
+                                      className="fill-slate-900 stroke-amber-400 stroke-2"
+                                      strokeDasharray="2 2"
+                                    />
+                                    <circle cx={pt.x} cy={pt.y} r="2" className="fill-amber-400" />
+                                  </g>
+                                );
+                              }
+
+                              const isZero = pt.passScore === 0;
                               return (
-                                <circle
-                                  key={pt.entry.entry_id || i}
-                                  cx={pt.x}
-                                  cy={pt.y}
-                                  r={isHovered ? '6' : '4'}
-                                  className="fill-sky-500 stroke-slate-900 stroke-2 cursor-pointer transition-all duration-150"
-                                  onMouseEnter={() => setHoveredPoint(pt)}
-                                  onMouseLeave={() => setHoveredPoint(null)}
-                                  onClick={() => onOpenAudit(pt.entry.session_id || pt.entry.entry_id, 'overview')}
-                                />
+                                <g
+                                  key={pt.version.version_id}
+                                  className="cursor-pointer transition-all duration-150"
+                                  onMouseEnter={() => setHoveredVersion({ node: pt.version, x: pt.x, y: pt.y })}
+                                  onMouseLeave={() => setHoveredVersion(null)}
+                                  onClick={() =>
+                                    setSelectedVersion((prev) =>
+                                      prev?.version_id === pt.version.version_id ? null : pt.version
+                                    )
+                                  }
+                                >
+                                  {isSelected && (
+                                    <circle
+                                      cx={pt.x}
+                                      cy={pt.y}
+                                      r="10"
+                                      className="fill-sky-500/20 stroke-sky-400 stroke-1 animate-pulse"
+                                    />
+                                  )}
+                                  <circle
+                                    cx={pt.x}
+                                    cy={pt.y}
+                                    r={isSelected ? '6.5' : isHovered ? '6' : '4.5'}
+                                    className={`${
+                                      isZero
+                                        ? 'fill-rose-500 stroke-slate-900'
+                                        : 'fill-sky-500 stroke-slate-900'
+                                    } stroke-2`}
+                                  />
+                                </g>
                               );
                             })}
+
+                            {/* X-Axis Version Ticks (V1 -> V10) */}
+                            <g className="text-[9px] font-mono fill-current text-slate-400 select-none">
+                              {versionPoints.map((pt) => {
+                                const isSelected = selectedVersion?.version_id === pt.version.version_id;
+                                return (
+                                  <text
+                                    key={`lbl-${pt.version.version_id}`}
+                                    x={pt.x}
+                                    y="160"
+                                    textAnchor="middle"
+                                    className={`cursor-pointer transition-colors ${
+                                      isSelected ? 'fill-sky-400 font-bold' : 'hover:fill-slate-200'
+                                    }`}
+                                    onClick={() =>
+                                      setSelectedVersion((prev) =>
+                                        prev?.version_id === pt.version.version_id ? null : pt.version
+                                      )
+                                    }
+                                  >
+                                    {pt.version.version_id}
+                                  </text>
+                                );
+                              })}
+                            </g>
                           </g>
                         );
                       })()}
                     </svg>
 
                     {/* Hover Tooltip Overlay */}
-                    {hoveredPoint && (
+                    {hoveredVersion && (
                       <div
-                        className="absolute z-20 pointer-events-none p-2.5 rounded-lg bg-slate-900 border border-slate-700 shadow-lg text-xs space-y-1 transform -translate-x-1/2 -translate-y-full"
+                        className="absolute z-30 pointer-events-none p-2.5 rounded-lg bg-slate-900/95 border border-slate-700 shadow-xl text-xs space-y-1 transform -translate-x-1/2 -translate-y-full min-w-[210px]"
                         style={{
-                          left: `${(hoveredPoint.x / 520) * 100}%`,
-                          top: `${(hoveredPoint.y / 160) * 100 - 10}%`,
+                          left: `${(hoveredVersion.x / 520) * 100}%`,
+                          top: `${(hoveredVersion.y / 170) * 100 - 8}%`,
                         }}
                       >
-                        <div className="font-semibold text-slate-100 flex items-center justify-between gap-3">
-                          <span>{hoveredPoint.entry.device_hostname || 'Unknown Device'}</span>
-                          <span className="font-mono text-sky-400 font-bold">
-                            {Math.round(hoveredPoint.rate * 100)}% Pass
+                        <div className="font-semibold text-slate-100 flex items-center justify-between gap-3 border-b border-slate-700/80 pb-1">
+                          <span className="font-mono text-sky-400 font-bold">{hoveredVersion.node.version_id}</span>
+                          <span className="font-mono font-bold">
+                            {hoveredVersion.node.is_evaluated ? (
+                              <span
+                                className={
+                                  hoveredVersion.node.latest_compliance_score === 0
+                                    ? 'text-rose-400'
+                                    : 'text-emerald-400'
+                                }
+                              >
+                                {hoveredVersion.node.latest_compliance_score}%
+                              </span>
+                            ) : (
+                              <span className="text-amber-400">Data Unavailable</span>
+                            )}
                           </span>
                         </div>
-                        <div className="text-[11px] text-slate-400 font-mono">
-                          {formatToIST(hoveredPoint.entry.timestamp)}
+                        <div className="text-[11px] text-slate-300 flex items-center justify-between">
+                          <span>Device:</span>
+                          <span className="font-mono">{hoveredVersion.node.device_hostname}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-[11px] font-mono pt-1 border-t border-slate-700">
-                          <span className="text-emerald-500">{hoveredPoint.passCount}P</span>
-                          <span className="text-slate-600">/</span>
-                          <span className="text-rose-500">{hoveredPoint.failCount}F</span>
-                          <span className="text-slate-600">/</span>
-                          <span className="text-amber-500">{hoveredPoint.unknownCount}U</span>
-                          <span className="text-slate-400">({hoveredPoint.totalControls} total)</span>
+                        <div className="text-[11px] text-slate-300 flex items-center justify-between">
+                          <span>Audits:</span>
+                          <span className="font-mono font-semibold text-sky-300">
+                            {hoveredVersion.node.audit_count} run{hoveredVersion.node.audit_count > 1 ? 's' : ''}
+                          </span>
                         </div>
+                        <div className="text-[10px] text-slate-400 font-mono truncate">
+                          Config: {hoveredVersion.node.config_hash.slice(0, 12)}...
+                        </div>
+                        <div className="text-[10px] text-slate-400 font-mono">
+                          {formatToIST(hoveredVersion.node.latest_audited)}
+                        </div>
+                        {hoveredVersion.node.delta_from_previous &&
+                          hoveredVersion.node.delta_from_previous.status === 'comparable' && (
+                            <div className="pt-1 border-t border-slate-700/80 text-[10px] font-mono flex items-center justify-between">
+                              <span className="text-slate-400">Delta vs Prev:</span>
+                              <span
+                                className={
+                                  hoveredVersion.node.delta_from_previous.delta_score !== null &&
+                                  hoveredVersion.node.delta_from_previous.delta_score >= 0
+                                    ? 'text-emerald-400'
+                                    : 'text-rose-400'
+                                }
+                              >
+                                {hoveredVersion.node.delta_from_previous.delta_score !== null &&
+                                hoveredVersion.node.delta_from_previous.delta_score >= 0
+                                  ? '+'
+                                  : ''}
+                                {hoveredVersion.node.delta_from_previous.delta_score} pp
+                              </span>
+                            </div>
+                          )}
                       </div>
                     )}
                   </div>
 
                   {/* Chronological Boundary Timeline */}
                   <div className="flex justify-between text-[11px] text-slate-400 border-t border-slate-700 pt-2 font-mono">
-                    <span>First: {formatToIST(trendPoints[0].entry.timestamp)}</span>
-                    <span className="text-slate-500">Click node to inspect audit</span>
-                    <span>Latest: {formatToIST(trendPoints[trendPoints.length - 1].entry.timestamp)}</span>
+                    <span>First: {formatToIST(versionPoints[0].version.first_audited)}</span>
+                    <span className="text-slate-500 hidden sm:inline">Click any version node to inspect configuration state &amp; audits</span>
+                    <span>Latest: {formatToIST(versionPoints[versionPoints.length - 1].version.latest_audited)}</span>
                   </div>
+
+                  {/* CONFIGURATION VERSION INSPECTOR PANEL */}
+                  {(() => {
+                    const activeVersion =
+                      selectedVersion ||
+                      (progression?.versions && progression.versions.length > 0
+                        ? progression.versions[progression.versions.length - 1]
+                        : null);
+
+                    if (!activeVersion) return null;
+
+                    return (
+                      <div className="mt-4 border-t border-slate-700/80 pt-4 space-y-3">
+                        {/* Inspector Header */}
+                        <div className="flex flex-wrap items-center justify-between gap-2 bg-slate-950/70 p-3 rounded-lg border border-slate-800">
+                          <div className="flex items-center gap-2.5">
+                            <span className="px-2.5 py-1 rounded bg-sky-500/20 text-sky-400 font-mono font-bold text-sm border border-sky-500/30">
+                              {activeVersion.version_id}
+                            </span>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold text-xs text-slate-200">
+                                  {activeVersion.device_hostname}
+                                </span>
+                                <span className="text-[11px] text-slate-400 font-mono">
+                                  • {activeVersion.audit_count} audit run{activeVersion.audit_count > 1 ? 's' : ''}
+                                </span>
+                              </div>
+                              <div className="text-[11px] font-mono text-slate-400 flex items-center gap-1.5 mt-0.5">
+                                <span className="text-slate-500">SHA-256:</span>
+                                <span
+                                  className="text-slate-300 hover:text-sky-300 cursor-pointer select-all truncate max-w-[200px] sm:max-w-none"
+                                  title={`Click to copy: ${activeVersion.config_hash}`}
+                                  onClick={() => copyToClipboard(activeVersion.config_hash, 'Config Hash')}
+                                >
+                                  {activeVersion.config_hash.slice(0, 16)}...{activeVersion.config_hash.slice(-8)}
+                                </span>
+                                <span className="text-[10px] text-slate-600">📋</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="text-right">
+                            <div className="text-[10px] uppercase tracking-wider text-slate-400 font-medium">Compliance State</div>
+                            {activeVersion.is_evaluated ? (
+                              <div className="flex items-center gap-1.5 justify-end">
+                                <span
+                                  className={`font-mono text-base font-bold tabular-nums ${
+                                    activeVersion.latest_compliance_score === 0
+                                      ? 'text-rose-400'
+                                      : (activeVersion.latest_compliance_score ?? 0) >= 80
+                                      ? 'text-emerald-400'
+                                      : 'text-amber-400'
+                                  }`}
+                                >
+                                  {activeVersion.latest_compliance_score}%
+                                </span>
+                                {activeVersion.latest_compliance_score === 0 && (
+                                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-rose-950/60 text-rose-300 border border-rose-800/60 font-semibold">
+                                    0% Evaluated
+                                  </span>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="inline-block text-xs font-semibold px-2 py-0.5 rounded bg-slate-800 text-amber-300 border border-amber-800/50">
+                                Data Unavailable
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Metric Grid: Controls Breakdown & Timestamps */}
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                          <div className="bg-slate-950/40 p-2.5 rounded border border-slate-800/80">
+                            <div className="text-[10px] text-slate-400 uppercase tracking-wide">Evaluated Controls</div>
+                            <div className="font-mono text-sm font-semibold text-slate-200 mt-0.5">
+                              {activeVersion.total_controls}
+                            </div>
+                            <div className="text-[10px] font-mono text-slate-400 mt-0.5">
+                              <span className="text-emerald-400">{activeVersion.pass_count}P</span> /{' '}
+                              <span className="text-rose-400">{activeVersion.fail_count}F</span> /{' '}
+                              <span className="text-amber-400">{activeVersion.unknown_count}U</span>
+                            </div>
+                          </div>
+
+                          <div className="bg-slate-950/40 p-2.5 rounded border border-slate-800/80">
+                            <div className="text-[10px] text-slate-400 uppercase tracking-wide">Audit Executions</div>
+                            <div className="font-mono text-sm font-semibold text-sky-400 mt-0.5">
+                              {activeVersion.audit_count}
+                            </div>
+                            <div className="text-[10px] text-slate-400 mt-0.5">Preserved runs</div>
+                          </div>
+
+                          <div className="bg-slate-950/40 p-2.5 rounded border border-slate-800/80">
+                            <div className="text-[10px] text-slate-400 uppercase tracking-wide">First Audited</div>
+                            <div
+                              className="font-mono text-[11px] text-slate-300 mt-0.5 truncate"
+                              title={formatToIST(activeVersion.first_audited)}
+                            >
+                              {formatToIST(activeVersion.first_audited)}
+                            </div>
+                          </div>
+
+                          <div className="bg-slate-950/40 p-2.5 rounded border border-slate-800/80">
+                            <div className="text-[10px] text-slate-400 uppercase tracking-wide">Latest Audited</div>
+                            <div
+                              className="font-mono text-[11px] text-slate-300 mt-0.5 truncate"
+                              title={formatToIST(activeVersion.latest_audited)}
+                            >
+                              {formatToIST(activeVersion.latest_audited)}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Version Delta Banner */}
+                        <div className="bg-slate-950/50 p-3 rounded-lg border border-slate-800 text-xs space-y-2">
+                          <div className="flex items-center justify-between border-b border-slate-800/70 pb-1.5">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                              Progression Delta ({activeVersion.version_id === 'V1' ? 'Genesis Version' : 'vs Predecessor'})
+                            </span>
+                            {activeVersion.delta_from_previous &&
+                            activeVersion.delta_from_previous.status === 'comparable' ? (
+                              <span
+                                className={`font-mono text-xs font-bold px-2 py-0.5 rounded border ${
+                                  (activeVersion.delta_from_previous.delta_score ?? 0) >= 0
+                                    ? 'bg-emerald-950/40 text-emerald-300 border-emerald-800/60'
+                                    : 'bg-rose-950/40 text-rose-300 border-rose-800/60'
+                                }`}
+                              >
+                                {(activeVersion.delta_from_previous.delta_score ?? 0) >= 0 ? '+' : ''}
+                                {activeVersion.delta_from_previous.delta_score} percentage points
+                              </span>
+                            ) : (
+                              <span className="font-mono text-[11px] text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
+                                {activeVersion.version_id === 'V1' ? 'Baseline V1' : 'No comparable baseline'}
+                              </span>
+                            )}
+                          </div>
+
+                          {activeVersion.delta_from_previous &&
+                          activeVersion.delta_from_previous.status === 'comparable' ? (
+                            <div className="flex flex-wrap gap-2 text-[11px] font-mono">
+                              <span className="px-2 py-0.5 rounded bg-emerald-950/30 text-emerald-300 border border-emerald-900/40">
+                                Improved: {activeVersion.delta_from_previous.improved_count}
+                              </span>
+                              <span className="px-2 py-0.5 rounded bg-rose-950/30 text-rose-300 border border-rose-900/40">
+                                Regressed: {activeVersion.delta_from_previous.regressed_count}
+                              </span>
+                              <span className="px-2 py-0.5 rounded bg-slate-900 text-slate-300 border border-slate-800">
+                                Unchanged: {activeVersion.delta_from_previous.unchanged_count}
+                              </span>
+                              <span className="px-2 py-0.5 rounded bg-sky-950/30 text-sky-300 border border-sky-900/40">
+                                Newly Evaluated: {activeVersion.delta_from_previous.newly_evaluated_count}
+                              </span>
+                              <span className="px-2 py-0.5 rounded bg-slate-900 text-slate-400 border border-slate-800">
+                                Retired: {activeVersion.delta_from_previous.retired_count}
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="text-[11px] text-slate-400">
+                              {activeVersion.version_id === 'V1'
+                                ? 'Initial baseline configuration state in the cryptographic ledger.'
+                                : activeVersion.delta_from_previous?.reason ||
+                                  'One or both configuration versions lack evaluated controls.'}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Underlying Audit Executions List */}
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between text-xs font-semibold text-slate-300">
+                            <span>Underlying Audit Executions ({activeVersion.audit_entries.length})</span>
+                            <span className="text-[11px] text-slate-400 font-normal">
+                              All {activeVersion.audit_entries.length} runs preserved in immutable ledger
+                            </span>
+                          </div>
+
+                          <div className="max-h-56 overflow-y-auto rounded border border-slate-800 divide-y divide-slate-800/80 bg-slate-950/40">
+                            {activeVersion.audit_entries.map((audit, aIdx) => (
+                              <div
+                                key={audit.entry_id}
+                                className="p-2.5 flex flex-wrap items-center justify-between gap-2 text-xs hover:bg-slate-900/50 transition-colors"
+                              >
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-1.5 font-mono text-[11px]">
+                                    <span className="text-sky-400 font-bold">#{aIdx + 1}</span>
+                                    <span
+                                      className="text-slate-200 truncate cursor-pointer hover:underline"
+                                      title={`Click to copy Audit ID: ${audit.entry_id}`}
+                                      onClick={() => copyToClipboard(audit.entry_id, 'Audit ID')}
+                                    >
+                                      {audit.entry_id}
+                                    </span>
+                                  </div>
+                                  <div className="text-[10px] text-slate-400 font-mono flex items-center gap-2 mt-0.5">
+                                    <span>{formatToIST(audit.timestamp)}</span>
+                                    <span>•</span>
+                                    <span>
+                                      Hash: {audit.entryHash.slice(0, 10)}...{audit.entryHash.slice(-6)}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-3">
+                                  <div className="font-mono text-xs text-right tabular-nums">
+                                    <span className="text-emerald-400 font-semibold">{audit.pass_count}P</span>
+                                    <span className="text-slate-600 mx-1">/</span>
+                                    <span className="text-rose-400 font-semibold">{audit.fail_count}F</span>
+                                    <span className="text-slate-600 mx-1">/</span>
+                                    <span className="text-amber-400 font-semibold">{audit.unknown_count}U</span>
+                                  </div>
+
+                                  <button
+                                    onClick={() => onOpenAudit(audit.session_id || audit.entry_id, 'overview')}
+                                    className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-sky-400 border border-slate-700 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap"
+                                    title={`Open audit workspace for ${audit.entry_id}`}
+                                  >
+                                    View Report &rarr;
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
             </div>

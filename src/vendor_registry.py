@@ -17,7 +17,13 @@ Hard Invariants:
 
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
-from src.vendor_adapter import CiscoVendorAdapter, JuniperVendorAdapter, VendorAdapter
+from src.vendor_adapter import (
+    AristaVendorAdapter,
+    CiscoVendorAdapter,
+    FortinetVendorAdapter,
+    JuniperVendorAdapter,
+    VendorAdapter,
+)
 
 
 # --- Domain Exceptions ---
@@ -158,12 +164,14 @@ _DEFAULT_REGISTRY: Optional[VendorRegistry] = None
 
 
 def get_default_vendor_registry() -> VendorRegistry:
-    """Returns the shared process-level VendorRegistry pre-seeded with Cisco and Juniper adapters."""
+    """Returns the shared process-level VendorRegistry pre-seeded with Cisco, Juniper, Fortinet, and Arista adapters."""
     global _DEFAULT_REGISTRY
     if _DEFAULT_REGISTRY is None:
         _DEFAULT_REGISTRY = VendorRegistry()
         _DEFAULT_REGISTRY.register(CiscoVendorAdapter())
         _DEFAULT_REGISTRY.register(JuniperVendorAdapter())
+        _DEFAULT_REGISTRY.register(FortinetVendorAdapter())
+        _DEFAULT_REGISTRY.register(AristaVendorAdapter())
     return _DEFAULT_REGISTRY
 
 

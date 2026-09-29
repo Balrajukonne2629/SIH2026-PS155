@@ -20,6 +20,7 @@ Architectural Invariants & Hard Guarantees:
 
 from typing import Any, Dict, List, Optional, Sequence
 import pathlib
+import re
 
 from src.compliance_framework import (
     ComplianceStatus,
@@ -48,14 +49,29 @@ CISCO_BASELINE_RULE_IDS = [
 
 
 def detect_vendor(csm: Dict[str, Any]) -> str:
-    """Detects vendor type ('cisco' or 'juniper') from normalized CSM device info."""
+    """Detects vendor type from normalized CSM device info.
+    Recognizes Cisco, Juniper, Fortinet, Palo Alto, and Arista.
+    Returns 'unknown' if the vendor cannot be determined or is unsupported.
+    """
     dev = csm.get("device", {}) if isinstance(csm, dict) else {}
     plat = str(dev.get("platform", "")).lower()
     vend = str(dev.get("vendor", "")).lower()
-    comb = f"{plat} {vend}"
+    comb = f"{plat} {vend}".strip()
+    if not comb:
+        return "unknown"
+    if "fortinet" in comb or "fortios" in comb:
+        return "fortinet"
+    if "paloalto" in comb or "palo alto" in comb or "pan-os" in comb or "panos" in comb:
+        return "paloalto"
+    if "arista" in comb or "eos" in comb:
+        return "arista"
     if "juniper" in comb or "junos" in comb:
         return "juniper"
-    return "cisco"
+    if "cisco" in comb or "ios-xe" in comb or re.search(r"\bios\b", comb):
+        return "cisco"
+    if vend and vend not in ("unknown", "none", "null", ""):
+        return vend
+    return "unknown"
 
 
 class CrosswalkEvaluator(FrameworkEvaluator):
@@ -93,6 +109,33 @@ class CrosswalkEvaluator(FrameworkEvaluator):
         """
         vendor_key = detect_vendor(csm)
 
+        target_controls = controls if controls is not None else list(self._controls.values())
+        # Deterministic sorting by control_id
+        sorted_controls = sorted(target_controls, key=lambda c: c.control_id)
+
+        # Fail-soft for unknown or unsupported vendors: MUST NOT inherit Cisco framework mappings
+        if vendor_key == "unknown" or vendor_key not in self._vendor_rule_mappings:
+            results: List[EvaluationResult] = []
+            for ctrl in sorted_controls:
+                res = EvaluationResult(
+                    framework_id=self._framework_id,
+                    control_id=ctrl.control_id,
+                    status=ComplianceStatus.NOT_ASSESSED,
+                    evidence=Evidence(
+                        observed_value={"vendor": vendor_key, "mapped_rules": []},
+                        location="csm.device",
+                        expected_value=f"Supported vendor for framework {self._framework_id}",
+                        rationale=f"not assessed: vendor '{vendor_key}' is unknown or not supported by framework {self._framework_id}",
+                        confidence=1.0,
+                    ),
+                    reason=f"not assessed: vendor '{vendor_key}' is unknown or not supported by framework {self._framework_id}",
+                    observed_value={"vendor": vendor_key, "mapped_rules": []},
+                    expected_value=f"Supported vendor for framework {self._framework_id}",
+                    evaluator_id=f"crosswalk_{self._framework_id}",
+                )
+                results.append(res)
+            return results
+
         # Run authoritative baseline evaluation for detected vendor
         if vendor_key == "juniper":
             from src.juniper_auditor import evaluate_juniper_baseline, parse_juniper
@@ -103,7 +146,7 @@ class CrosswalkEvaluator(FrameworkEvaluator):
                 else:
                     full_csm[k] = v
             baseline_results = evaluate_juniper_baseline(full_csm)
-        else:
+        elif vendor_key == "cisco":
             from src.cisco_auditor import evaluate_rules, parse_cisco
             full_csm = parse_cisco("")
             for k, v in (csm or {}).items():
@@ -113,6 +156,8 @@ class CrosswalkEvaluator(FrameworkEvaluator):
                     full_csm[k] = v
             cisco_rules = [{"vendor_rule_id": rid} for rid in CISCO_BASELINE_RULE_IDS]
             baseline_results = evaluate_rules(full_csm, cisco_rules)
+        else:
+            baseline_results = {}
 
         target_controls = controls if controls is not None else list(self._controls.values())
         # Deterministic sorting by control_id

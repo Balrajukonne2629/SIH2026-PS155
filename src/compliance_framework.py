@@ -505,3 +505,34 @@ class CiscoCsmFrameworkAdapter(FrameworkEvaluator):
             )
 
         return results
+
+
+def register_cisco_baseline(
+    registry: Optional[FrameworkRegistry] = None,
+    rules_data: Optional[Sequence[Dict[str, Any]]] = None,
+    trusted_rules: Optional[Sequence[Dict[str, Any]]] = None,
+) -> FrameworkRegistry:
+    """Registers the 'cisco-ios-xe-baseline' framework and evaluator into FrameworkRegistry."""
+    target = registry if registry is not None else get_default_registry()
+    framework = Framework(
+        framework_id="cisco-ios-xe-baseline",
+        name="Cisco IOS-XE Baseline Security Standard",
+        version="1.0",
+        description="Deterministic network security baseline for Cisco IOS-XE network operating systems.",
+        vendor_scope="Cisco IOS-XE",
+        control_namespace="CISCO",
+        enabled=True,
+    )
+    if rules_data is None:
+        try:
+            import src.cisco_auditor as cisco_auditor
+            rules_data = cisco_auditor.load_baseline_rules()
+        except Exception:
+            rules_data = []
+    evaluator = CiscoCsmFrameworkAdapter(
+        framework_id="cisco-ios-xe-baseline",
+        rules_data=rules_data,
+        trusted_rules=trusted_rules,
+    )
+    target.register(framework=framework, evaluator=evaluator, allow_replace=True)
+    return target

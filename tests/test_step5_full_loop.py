@@ -229,15 +229,15 @@ def main():
         "why_it_failed": ai_exp["why_it_failed"],
         "what_remediation_does": ai_exp["what_remediation_does"]
     }
-    entry_1 = audit_log.create_audit_entry(csm_post, evals_post, cfg_text, rem_summary, LOG_FILE)
-    hash_1 = audit_log.append_audit_entry(entry_1, LOG_FILE)
+    entry_1 = audit_log.create_audit_entry(csm_post, evals_post, cfg_text, rem_summary)
+    hash_1 = audit_log.append_audit_entry(entry_1)
     assert entry_1["prevEntryHash"] == "0" * 64
     print(f"  Created Entry 1: ID={entry_1['entry_id']}, prevHash=GENESIS, entryHash={hash_1[:16]}... -> PASS")
 
     # Stage 12: Write Hash-Chained Audit Log Entry #2 (Chain Continuity)
     print("\n[STAGE 12] Write Hash-Chained Audit Log Entry #2 (Chain Linkage):")
-    entry_2 = audit_log.create_audit_entry(csm_post, evals_post, cfg_text, rem_summary, LOG_FILE)
-    hash_2 = audit_log.append_audit_entry(entry_2, LOG_FILE)
+    entry_2 = audit_log.create_audit_entry(csm_post, evals_post, cfg_text, rem_summary)
+    hash_2 = audit_log.append_audit_entry(entry_2)
     assert entry_2["prevEntryHash"] == hash_1
     assert entry_1["entry_id"] != entry_2["entry_id"], "entry_id collision: entry_1 and entry_2 must have distinct IDs!"
     print(f"  Created Entry 2: ID={entry_2['entry_id']}, prevHash={entry_2['prevEntryHash'][:16]}..., entryHash={hash_2[:16]}... -> PASS")
@@ -251,7 +251,7 @@ def main():
 
     # Stage 14: Verify Hash Chain Integrity
     print("\n[STAGE 14] Verify Complete Audit Log Hash Chain:")
-    valid_chain, chain_msg, broken_idx = audit_log.verify_chain(LOG_FILE)
+    valid_chain, chain_msg, broken_idx = audit_log.verify_chain()
     print(f"  verify_chain() Result: {valid_chain} | Details: {chain_msg}")
     assert valid_chain is True
     print("  Hash-Chain Verification -> PASS")

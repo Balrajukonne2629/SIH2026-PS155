@@ -1,0 +1,188 @@
+<USER_REQUEST>
+# NTRO PS26155 â€” PHASE D/E: FRAMEWORK SELECTION + CROSSWALK INTEGRATION
+
+CURRENT VERIFIED STATE
+
+Completed:
+- Cisco baseline âœ…
+- Juniper baseline âœ…
+- Fortinet baseline âœ…
+- Arista baseline âœ…
+- Crosswalk vendor-isolation bug fixed âœ…
+- Fortinet vendor isolation verified âœ…
+- Arista vendor isolation verified âœ…
+- Arista focused tests: 38 passed
+- Current regression suites: 176 passed
+- Production data/auditor.db untouched
+- Protected DB schemas untouched
+
+The Arista implementation currently reaches NOT_ASSESSED at the framework
+layer because Arista framework mappings have not yet been wired.
+
+THIS PHASE FIXES THAT GAP AND IMPLEMENTS REAL FRAMEWORK SELECTION.
+
+DO NOT START:
+- Palo Alto
+- Bulk upload
+- UI redesign
+- JWT/RBAC
+- SSE/WebSockets
+- queues/workers
+- simulator
+- broad cleanup
+
+============================================================
+REQUIRED SKILLS
+============================================================
+
+Explicitly invoke:
+
+1. using-agent-skills
+2. planning-and-task-breakdown
+3. spec-driven-development
+4. constraint-driven-development
+5. ponytail
+6. incremental-implementation
+7. test-driven-development
+8. api-and-interface-design
+9. code-review-and-quality
+10. security-and-hardening
+11. git-workflow-and-versioning
+
+Use YAGNI.
+Do not redesign the framework architecture.
+
+============================================================
+PHASE OBJECTIVES
+============================================================
+
+Implement:
+
+1. Vendor-aware framework crosswalks for the vendors where authoritative
+   mappings actually exist.
+
+2. User-selectable framework evaluation.
+
+3. Strict framework scope filtering.
+
+4. Framework-wise compliance results.
+
+5. Deterministic behavior.
+
+6. Reproducible selected-framework information where the existing architecture
+   already has a safe place for it.
+
+Target flow:
+
+Configuration
+    â†“
+Vendor selection/detection
+    â†“
+Vendor adapter
+    â†“
+CSM
+    â†“
+Selected 
+<truncated 10428 bytes>
+ameworks actually scope evaluation.
+[ ] Unselected frameworks are not evaluated.
+[ ] Framework identity retained in results.
+[ ] Framework-wise aggregation works.
+[ ] Framework scores remain deterministic.
+[ ] Unsupported vendor/framework combinations fail-soft honestly.
+[ ] Focused tests pass.
+[ ] Existing framework tests pass.
+[ ] Cisco/Juniper/Fortinet/Arista regressions pass.
+[ ] Production DB untouched.
+[ ] Protected schemas unchanged.
+[ ] No prohibited execution/network capabilities.
+[ ] No scope creep.
+
+============================================================
+FINAL REPORT
+============================================================
+
+Return:
+
+# PHASE D/E â€” FRAMEWORK SELECTION REPORT
+
+## 1. Existing Framework Inventory
+
+| Framework ID | Vendor Coverage | Authoritative Source |
+
+## 2. Vendor Ã— Framework Matrix
+
+| Vendor | CIS | NIST | DISA STIG | ISO |
+
+Clearly distinguish:
+- mapped
+- unmapped
+- unsupported
+- NOT_ASSESSED
+
+## 3. Files Created
+
+## 4. Files Modified
+
+## 5. API Contract Changes
+
+Show exact request/response changes.
+
+## 6. Selection Semantics
+
+Explain:
+- single framework
+- multiple frameworks
+- empty selection
+- invalid framework
+- incompatible vendor/framework
+
+## 7. Crosswalk Changes
+
+Explain exactly how vendor isolation is maintained.
+
+## 8. Aggregation Changes
+
+Explain framework-wise results and scoring.
+
+## 9. Tests Added
+
+## 10. Exact Test Results
+
+Include exact pytest commands and output.
+
+## 11. Regression Results
+
+Cisco:
+Juniper:
+Fortinet:
+Arista:
+Framework:
+Aggregation:
+
+## 12. Database Safety
+
+Confirm production DB untouched.
+
+## 13. Protected Schema
+
+Confirm unchanged.
+
+## 14. Remaining Mapping Gaps
+
+Be completely explicit.
+
+## 15. Next Phase
+
+State:
+
+NEXT = Vendor Selection / Detection API integration
+
+DO NOT START THE NEXT PHASE AUTOMATICALLY.
+
+STOP AFTER THIS REPORT.
+
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-09-29T09:22:15+05:30.
+</ADDITIONAL_METADATA>

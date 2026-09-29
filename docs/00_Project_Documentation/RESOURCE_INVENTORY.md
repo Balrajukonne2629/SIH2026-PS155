@@ -9,6 +9,7 @@
 | Scanner repositories | `stig-master.zip`, `NetworkConfigPro-main.zip` |
 | Framework mappings | `CCI_List.zip` |
 | Rule library | `Rule_Library.zip` plus extracted contents |
+| Product Presentation Layer | `/landing-page/` standalone evaluator portal, interactive architecture iframe, vector diagrams, and verified benchmarks |
 | Project documents | PRD addendum and project guides |
 
 Collection status describes file presence only; validation and integration are separate activities.

@@ -19,6 +19,8 @@ import re
 
 import src.cisco_auditor as cisco_auditor
 import src.juniper_auditor as juniper_auditor
+import src.fortinet_auditor as fortinet_auditor
+import src.arista_auditor as arista_auditor
 
 
 class VendorAdapter(ABC):
@@ -127,6 +129,8 @@ class CiscoVendorAdapter(VendorAdapter):
         re.compile(r"^\s*(?:system|interfaces|protocols)\s*\{", re.MULTILINE),  # Juniper bracket syntax
         re.compile(r"^\s*##\s*Last\s+changed:", re.MULTILINE),       # Juniper header
         re.compile(r"^\s*config\s+system\s+", re.MULTILINE),         # FortiOS
+        re.compile(r"^\s*management\s+ssh\b", re.MULTILINE),         # Arista EOS
+        re.compile(r"^\s*interface\s+Management\d+\b", re.MULTILINE), # Arista EOS
     ]
 
     @property
@@ -311,3 +315,222 @@ class JuniperVendorAdapter(VendorAdapter):
             trusted_rules=trusted_rules or [],
         )
 
+
+class FortinetVendorAdapter(VendorAdapter):
+    """Fortinet vendor adapter wrapping verified fortinet_auditor logic.
+
+    Implements:
+    - vendor_id = 'fortinet'
+    - vendor_name = 'Fortinet'
+    - supported_platforms = ('FortiOS',)
+    - Canonical parsing and CSM normalization via fortinet_auditor.parse_fortinet
+    - Heuristic detection for block 'config ... end' FortiOS syntax
+    - Baseline rule evaluation via fortinet_auditor.evaluate_rules
+    """
+
+    # Strong FortiOS syntax indicators
+    _FORTINET_STRONG_PATTERNS = (
+        re.compile(r"^\s*config\s+(system|firewall|router|vpn|log|user|switch-controller|wireless-controller)\b", re.MULTILINE),
+        re.compile(r"#config-version=(FG|FortiGate|FW)"),
+        re.compile(r"\bset\s+vdom\s+\"?root\"?"),
+        re.compile(r"\bset\s+allowaccess\s+"),
+        re.compile(r"^\s*edit\s+\"[^\"]+\"", re.MULTILINE),
+    )
+
+    # Medium FortiOS indicators
+    _FORTINET_MEDIUM_PATTERNS = (
+        re.compile(r"^\s*end\s*$", re.MULTILINE),
+        re.compile(r"^\s*next\s*$", re.MULTILINE),
+        re.compile(r"\bset\s+admin-ssh-v1\b"),
+        re.compile(r"\bset\s+admin-telnet\b"),
+        re.compile(r"\bset\s+hostname\s+"),
+    )
+
+    # Disqualifying Cisco and Junos patterns
+    _NON_FORTINET_PATTERNS = (
+        re.compile(r"^\s*!\s*$", re.MULTILINE),
+        re.compile(r"^\s*service\s+timestamps\b", re.MULTILINE),
+        re.compile(r"^\s*aaa\s+new-model\b", re.MULTILINE),
+        re.compile(r"^\s*line\s+vty\b", re.MULTILINE),
+        re.compile(r"^\s*set\s+system\s+services\b", re.MULTILINE),
+        re.compile(r"^\s*interfaces\s*\{", re.MULTILINE),
+    )
+
+    @property
+    def vendor_id(self) -> str:
+        return "fortinet"
+
+    @property
+    def vendor_name(self) -> str:
+        return "Fortinet"
+
+    @property
+    def supported_platforms(self) -> Sequence[str]:
+        return ("FortiOS",)
+
+    def parse(
+        self,
+        text: str,
+        filename: str = "fortinet.conf",
+        trusted_rules: Optional[List[dict]] = None,
+    ) -> Dict[str, Any]:
+        """Parses raw Fortinet FortiOS configuration into the Common Security Model (CSM)."""
+        return fortinet_auditor.parse_fortinet(
+            text=text,
+            filename=filename,
+            trusted_rules=trusted_rules or [],
+        )
+
+    def detect_confidence(self, text: str) -> float:
+        """Determines confidence that the text represents Fortinet FortiOS configuration.
+
+        Scores based on presence of distinctive FortiOS block syntax ('config ... end'),
+        and returns 0.0 if obvious Cisco IOS-XE or Junos markers are detected.
+        """
+        if not text or not text.strip():
+            return 0.0
+
+        # Disqualify immediately if Cisco or Junos syntax is present
+        for pattern in self._NON_FORTINET_PATTERNS:
+            if pattern.search(text):
+                return 0.0
+
+        score = 0.0
+
+        # Check strong markers
+        strong_matches = sum(1 for p in self._FORTINET_STRONG_PATTERNS if p.search(text))
+        if strong_matches >= 2:
+            return 1.0
+        elif strong_matches >= 1:
+            score += 0.6
+
+        # Check medium markers
+        medium_matches = sum(1 for p in self._FORTINET_MEDIUM_PATTERNS if p.search(text))
+        score += 0.15 * medium_matches
+
+        return min(1.0, max(0.0, score))
+
+    def evaluate_legacy_rules(
+        self,
+        csm: Dict[str, Any],
+        rules: List[dict],
+        trusted_rules: Optional[List[dict]] = None,
+    ) -> Dict[str, Any]:
+        """Evaluates Fortinet baseline rules via verified fortinet_auditor."""
+        return fortinet_auditor.evaluate_rules(
+            csm=csm,
+            rules=rules,
+            trusted_rules=trusted_rules or [],
+        )
+
+
+class AristaVendorAdapter(VendorAdapter):
+    """Arista Networks vendor adapter wrapping verified arista_auditor logic.
+
+    Implements:
+    - vendor_id = 'arista'
+    - vendor_name = 'Arista Networks'
+    - supported_platforms = ('EOS',)
+    - Canonical parsing and CSM normalization via arista_auditor.parse_arista
+    - Heuristic detection for distinctive Arista EOS CLI syntax
+    - Baseline rule evaluation via arista_auditor.evaluate_rules
+    """
+
+    # Strong Arista EOS syntax indicators
+    _ARISTA_STRONG_PATTERNS = (
+        re.compile(r"^\s*management\s+ssh\b", re.MULTILINE),
+        re.compile(r"^\s*interface\s+Management\d+\b", re.MULTILINE),
+        re.compile(r"\bspanning-tree\s+bpduguard\s+enable\b"),
+        re.compile(r"\bswitchport\s+trunk\s+allowed\s+vlan\b"),
+        re.compile(r"\brole\s+network-admin\b"),
+        re.compile(r"^\s*protocol-version\s+2\b", re.MULTILINE),
+    )
+
+    # Medium Arista EOS indicators
+    _ARISTA_MEDIUM_PATTERNS = (
+        re.compile(r"^\s*hostname\s+\S+", re.MULTILINE),
+        re.compile(r"^\s*vlan\s+\d+", re.MULTILINE),
+        re.compile(r"^\s*ip\s+routing\b", re.MULTILINE),
+        re.compile(r"^\s*router\s+ospf\s+\d+", re.MULTILINE),
+        re.compile(r"^\s*logging\s+buffered\s+\S+", re.MULTILINE),
+    )
+
+    # Disqualifying Cisco-specific, Junos, and Fortinet patterns
+    _NON_ARISTA_PATTERNS = (
+        re.compile(r"^\s*service\s+timestamps\b", re.MULTILINE),        # Cisco IOS-XE
+        re.compile(r"^\s*aaa\s+new-model\b", re.MULTILINE),             # Cisco IOS-XE
+        re.compile(r"^\s*line\s+vty\b", re.MULTILINE),                  # Cisco IOS-XE
+        re.compile(r"^\s*boot-start-marker\b", re.MULTILINE),           # Cisco IOS-XE
+        re.compile(r"^\s*set\s+system\s+", re.MULTILINE),               # Juniper
+        re.compile(r"^\s*(?:system|interfaces|protocols)\s*\{", re.MULTILINE),  # Juniper
+        re.compile(r"^\s*config\s+system\s+", re.MULTILINE),             # FortiOS
+        re.compile(r"\bset\s+vdom\s+", re.MULTILINE),                   # FortiOS
+    )
+
+    @property
+    def vendor_id(self) -> str:
+        return "arista"
+
+    @property
+    def vendor_name(self) -> str:
+        return "Arista Networks"
+
+    @property
+    def supported_platforms(self) -> Sequence[str]:
+        return ("EOS",)
+
+    def parse(
+        self,
+        text: str,
+        filename: str = "arista.conf",
+        trusted_rules: Optional[List[dict]] = None,
+    ) -> Dict[str, Any]:
+        """Parses raw Arista EOS configuration into the Common Security Model (CSM)."""
+        return arista_auditor.parse_arista(
+            text=text,
+            filename=filename,
+            trusted_rules=trusted_rules or [],
+        )
+
+    def detect_confidence(self, text: str) -> float:
+        """Determines confidence that the text represents Arista EOS configuration.
+
+        Scores based on presence of distinctive EOS CLI syntax (e.g. 'management ssh',
+        'interface Management1', 'switchport trunk allowed vlan'), while returning
+        0.0 if explicit Cisco IOS-XE, Junos, or FortiOS markers are detected.
+        """
+        if not text or not text.strip():
+            return 0.0
+
+        # Disqualify immediately if Cisco IOS-XE, Junos, or FortiOS syntax is present
+        for pattern in self._NON_ARISTA_PATTERNS:
+            if pattern.search(text):
+                return 0.0
+
+        score = 0.0
+
+        # Check strong markers
+        strong_matches = sum(1 for p in self._ARISTA_STRONG_PATTERNS if p.search(text))
+        if strong_matches >= 2:
+            return 1.0
+        elif strong_matches >= 1:
+            score += 0.6
+
+        # Check medium markers
+        medium_matches = sum(1 for p in self._ARISTA_MEDIUM_PATTERNS if p.search(text))
+        score += 0.15 * medium_matches
+
+        return min(1.0, max(0.0, score))
+
+    def evaluate_legacy_rules(
+        self,
+        csm: Dict[str, Any],
+        rules: List[dict],
+        trusted_rules: Optional[List[dict]] = None,
+    ) -> Dict[str, Any]:
+        """Evaluates Arista baseline rules via verified arista_auditor."""
+        return arista_auditor.evaluate_rules(
+            csm=csm,
+            rules=rules,
+            trusted_rules=trusted_rules or [],
+        )

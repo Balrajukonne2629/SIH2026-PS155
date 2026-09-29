@@ -91,11 +91,19 @@ import src.report_exporter as report_exporter
 import src.configuration_progression as configuration_progression
 
 import src.framework_crosswalk as framework_crosswalk
+import src.juniper_auditor as juniper_auditor
+import src.fortinet_auditor as fortinet_auditor
+import src.arista_auditor as arista_auditor
 
 # Register default deterministic compliance frameworks
 cis_benchmark_cisco_iosxe.register_cis_cisco_iosxe()
 disa_stig_cisco_iosxe.register_disa_stig_cisco_iosxe()
 framework_crosswalk.register_crosswalk_frameworks()
+compliance_framework.register_cisco_baseline()
+juniper_auditor.register_juniper_baseline()
+fortinet_auditor.register_fortinet_baseline()
+arista_auditor.register_arista_baseline()
+
 
 
 app = FastAPI(
@@ -583,6 +591,27 @@ async def get_me(current_user: Dict[str, Any] = Depends(get_current_user)):
     )
 
 
+def _parse_framework_ids(raw_val: Any) -> Optional[List[str]]:
+    """Deterministically parses framework_ids parameter from form-data or JSON payloads."""
+    if raw_val is None:
+        return None
+    if isinstance(raw_val, (list, tuple)):
+        return [str(x).strip() for x in raw_val if str(x).strip()]
+    if isinstance(raw_val, str):
+        val = raw_val.strip()
+        if not val:
+            return []
+        if val.startswith("[") and val.endswith("]"):
+            try:
+                parsed = json.loads(val)
+                if isinstance(parsed, list):
+                    return [str(x).strip() for x in parsed if str(x).strip()]
+            except Exception:
+                pass
+        return [x.strip() for x in val.split(",") if x.strip()]
+    return None
+
+
 # --- 1. POST /api/audit/upload ---
 
 @app.post("/api/audit/upload")
@@ -591,6 +620,7 @@ async def audit_upload(
     file: Optional[UploadFile] = File(None),
     raw_config: Optional[str] = Form(None),
     vendor: Optional[str] = Form(None),
+    framework_ids: Optional[str] = Form(None),
     current_user: Dict[str, Any] = Depends(require_role("uploader", "reviewer"))
 ):
     """Accepts uploaded config file (multipart) or raw text.
@@ -600,6 +630,7 @@ async def audit_upload(
     """
     text = ""
     filename = "labeled_test_config.txt"
+    raw_framework_ids = framework_ids
 
     content_type = request.headers.get("content-type", "")
     if "application/json" in content_type:
@@ -608,6 +639,8 @@ async def audit_upload(
             text = body.get("raw_config", "")
             filename = body.get("filename", filename)
             vendor = body.get("vendor", vendor)
+            if "framework_ids" in body:
+                raw_framework_ids = body.get("framework_ids")
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Malformed JSON request: {e}")
     elif file is not None:
@@ -624,6 +657,8 @@ async def audit_upload(
 
     if not text.strip():
         raise HTTPException(status_code=400, detail="Configuration content is empty.")
+
+    parsed_framework_ids = _parse_framework_ids(raw_framework_ids)
 
     try:
         # Determine vendor adapter first to enforce vendor isolation on trusted mappings
@@ -650,6 +685,8 @@ async def audit_upload(
         )
         evals = adapter.evaluate_legacy_rules(csm, baseline_rules, trusted_rules=trusted_rules)
         config_hash = hashlib.sha256(text.encode("utf-8")).hexdigest()
+        if parsed_framework_ids is not None:
+            csm["selected_framework_ids"] = parsed_framework_ids
 
         session_id = str(uuid.uuid4())
         session_data = {
@@ -660,7 +697,8 @@ async def audit_upload(
             "filename": filename,
             "config_file_hash": config_hash,
             "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-            "owner_user_id": current_user["sub"]
+            "owner_user_id": current_user["sub"],
+            "selected_framework_ids": parsed_framework_ids,
         }
         database.save_session(session_data)
 
@@ -668,10 +706,11 @@ async def audit_upload(
         fail_count = sum(1 for v in evals.values() if v.get("status") == "Fail")
         unknown_count = sum(1 for v in evals.values() if v.get("status") == "Unknown")
 
-        return {
+        resp = {
             "session_id": session_id,
             "device_hostname": csm.get("device", {}).get("hostname", "unknown"),
             "platform": csm.get("device", {}).get("platform") or "unknown",
+            "vendor": resolved_vendor,
             "config_file_hash": config_hash,
             "summary": {
                 "total": len(evals),
@@ -682,12 +721,17 @@ async def audit_upload(
             "csm_summary": {
                 "hostname": csm.get("device", {}).get("hostname"),
                 "platform": csm.get("device", {}).get("platform"),
+                "vendor": resolved_vendor,
                 "interfaces_count": len(csm.get("interfaces", [])),
                 "management_ip": csm.get("device", {}).get("management_ip")
             },
             "rule_results": evals,
             "unmapped_lines": csm.get("unmapped_lines", [])
         }
+        if parsed_framework_ids is not None:
+            resp["selected_framework_ids"] = parsed_framework_ids
+            resp["framework_ids"] = parsed_framework_ids
+        return resp
     except (UnsupportedVendorError, UndeterminedVendorError) as ve:
         raise HTTPException(status_code=422, detail=str(ve))
     except HTTPException:
@@ -1381,6 +1425,10 @@ async def evaluate_compliance(
         audit_id = req.session_id
         if isinstance(csm, dict):
             device_hostname = csm.get("device", {}).get("hostname", "unknown")
+            if req.framework_ids is None and csm.get("selected_framework_ids"):
+                req.framework_ids = csm.get("selected_framework_ids")
+        if req.framework_ids is None and session.get("selected_framework_ids"):
+            req.framework_ids = session.get("selected_framework_ids")
     elif req.csm is not None:
         if not isinstance(req.csm, dict):
             raise HTTPException(status_code=422, detail="CSM must be a valid JSON dictionary.")
@@ -1421,7 +1469,10 @@ async def evaluate_compliance(
         raise HTTPException(status_code=422, detail="CSM payload is empty or invalid.")
 
     device_info = csm.get("device") if isinstance(csm.get("device"), dict) else {}
-    raw_vendor = req.vendor or device_info.get("vendor") or device_info.get("platform") or "unknown"
+    req_v = req.vendor.strip().lower() if (req.vendor and req.vendor.strip()) else None
+    if req_v == "auto":
+        req_v = None
+    raw_vendor = req_v or device_info.get("vendor") or device_info.get("platform") or "unknown"
     resolved_vendor = raw_vendor.strip().lower() if isinstance(raw_vendor, str) else "unknown"
 
     registry = compliance_framework.get_default_registry()
@@ -1430,15 +1481,26 @@ async def evaluate_compliance(
 
     # Determine frameworks to evaluate
     if req.framework_ids is None:
-        target_fids = [
-            f.framework_id
-            for f in compatible_fws
-            if f.vendor_scope is not None and registry.get_evaluator(f.framework_id) is not None
-        ]
+        if resolved_vendor == "cisco":
+            # Deterministic default for Cisco: CIS and DISA-STIG
+            target_fids = [
+                fid for fid in ["cis-cisco-iosxe", "disa-stig-cisco-iosxe"]
+                if fid in compatible_fids and registry.get_evaluator(fid) is not None
+            ]
+        else:
+            target_fids = [
+                f.framework_id
+                for f in compatible_fws
+                if f.vendor_scope is not None and registry.get_evaluator(f.framework_id) is not None
+            ]
     else:
         target_fids = []
+        seen = set()
         for fid in req.framework_ids:
             cleaned_fid = fid.strip().lower()
+            if cleaned_fid in seen:
+                continue
+            seen.add(cleaned_fid)
             if not registry.exists(cleaned_fid):
                 raise HTTPException(
                     status_code=422,

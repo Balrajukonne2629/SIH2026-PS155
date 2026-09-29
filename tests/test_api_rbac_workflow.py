@@ -397,7 +397,7 @@ def test_finalization_uploader_and_reviewer_authorization(uploader_a_token, uplo
     conn.close()
 
     # 5. Ledger hash chain verification still succeeds
-    valid, msg, broken_idx = audit_log.verify_chain(main.LOG_FILE)
+    valid, msg, broken_idx = audit_log.verify_chain()
     assert valid is True, f"Hash chain verification failed: {msg}"
 
 
@@ -599,7 +599,7 @@ def test_full_audit_workflow_e2e(uploader_a_token, uploader_b_token, reviewer_to
     conn.close()
 
     # Confirm hash-chain verification still succeeds
-    valid, msg, _ = audit_log.verify_chain(main.LOG_FILE)
+    valid, msg, _ = audit_log.verify_chain()
     assert valid is True, f"Hash chain verification failed: {msg}"
 
     # Confirm report download succeeds
@@ -884,5 +884,5 @@ def test_finalization_compatibility_both_paths(uploader_a_token, reviewer_token)
     assert database.get_session("sess-path-b")["workflow_status"] == "finalized"
 
     # Both paths have valid hash chain
-    valid, msg, _ = audit_log.verify_chain(main.LOG_FILE)
+    valid, msg, _ = audit_log.verify_chain()
     assert valid is True, f"Hash chain verification failed: {msg}"

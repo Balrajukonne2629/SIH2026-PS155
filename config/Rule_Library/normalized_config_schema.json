@@ -41,6 +41,8 @@
           "enum": [
             "cisco",
             "juniper",
+            "fortinet",
+            "paloalto",
             "arista",
             "unknown"
           ]

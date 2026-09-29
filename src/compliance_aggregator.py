@@ -63,6 +63,7 @@ class FrameworkSummary:
     pass_count: int = 0
     fail_count: int = 0
     unknown_count: int = 0
+    not_assessed_count: int = 0
     pass_rate: Optional[float] = None       # Percentage (0.0 to 100.0) or None if (pass + fail == 0)
     unknown_rate: Optional[float] = None   # Percentage (0.0 to 100.0) or None if (total_controls == 0)
     results: List[EvaluationResult] = field(default_factory=list)
@@ -76,6 +77,7 @@ class FrameworkSummary:
             "pass_count": self.pass_count,
             "fail_count": self.fail_count,
             "unknown_count": self.unknown_count,
+            "not_assessed_count": self.not_assessed_count,
             "pass_rate": self.pass_rate,
             "unknown_rate": self.unknown_rate,
             "results": [r.to_dict() for r in self.results],
@@ -90,6 +92,7 @@ class OverallMetrics:
     total_pass: int
     total_fail: int
     total_unknown: int
+    total_not_assessed: int = 0
     overall_pass_rate: Optional[float] = None     # Percentage (0.0 to 100.0) or None if (total_pass + total_fail == 0)
     overall_unknown_rate: Optional[float] = None # Percentage (0.0 to 100.0) or None if (total_controls == 0)
 
@@ -100,6 +103,7 @@ class OverallMetrics:
             "total_pass": self.total_pass,
             "total_fail": self.total_fail,
             "total_unknown": self.total_unknown,
+            "total_not_assessed": self.total_not_assessed,
             "overall_pass_rate": self.overall_pass_rate,
             "overall_unknown_rate": self.overall_unknown_rate,
         }
@@ -224,6 +228,7 @@ class MultiFrameworkAggregator:
         total_fail = 0
         total_unknown = 0
         total_controls_all = 0
+        total_not_assessed = 0
 
         sorted_fids = sorted(framework_groups.keys())
         for fid in sorted_fids:
@@ -234,6 +239,7 @@ class MultiFrameworkAggregator:
             p_count = sum(1 for r in sorted_res if r.status == ComplianceStatus.PASS)
             f_count = sum(1 for r in sorted_res if r.status == ComplianceStatus.FAIL)
             u_count = sum(1 for r in sorted_res if r.status == ComplianceStatus.UNKNOWN)
+            na_count = sum(1 for r in sorted_res if r.status == ComplianceStatus.NOT_ASSESSED)
             # Assessed controls count (excludes NOT_ASSESSED)
             t_count = p_count + f_count + u_count
 
@@ -253,6 +259,7 @@ class MultiFrameworkAggregator:
                 pass_count=p_count,
                 fail_count=f_count,
                 unknown_count=u_count,
+                not_assessed_count=na_count,
                 pass_rate=pass_rate,
                 unknown_rate=unknown_rate,
                 results=sorted_res,
@@ -261,6 +268,7 @@ class MultiFrameworkAggregator:
             total_pass += p_count
             total_fail += f_count
             total_unknown += u_count
+            total_not_assessed += na_count
             total_controls_all += t_count
 
         # 4. Calculate Overall Metrics
@@ -283,6 +291,7 @@ class MultiFrameworkAggregator:
             total_pass=total_pass,
             total_fail=total_fail,
             total_unknown=total_unknown,
+            total_not_assessed=total_not_assessed,
             overall_pass_rate=overall_pass_rate,
             overall_unknown_rate=overall_unknown_rate,
         )

@@ -1,0 +1,614 @@
+<USER_REQUEST>
+# NTRO PS26155 â€” PHASE D/E: FRAMEWORK SELECTION + CROSSWALK INTEGRATION
+
+CURRENT VERIFIED STATE
+
+Completed:
+- Cisco baseline âœ…
+- Juniper baseline âœ…
+- Fortinet baseline âœ…
+- Arista baseline âœ…
+- Crosswalk vendor-isolation bug fixed âœ…
+- Fortinet vendor isolation verified âœ…
+- Arista vendor isolation verified âœ…
+- Arista focused tests: 38 passed
+- Current regression suites: 176 passed
+- Production data/auditor.db untouched
+- Protected DB schemas untouched
+
+The Arista implementation currently reaches NOT_ASSESSED at the framework
+layer because Arista framework mappings have not yet been wired.
+
+THIS PHASE FIXES THAT GAP AND IMPLEMENTS REAL FRAMEWORK SELECTION.
+
+DO NOT START:
+- Palo Alto
+- Bulk upload
+- UI redesign
+- JWT/RBAC
+- SSE/WebSockets
+- queues/workers
+- simulator
+- broad cleanup
+
+============================================================
+REQUIRED SKILLS
+============================================================
+
+Explicitly invoke:
+
+1. using-agent-skills
+2. planning-and-task-breakdown
+3. spec-driven-development
+4. constraint-driven-development
+5. ponytail
+6. incremental-implementation
+7. test-driven-development
+8. api-and-interface-design
+9. code-review-and-quality
+10. security-and-hardening
+11. git-workflow-and-versioning
+
+Use YAGNI.
+Do not redesign the framework architecture.
+
+============================================================
+PHASE OBJECTIVES
+============================================================
+
+Implement:
+
+1. Vendor-aware framework crosswalks for the vendors where authoritative
+   mappings actually exist.
+
+2. User-selectable framework evaluation.
+
+3. Strict framework scope filtering.
+
+4. Framework-wise compliance results.
+
+5. Deterministic behavior.
+
+6. Reproducible selected-framework information where the existing architecture
+   already has a safe place for it.
+
+Target flow:
+
+Configuration
+    â†“
+Vendor selection/detection
+    â†“
+Vendor adapter
+    â†“
+CSM
+    â†“
+Selected framework IDs
+    â†“
+Vendor-specific crosswalk
+    â†“
+Only selected framework controls
+    â†“
+Deterministic evaluation
+    â†“
+PASS / FAIL / UNKNOWN / NOT_ASSESSED
+    â†“
+Framework-wise aggregation
+
+============================================================
+STEP 1 â€” INSPECT AUTHORITATIVE MAPPINGS
+============================================================
+
+Before changing code, inspect:
+
+- config/Rule_Library/vendor_rule_mapping.json
+- all framework definition files
+- framework_crosswalk.py
+- compliance_framework.py
+- multi_framework_aggregation.py
+- existing Cisco mappings
+- existing Juniper mappings
+- existing Fortinet mappings
+- existing Arista mappings
+- existing framework tests
+
+Create a factual matrix:
+
+| Vendor | CIS | NIST | DISA STIG | ISO 27001 | Source |
+| Cisco | ? | ? | ? | ? | |
+| Juniper | ? | ? | ? | ? | |
+| Fortinet | ? | ? | ? | ? | |
+| Arista | ? | ? | ? | ? | |
+
+IMPORTANT:
+
+Do NOT invent framework mappings.
+
+Do NOT assume that a vendor's baseline rule is automatically equivalent to
+a CIS/NIST/DISA/ISO control.
+
+Only use mappings that already exist authoritatively in the repository.
+
+If a mapping does not exist:
+
+- leave it unmapped
+- return NOT_ASSESSED where appropriate
+- document the gap
+
+NEVER borrow Cisco mappings for another vendor.
+
+============================================================
+STEP 2 â€” PRESERVE VENDOR ISOLATION
+============================================================
+
+The following invariant MUST remain true:
+
+Cisco â†’ Cisco mappings
+Juniper â†’ Juniper mappings
+Fortinet â†’ Fortinet mappings
+Arista â†’ Arista mappings
+Unknown â†’ UNKNOWN / NOT_ASSESSED
+
+Never:
+
+Fortinet â†’ Cisco
+Arista â†’ Cisco
+Palo Alto â†’ Cisco
+Unknown â†’ Cisco
+
+The Phase A fix must remain intact.
+
+Add regression coverage proving this.
+
+============================================================
+STEP 3 â€” FRAMEWORK IDS
+============================================================
+
+Use the repository's existing framework IDs.
+
+Do not invent new IDs.
+
+Current known framework IDs include:
+
+- cisco-ios-xe-baseline
+- juniper-junos-baseline
+- cis-cisco-iosxe-v2.2.1
+- disa-stig-cisco-iosxe-v3r7
+- nist-sp-800-53-rev5
+- iso-iec-27001-2022
+
+Inspect the repository to determine which of these are genuinely
+vendor-specific and which are generic/shared.
+
+Do NOT rename existing IDs.
+
+Do NOT break existing callers.
+
+If new vendor-specific framework IDs are required, only create them if
+the existing project architecture and authoritative rule definitions clearly
+support them. Do not create empty fake frameworks just to make the UI work.
+
+============================================================
+STEP 4 â€” STRICT FRAMEWORK SELECTION
+============================================================
+
+The API must support selected framework IDs.
+
+Relevant endpoints currently include:
+
+/api/audit/upload
+/api/compliance/evaluate
+
+Inspect their existing request/response contracts first.
+
+Add:
+
+framework_ids
+
+only in a backward-compatible manner.
+
+Example:
+
+{
+    "vendor": "arista",
+    "framework_ids": [
+        "nist-sp-800-53-rev5",
+        "iso-iec-27001-2022"
+    ]
+}
+
+The evaluator must evaluate ONLY the requested frameworks.
+
+Do NOT evaluate every framework and hide the others afterward.
+
+Bad:
+
+All frameworks evaluated
+        â†“
+UI hides unselected frameworks
+
+Correct:
+
+Selected framework IDs
+        â†“
+Evaluator receives selected scope
+        â†“
+Only selected frameworks evaluated
+
+============================================================
+STEP 5 â€” EMPTY / INVALID FRAMEWORK SELECTION
+============================================================
+
+Define behavior using existing project conventions.
+
+Test:
+
+- one valid framework
+- multiple valid frameworks
+- unknown framework ID
+- empty framework list
+- duplicate framework IDs
+- framework incompatible with vendor
+- vendor unknown
+
+Do not silently substitute another framework.
+
+Do not silently substitute Cisco.
+
+For unsupported vendor/framework combinations:
+
+return deterministic NOT_ASSESSED / appropriate existing status.
+
+Provide an explicit reason.
+
+============================================================
+STEP 6 â€” FRAMEWORK-WISE RESULTS
+============================================================
+
+Results must retain framework identity.
+
+For example:
+
+{
+    "framework_id": "...",
+    "vendor": "arista",
+    "results": [...]
+}
+
+Use the existing response contract if one already exists.
+
+Do not create a competing result format.
+
+The aggregation layer must be able to distinguish:
+
+Framework A:
+PASS = ...
+FAIL = ...
+UNKNOWN = ...
+NOT_ASSESSED = ...
+
+Framework B:
+PASS = ...
+FAIL = ...
+UNKNOWN = ...
+NOT_ASSESSED = ...
+
+Do not mix controls across frameworks.
+
+============================================================
+STEP 7 â€” SCORING
+============================================================
+
+Inspect the existing score calculation first.
+
+Do not introduce a second scoring algorithm.
+
+Framework scores must be calculated from the existing deterministic
+compliance statuses.
+
+Do not count:
+
+NOT_ASSESSED
+
+as FAIL unless the existing project explicitly defines that behavior.
+
+Do not silently change Cisco/Juniper scoring.
+
+If framework scoring currently exists, extend it rather than duplicating it.
+
+============================================================
+STEP 8 â€” TEST-DRIVEN DEVELOPMENT
+============================================================
+
+Create or extend:
+
+tests/test_framework_selection.py
+
+Test at minimum:
+
+1. Single framework selection.
+2. Multiple framework selection.
+3. Only selected frameworks are evaluated.
+4. Unselected frameworks are absent from evaluation.
+5. Duplicate framework IDs are handled deterministically.
+6. Unknown framework ID is rejected or fail-soft according to existing API
+   conventions.
+7. Empty selection follows explicit documented behavior.
+8. Cisco framework evaluation remains unchanged.
+9. Juniper framework evaluation remains unchanged.
+10. Fortinet framework evaluation never inherits Cisco mappings.
+11. Arista framework evaluation never inherits Cisco mappings.
+12. Unknown vendor never receives Cisco mappings.
+13. Framework-wise aggregation is correct.
+14. Framework scores are deterministic.
+15. Same input + same vendor + same framework selection produces identical
+    results across repeated runs.
+16. API accepts framework_ids.
+17. API response exposes framework identity.
+18. Existing API calls without framework_ids remain backward compatible if
+    the current contract requires backward compatibility.
+
+Use temporary databases only.
+
+Never touch data/auditor.db.
+
+============================================================
+STEP 9 â€” DO NOT FABRICATE MAPPINGS
+============================================================
+
+This is critical.
+
+If the repository does NOT contain legitimate:
+
+- Fortinet CIS mapping
+- Fortinet NIST mapping
+- Fortinet ISO mapping
+- Arista CIS mapping
+- Arista NIST mapping
+- Arista ISO mapping
+
+DO NOT INVENT THEM.
+
+Instead:
+
+1. preserve the vendor-specific baseline evaluation;
+2. return NOT_ASSESSED for the unsupported framework/vendor combination;
+3. expose the reason;
+4. document the mapping gap.
+
+The system must be honest rather than appearing more complete than it is.
+
+============================================================
+STEP 10 â€” DATABASE CONSTRAINTS
+============================================================
+
+Do NOT modify:
+
+audit_ledger
+audit_reports
+audit_report_edits
+trusted_mappings
+
+Do not create migrations unless explicitly authorized.
+
+Do not add synthetic rows.
+
+Do not touch:
+
+data/auditor.db
+
+Tests must use isolated temporary databases.
+
+============================================================
+STEP 11 â€” SECURITY CONSTRAINTS
+============================================================
+
+Do not introduce:
+
+subprocess
+socket
+netmiko
+napalm
+paramiko
+pexpect
+telnetlib
+
+into parsing/audit/compliance/aggregation logic.
+
+No network execution.
+
+No remediation execution.
+
+AI never determines compliance.
+
+============================================================
+STEP 12 â€” GIT SAFETY
+============================================================
+
+NEVER run:
+
+git checkout
+git restore
+git reset
+git clean
+git stash
+
+Do not discard unrelated work.
+
+============================================================
+SCOPE LOCK
+============================================================
+
+THIS PHASE IS ONLY:
+
+Framework selection
++
+Vendor-aware framework crosswalk integration
++
+Framework-wise aggregation
+
+DO NOT IMPLEMENT:
+
+- Palo Alto
+- bulk upload
+- UI redesign
+- JWT/RBAC
+- SSE/WebSockets
+- Redis/Celery/RQ
+- simulator
+- Trusted Rule Library GUI
+- broad cleanup
+- dependency upgrades
+- graphify cleanup
+
+If an unrelated problem is discovered:
+
+DOCUMENT IT.
+
+Only fix it if it directly blocks this phase or causes a regression.
+
+============================================================
+VALIDATION ORDER
+============================================================
+
+First:
+
+python -m pytest tests/test_framework_selection.py -v
+
+Then:
+
+python -m pytest tests/test_compliance_gaps.py -q
+
+Then:
+
+python -m pytest tests/test_compliance_framework.py tests/test_multi_framework_aggregation.py -q
+
+Then:
+
+python -m pytest tests/test_juniper_vendor.py -q
+
+Then:
+
+python -m pytest tests/test_fortinet_vendor.py -q
+
+Then:
+
+python -m pytest tests/test_arista_vendor.py -q
+
+Do NOT run the final two consecutive full-suite gates yet.
+
+============================================================
+SUCCESS CRITERIA
+============================================================
+
+[ ] Existing framework IDs preserved.
+[ ] Existing framework behavior preserved.
+[ ] Authoritative vendor mappings identified.
+[ ] No fabricated mappings.
+[ ] Cisco mappings remain Cisco-only.
+[ ] Juniper mappings remain Juniper-only.
+[ ] Fortinet mappings remain Fortinet-only.
+[ ] Arista mappings remain Arista-only.
+[ ] Unknown vendors never inherit Cisco.
+[ ] framework_ids accepted by the appropriate API.
+[ ] Selected frameworks actually scope evaluation.
+[ ] Unselected frameworks are not evaluated.
+[ ] Framework identity retained in results.
+[ ] Framework-wise aggregation works.
+[ ] Framework scores remain deterministic.
+[ ] Unsupported vendor/framework combinations fail-soft honestly.
+[ ] Focused tests pass.
+[ ] Existing framework tests pass.
+[ ] Cisco/Juniper/Fortinet/Arista regressions pass.
+[ ] Production DB untouched.
+[ ] Protected schemas unchanged.
+[ ] No prohibited execution/network capabilities.
+[ ] No scope creep.
+
+============================================================
+FINAL REPORT
+============================================================
+
+Return:
+
+# PHASE D/E â€” FRAMEWORK SELECTION REPORT
+
+## 1. Existing Framework Inventory
+
+| Framework ID | Vendor Coverage | Authoritative Source |
+
+## 2. Vendor Ã— Framework Matrix
+
+| Vendor | CIS | NIST | DISA STIG | ISO |
+
+Clearly distinguish:
+- mapped
+- unmapped
+- unsupported
+- NOT_ASSESSED
+
+## 3. Files Created
+
+## 4. Files Modified
+
+## 5. API Contract Changes
+
+Show exact request/response changes.
+
+## 6. Selection Semantics
+
+Explain:
+- single framework
+- multiple frameworks
+- empty selection
+- invalid framework
+- incompatible vendor/framework
+
+## 7. Crosswalk Changes
+
+Explain exactly how vendor isolation is maintained.
+
+## 8. Aggregation Changes
+
+Explain framework-wise results and scoring.
+
+## 9. Tests Added
+
+## 10. Exact Test Results
+
+Include exact pytest commands and output.
+
+## 11. Regression Results
+
+Cisco:
+Juniper:
+Fortinet:
+Arista:
+Framework:
+Aggregation:
+
+## 12. Database Safety
+
+Confirm production DB untouched.
+
+## 13. Protected Schema
+
+Confirm unchanged.
+
+## 14. Remaining Mapping Gaps
+
+Be completely explicit.
+
+## 15. Next Phase
+
+State:
+
+NEXT = Vendor Selection / Detection API integration
+
+DO NOT START THE NEXT PHASE AUTOMATICALLY.
+
+STOP AFTER THIS REPORT.
+
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-09-29T09:22:15+05:30.
+</ADDITIONAL_METADATA>

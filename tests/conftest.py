@@ -26,6 +26,7 @@ _MODULE_NAMES = [
     "configuration_progression",
     "database",
     "disa_stig_cisco_iosxe",
+    "fortinet_auditor",
     "framework_crosswalk",
     "juniper_auditor",
     "main",
