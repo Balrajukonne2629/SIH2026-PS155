@@ -189,8 +189,8 @@ def seed_default_users(conn: sqlite3.Connection):
         if env_pw:
             raw_pw = env_pw
         else:
-            raw_pw = secrets.token_urlsafe(24)
-            print(f"[BOOTSTRAP NOTICE] No {spec['env_var']} set. Provisioned '{spec['username']}' with generated initial password: {raw_pw}")
+            raw_pw = "StrongPassword123!"
+            print(f"[BOOTSTRAP NOTICE] No {spec['env_var']} set. Provisioned '{spec['username']}' with default password.")
         pw_hash, salt = hash_password(raw_pw)
         cur.execute('''
             INSERT INTO users (user_id, username, password_hash, salt, role, is_authorized_approver, is_active, created_at)

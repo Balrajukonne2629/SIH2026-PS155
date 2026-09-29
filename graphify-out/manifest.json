@@ -1788,9 +1788,9 @@
     "semantic_hash": ""
   },
   "landing-page/src/components/ArchitectureSection.tsx": {
-    "mtime": 1790662607.7673192,
-    "seen": 1790662955.6307287,
-    "ast_hash": "3537c2fa204a977cc5c47cad718312b2",
+    "mtime": 1790664260.0662231,
+    "seen": 1790664326.2476585,
+    "ast_hash": "eb19ffb2b000965a2877554b4ed924e6",
     "semantic_hash": ""
   },
   "landing-page/src/components/DocumentationHub.tsx": {
@@ -1806,27 +1806,27 @@
     "semantic_hash": ""
   },
   "landing-page/src/components/Footer.tsx": {
-    "mtime": 1790662884.4927523,
-    "seen": 1790662955.6307476,
-    "ast_hash": "5d9e0b79ee79c1e1c2b7c1011db92ab5",
+    "mtime": 1790664274.8124528,
+    "seen": 1790664326.247666,
+    "ast_hash": "d323ae6dc4bcaf0516bb93296e84e3c4",
     "semantic_hash": ""
   },
   "landing-page/src/components/FoundationalPillars.tsx": {
-    "mtime": 1790662541.4247055,
-    "seen": 1790662955.6307547,
-    "ast_hash": "c081c30205933ae3fef24434df29bd5a",
+    "mtime": 1790664252.2971418,
+    "seen": 1790664326.2476683,
+    "ast_hash": "f69101709f7a127f88a22cd6457fb3b6",
     "semantic_hash": ""
   },
   "landing-page/src/components/GraphifySpotlight.tsx": {
-    "mtime": 1790662387.1232457,
-    "seen": 1790662955.6307614,
-    "ast_hash": "6ca89f60c90c5f24c63e1f40dc1013c5",
+    "mtime": 1790664270.5603356,
+    "seen": 1790664326.2476695,
+    "ast_hash": "22449c47e62bc1ef01acef6b36f2b718",
     "semantic_hash": ""
   },
   "landing-page/src/components/Hero.tsx": {
-    "mtime": 1790662468.689406,
-    "seen": 1790662955.6307676,
-    "ast_hash": "212e51a36c509cb8d29964c86bce194e",
+    "mtime": 1790664228.2267034,
+    "seen": 1790664326.2476714,
+    "ast_hash": "1ae25e82d5c77e2ada383e5d94743653",
     "semantic_hash": ""
   },
   "landing-page/src/components/MultiVendorSection.tsx": {
@@ -1836,21 +1836,21 @@
     "semantic_hash": ""
   },
   "landing-page/src/components/Navbar.tsx": {
-    "mtime": 1790663356.3386254,
-    "seen": 1790663410.980924,
-    "ast_hash": "118cf0c04d0407a53daf2b69309d47c3",
+    "mtime": 1790664219.82946,
+    "seen": 1790664326.247675,
+    "ast_hash": "2211dbf441567eb5aed6a664a5599786",
     "semantic_hash": ""
   },
   "landing-page/src/components/PipelineWorkflow.tsx": {
-    "mtime": 1790662584.5701585,
-    "seen": 1790662955.6307852,
-    "ast_hash": "ee8124db6fa4c914b910df5870700e38",
+    "mtime": 1790664265.0713184,
+    "seen": 1790664326.2476764,
+    "ast_hash": "131034ece33db6d32cdd3f5b29c62a86",
     "semantic_hash": ""
   },
   "landing-page/src/components/ProblemSolution.tsx": {
-    "mtime": 1790662526.4554043,
-    "seen": 1790662955.6307921,
-    "ast_hash": "d8c3b898c2cbe04e4d655e056f1585cb",
+    "mtime": 1790664237.231279,
+    "seen": 1790664326.247678,
+    "ast_hash": "01c70e8eb5aff6cd7b9bdfc7a06d66c3",
     "semantic_hash": ""
   },
   "landing-page/src/components/PrototypeShowcase.tsx": {
@@ -1860,9 +1860,9 @@
     "semantic_hash": ""
   },
   "landing-page/src/components/TechnicalEvidence.tsx": {
-    "mtime": 1790662963.135021,
-    "seen": 1790663410.9809453,
-    "ast_hash": "71b3296a7c99e991a3b02923482d5c5a",
+    "mtime": 1790663412.5367408,
+    "seen": 1790664326.2476811,
+    "ast_hash": "30e81fe632e8051751b9c7107876d26a",
     "semantic_hash": ""
   },
   "landing-page/src/components/VideoSection.tsx": {
