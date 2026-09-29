@@ -122,19 +122,41 @@ export async function getCurrentUser(): Promise<UserIdentity> {
 }
 
 // 1. POST /api/audit/upload
-export async function uploadAuditConfig(file?: File, rawConfig?: string, filename?: string) {
+export async function uploadAuditConfig(
+  file?: File,
+  rawConfig?: string,
+  filename?: string,
+  vendor?: string,
+  frameworkIds?: string[]
+) {
   if (file) {
     const formData = new FormData();
     formData.append('file', file);
+    if (vendor && vendor !== 'auto') {
+      formData.append('vendor', vendor);
+    }
+    if (frameworkIds && frameworkIds.length > 0) {
+      formData.append('framework_ids', JSON.stringify(frameworkIds));
+    }
     return request<any>('/api/audit/upload', {
       method: 'POST',
       body: formData,
     });
   } else {
+    const payload: Record<string, any> = {
+      raw_config: rawConfig,
+      filename: filename || 'labeled_test_config.txt',
+    };
+    if (vendor && vendor !== 'auto') {
+      payload.vendor = vendor;
+    }
+    if (frameworkIds && frameworkIds.length > 0) {
+      payload.framework_ids = frameworkIds;
+    }
     return request<any>('/api/audit/upload', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ raw_config: rawConfig, filename: filename || 'labeled_test_config.txt' }),
+      body: JSON.stringify(payload),
     });
   }
 }
