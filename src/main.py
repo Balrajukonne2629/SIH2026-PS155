@@ -94,6 +94,7 @@ import src.framework_crosswalk as framework_crosswalk
 import src.juniper_auditor as juniper_auditor
 import src.fortinet_auditor as fortinet_auditor
 import src.arista_auditor as arista_auditor
+import src.paloalto_auditor as paloalto_auditor
 
 # Register default deterministic compliance frameworks
 cis_benchmark_cisco_iosxe.register_cis_cisco_iosxe()
@@ -103,6 +104,7 @@ compliance_framework.register_cisco_baseline()
 juniper_auditor.register_juniper_baseline()
 fortinet_auditor.register_fortinet_baseline()
 arista_auditor.register_arista_baseline()
+paloalto_auditor.register_paloalto_baseline()
 
 
 

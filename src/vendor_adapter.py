@@ -21,6 +21,7 @@ import src.cisco_auditor as cisco_auditor
 import src.juniper_auditor as juniper_auditor
 import src.fortinet_auditor as fortinet_auditor
 import src.arista_auditor as arista_auditor
+import src.paloalto_auditor as paloalto_auditor
 
 
 class VendorAdapter(ABC):
@@ -131,6 +132,8 @@ class CiscoVendorAdapter(VendorAdapter):
         re.compile(r"^\s*config\s+system\s+", re.MULTILINE),         # FortiOS
         re.compile(r"^\s*management\s+ssh\b", re.MULTILINE),         # Arista EOS
         re.compile(r"^\s*interface\s+Management\d+\b", re.MULTILINE), # Arista EOS
+        re.compile(r"^\s*set\s+(?:deviceconfig|shared\s+log-settings|shared\s+server-profile|rulebase\s+security)", re.MULTILINE), # Palo Alto
+        re.compile(r"paloaltonetworks\.panos", re.IGNORECASE),       # Palo Alto
     ]
 
     @property
@@ -245,6 +248,8 @@ class JuniperVendorAdapter(VendorAdapter):
         re.compile(r"^\s*line\s+vty\b", re.MULTILINE),
         re.compile(r"^\s*ip\s+access-list\b", re.MULTILINE),
         re.compile(r"^\s*interface\s+(GigabitEthernet|Loopback|TenGigabitEthernet)\b", re.MULTILINE),
+        re.compile(r"^\s*set\s+(?:deviceconfig|shared\s+log-settings|shared\s+server-profile|rulebase\s+security)", re.MULTILINE), # Palo Alto
+        re.compile(r"paloaltonetworks\.panos", re.IGNORECASE), # Palo Alto
     )
 
     @property
@@ -354,6 +359,8 @@ class FortinetVendorAdapter(VendorAdapter):
         re.compile(r"^\s*line\s+vty\b", re.MULTILINE),
         re.compile(r"^\s*set\s+system\s+services\b", re.MULTILINE),
         re.compile(r"^\s*interfaces\s*\{", re.MULTILINE),
+        re.compile(r"^\s*set\s+(?:deviceconfig|shared\s+log-settings|shared\s+server-profile|rulebase\s+security)", re.MULTILINE), # Palo Alto
+        re.compile(r"paloaltonetworks\.panos", re.IGNORECASE), # Palo Alto
     )
 
     @property
@@ -465,6 +472,8 @@ class AristaVendorAdapter(VendorAdapter):
         re.compile(r"^\s*(?:system|interfaces|protocols)\s*\{", re.MULTILINE),  # Juniper
         re.compile(r"^\s*config\s+system\s+", re.MULTILINE),             # FortiOS
         re.compile(r"\bset\s+vdom\s+", re.MULTILINE),                   # FortiOS
+        re.compile(r"^\s*set\s+(?:deviceconfig|shared\s+log-settings|shared\s+server-profile|rulebase\s+security)", re.MULTILINE), # Palo Alto
+        re.compile(r"paloaltonetworks\.panos", re.IGNORECASE),          # Palo Alto
     )
 
     @property
@@ -534,3 +543,98 @@ class AristaVendorAdapter(VendorAdapter):
             rules=rules,
             trusted_rules=trusted_rules or [],
         )
+
+
+class PaloAltoVendorAdapter(VendorAdapter):
+    """Palo Alto Networks PAN-OS vendor adapter wrapping verified paloalto_auditor parsing logic."""
+
+    # Distinctive PAN-OS CLI syntactic markers
+    _PANOS_STRONG_PATTERNS = (
+        re.compile(r"^\s*set\s+deviceconfig\s+system\s+", re.MULTILINE),
+        re.compile(r"^\s*set\s+shared\s+log-settings\s+syslog\s+", re.MULTILINE),
+        re.compile(r"^\s*set\s+shared\s+server-profile\s+(?:netflow|tacacs|radius)\s+", re.MULTILINE),
+        re.compile(r"^\s*set\s+network\s+virtual-router\s+", re.MULTILINE),
+        re.compile(r"^\s*set\s+rulebase\s+security\s+rules\s+", re.MULTILINE),
+        re.compile(r"paloaltonetworks\.panos", re.IGNORECASE),
+        re.compile(r"panos_security_rule:", re.IGNORECASE),
+    )
+
+    _PANOS_MEDIUM_PATTERNS = (
+        re.compile(r"^\s*set\s+network\s+interface\s+", re.MULTILINE),
+        re.compile(r"^\s*set\s+shared\s+", re.MULTILINE),
+        re.compile(r"PAN-OS", re.IGNORECASE),
+    )
+
+    # Disqualifying Cisco, Juniper, Fortinet, Arista patterns
+    _NON_PANOS_PATTERNS = (
+        re.compile(r"^\s*service\s+timestamps\b", re.MULTILINE),        # Cisco IOS-XE
+        re.compile(r"^\s*aaa\s+new-model\b", re.MULTILINE),             # Cisco IOS-XE
+        re.compile(r"^\s*boot-start-marker\b", re.MULTILINE),           # Cisco IOS-XE
+        re.compile(r"^\s*set\s+system\s+", re.MULTILINE),               # Juniper
+        re.compile(r"^\s*(?:system|interfaces|protocols)\s*\{", re.MULTILINE),  # Juniper
+        re.compile(r"^\s*config\s+system\s+", re.MULTILINE),             # FortiOS
+        re.compile(r"\bset\s+vdom\s+", re.MULTILINE),                   # FortiOS
+        re.compile(r"^\s*management\s+ssh\b", re.MULTILINE),         # Arista EOS
+    )
+
+    @property
+    def vendor_id(self) -> str:
+        return "paloalto"
+
+    @property
+    def vendor_name(self) -> str:
+        return "Palo Alto Networks"
+
+    @property
+    def supported_platforms(self) -> Sequence[str]:
+        return ("PAN-OS",)
+
+    def parse(
+        self,
+        text: str,
+        filename: str = "panos.conf",
+        trusted_rules: Optional[List[dict]] = None,
+    ) -> Dict[str, Any]:
+        """Parses raw Palo Alto PAN-OS configuration into the Common Security Model (CSM)."""
+        return paloalto_auditor.parse_panos(
+            text=text,
+            filename=filename,
+            trusted_rules=trusted_rules or [],
+        )
+
+    def detect_confidence(self, text: str) -> float:
+        """Determines confidence that the text represents Palo Alto PAN-OS configuration."""
+        if not text or not text.strip():
+            return 0.0
+
+        for pattern in self._NON_PANOS_PATTERNS:
+            if pattern.search(text):
+                return 0.0
+
+        score = 0.0
+        strong_matches = sum(1 for p in self._PANOS_STRONG_PATTERNS if p.search(text))
+        if strong_matches >= 2:
+            return 1.0
+        elif strong_matches >= 1:
+            score += 0.8
+
+        medium_matches = sum(1 for p in self._PANOS_MEDIUM_PATTERNS if p.search(text))
+        score += 0.15 * medium_matches
+
+        return min(1.0, max(0.0, score))
+
+    def evaluate_legacy_rules(
+        self,
+        csm: Dict[str, Any],
+        rules: List[dict],
+        trusted_rules: Optional[List[dict]] = None,
+    ) -> Dict[str, Any]:
+        """Evaluates Palo Alto baseline rules via verified paloalto_auditor."""
+        if not any(r.get("vendor_rule_id", "").startswith("PALOALTO-") for r in rules):
+            rules = paloalto_auditor.load_baseline_rules()
+        return paloalto_auditor.evaluate_rules(
+            csm=csm,
+            rules=rules,
+            trusted_rules=trusted_rules or [],
+        )
+

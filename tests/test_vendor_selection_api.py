@@ -43,6 +43,7 @@ from src.vendor_adapter import (
     CiscoVendorAdapter,
     FortinetVendorAdapter,
     JuniperVendorAdapter,
+    PaloAltoVendorAdapter,
     VendorAdapter,
 )
 from src.vendor_registry import (
@@ -429,16 +430,16 @@ def test_undetermined_vendor_fails_soft_with_exception():
 def test_unsupported_vendor_raises_exception():
     """Requirement: Explicit unrecognized vendor raises UnsupportedVendorError."""
     with pytest.raises(UnsupportedVendorError) as exc_info:
-        ingest_configuration(CISCO_SAMPLE, vendor="paloalto")
-    assert "Vendor 'paloalto' is not supported" in str(exc_info.value)
+        ingest_configuration(CISCO_SAMPLE, vendor="brocade")
+    assert "Vendor 'brocade' is not supported" in str(exc_info.value)
 
 
 # ==============================================================================
 # GROUP 4: Vendor Registry & Adapter Resolution
 # ==============================================================================
 
-def test_registry_resolves_all_four_supported_vendors():
-    """Requirement: Registry manages all 4 adapters and provides lookup and enumeration."""
+def test_registry_resolves_all_five_supported_vendors():
+    """Requirement: Registry manages all 5 adapters and provides lookup and enumeration."""
     registry = get_default_vendor_registry()
     vendor_ids = registry.list_vendor_ids()
 
@@ -446,18 +447,21 @@ def test_registry_resolves_all_four_supported_vendors():
     assert "cisco" in vendor_ids
     assert "fortinet" in vendor_ids
     assert "juniper" in vendor_ids
-    assert len(vendor_ids) == 4
+    assert "paloalto" in vendor_ids
+    assert len(vendor_ids) == 5
 
     assert isinstance(registry.get("cisco"), CiscoVendorAdapter)
     assert isinstance(registry.get("juniper"), JuniperVendorAdapter)
     assert isinstance(registry.get("fortinet"), FortinetVendorAdapter)
     assert isinstance(registry.get("arista"), AristaVendorAdapter)
+    assert isinstance(registry.get("paloalto"), PaloAltoVendorAdapter)
 
     assert registry.has("cisco") is True
     assert registry.has("juniper") is True
     assert registry.has("fortinet") is True
     assert registry.has("arista") is True
-    assert registry.has("paloalto") is False
+    assert registry.has("paloalto") is True
+    assert registry.has("brocade") is False
 
 
 def test_registry_detect_ambiguity_returns_none():

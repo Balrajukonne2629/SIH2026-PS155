@@ -217,12 +217,23 @@ ip access-list standard MGMT-ACCESS
 !
 end`;
 
+const SAMPLE_PALOALTO = `set deviceconfig system hostname PA-VM-SECURE
+set deviceconfig system ip-address 192.168.1.10 netmask 255.255.255.0 default-gateway 192.168.1.1
+set deviceconfig system service disable-telnet yes
+set deviceconfig system service disable-http yes
+set deviceconfig system ntp-servers primary-ntp-server ntp-server-address 192.0.2.10
+set shared log-settings syslog Syslog-Server server 10.0.0.50
+set shared server-profile netflow NetFlow-Profile server 10.0.0.60
+set network virtual-router default protocol bgp enable yes
+set rulebase security rules Allow-Mgmt action allow`;
+
 const VENDOR_OPTIONS = [
   { id: 'auto', label: 'Auto Detect', badge: 'Deterministic' },
   { id: 'cisco', label: 'Cisco IOS-XE', badge: 'Cisco' },
   { id: 'juniper', label: 'Juniper Junos', badge: 'Juniper' },
   { id: 'fortinet', label: 'Fortinet FortiOS', badge: 'Fortinet' },
   { id: 'arista', label: 'Arista EOS', badge: 'Arista' },
+  { id: 'paloalto', label: 'Palo Alto PAN-OS', badge: 'Palo Alto' },
 ] as const;
 
 type VendorId = typeof VENDOR_OPTIONS[number]['id'];
@@ -237,6 +248,9 @@ function detectVendorFromContent(content: string): string {
   }
   if (content.includes('management ssh') || content.includes('management api') || (content.includes('role network-admin') && content.includes('switchport'))) {
     return 'arista';
+  }
+  if (content.includes('deviceconfig system') || content.includes('panos') || content.includes('rulebase security')) {
+    return 'paloalto';
   }
   return 'cisco';
 }
@@ -362,7 +376,7 @@ export const UploadScreen: React.FC<UploadScreenProps> = ({
     }
   };
 
-  const handleLoadSample = (vendor: 'cisco' | 'juniper' | 'fortinet' | 'arista') => {
+  const handleLoadSample = (vendor: 'cisco' | 'juniper' | 'fortinet' | 'arista' | 'paloalto') => {
     setUploadError(null);
     setFileObject(undefined);
     if (vendor === 'cisco') {
@@ -385,6 +399,11 @@ export const UploadScreen: React.FC<UploadScreenProps> = ({
       setFileContent(SAMPLE_ARISTA);
       setFileSize(SAMPLE_ARISTA.length);
       setSelectedVendor('arista');
+    } else if (vendor === 'paloalto') {
+      setSelectedFileName('sample_paloalto_panos.conf');
+      setFileContent(SAMPLE_PALOALTO);
+      setFileSize(SAMPLE_PALOALTO.length);
+      setSelectedVendor('paloalto');
     }
   };
 
@@ -544,7 +563,7 @@ export const UploadScreen: React.FC<UploadScreenProps> = ({
               Select or Drag &amp; Drop Network Configuration File
             </h3>
             <p className="text-xs text-slate-400 mt-1">
-              Supports Cisco IOS-XE, Juniper Junos, Fortinet FortiOS, and Arista EOS raw configs (.txt, .cfg, .conf)
+              Supports Cisco IOS-XE, Juniper Junos, Fortinet FortiOS, Arista EOS, and Palo Alto PAN-OS raw configs (.txt, .cfg, .conf)
             </p>
 
             <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
@@ -590,6 +609,13 @@ export const UploadScreen: React.FC<UploadScreenProps> = ({
                   className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-sky-400 text-xs font-mono border border-slate-700 hover:border-sky-500/50 cursor-pointer"
                 >
                   Arista (ARISTA-SECURE-LAB)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleLoadSample('paloalto')}
+                  className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-sky-400 text-xs font-mono border border-slate-700 hover:border-sky-500/50 cursor-pointer"
+                >
+                  Palo Alto (PA-VM-SECURE)
                 </button>
               </div>
             </div>

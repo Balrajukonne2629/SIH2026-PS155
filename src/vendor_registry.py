@@ -22,6 +22,7 @@ from src.vendor_adapter import (
     CiscoVendorAdapter,
     FortinetVendorAdapter,
     JuniperVendorAdapter,
+    PaloAltoVendorAdapter,
     VendorAdapter,
 )
 
@@ -172,6 +173,7 @@ def get_default_vendor_registry() -> VendorRegistry:
         _DEFAULT_REGISTRY.register(JuniperVendorAdapter())
         _DEFAULT_REGISTRY.register(FortinetVendorAdapter())
         _DEFAULT_REGISTRY.register(AristaVendorAdapter())
+        _DEFAULT_REGISTRY.register(PaloAltoVendorAdapter())
     return _DEFAULT_REGISTRY
 
 

@@ -1,5 +1,29 @@
 # Graphify code-first indexing scope
-# Exclude non-code documentation, references, and datasets
+# NTRO PS26155 Product Architecture & Verification Scope
+
+# --- Agent & Workspace Tooling (Exclude from product graph) ---
+.agents/
+.claude/
+.gemini/
+.impeccable/
+.github/
+skills/
+skills-lock.json
+
+# --- Evaluator Presentation Layer & Standalone Bundles ---
+landing-page/
+NTRO-PS26155-OFFLINE-DEMO/
+
+# --- Workspace Maintenance Utilities & Design System Scratchpad ---
+scripts/
+tools/
+tasks/
+design-system/
+
+# --- Decomposed JSON Property Schemas (Evaluator verified in ADR-002 / CSM types) ---
+config/Rule_Library/
+
+# --- Non-Code Documentation, References & Reports ---
 docs/
 references/
 reports/
@@ -7,8 +31,9 @@ datasets/
 data/
 artifacts/
 templates/
+*.md
 
-# Exclude dependencies and build output
+# --- Dependencies, Caches & Build Output ---
 node_modules/
 frontend/node_modules/
 dist/
