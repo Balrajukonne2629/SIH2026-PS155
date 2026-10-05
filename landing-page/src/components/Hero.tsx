@@ -6,7 +6,7 @@ import { useConsoleStatus } from '../context/ConsoleStatusContext';
 export const Hero: React.FC = () => {
   const { isOnline, openConsoleOrModal } = useConsoleStatus();
   return (
-    <section className="relative pt-28 pb-20 md:pt-36 md:pb-28 overflow-hidden border-b border-slate-200 bg-gradient-to-b from-white via-slate-50 to-white">
+    <section id="overview" className="relative pt-28 pb-20 md:pt-36 md:pb-28 overflow-hidden border-b border-slate-200 bg-gradient-to-b from-white via-slate-50 to-white">
       {/* Background Architectural Canvas & Subtle Radial Glow */}
       <div 
         className="absolute inset-0 bg-tech-grid opacity-60 pointer-events-none"

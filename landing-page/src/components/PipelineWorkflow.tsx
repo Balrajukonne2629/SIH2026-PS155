@@ -20,7 +20,8 @@ export const PipelineWorkflow: React.FC = () => {
   };
 
   return (
-    <section id="workflow" className="py-16 md:py-24 bg-surface border-b border-border">
+    <section id="workflow" className="py-16 md:py-24 bg-surface border-b border-border relative">
+      <div id="pipeline-workflow" className="absolute -top-24 pointer-events-none" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="max-w-3xl mb-12">

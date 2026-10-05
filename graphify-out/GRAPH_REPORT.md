@@ -1,46 +1,46 @@
-# Graph Report - PART-2  (2026-09-29)
+# Graph Report - PART-2  (2026-10-05)
 
 ## Corpus Check
-- 98 files · ~151,621 words
+- 98 files · ~255,961 words
 - Verdict: corpus is large enough that graph structure adds value.
-- Unclassified: 11 file(s) not represented in the graph (top: (none) 6, .example 1, .sha256 1)
+- Unclassified: 10 file(s) not represented in the graph (top: (none) 6, .example 1, .conf 1)
 
 ## Summary
-- 2744 nodes · 5215 edges · 177 communities (116 shown, 61 thin omitted)
+- 2747 nodes · 5219 edges · 198 communities (126 shown, 72 thin omitted)
 - Extraction: 92% EXTRACTED · 8% INFERRED · 0% AMBIGUOUS · INFERRED: 412 edges (avg confidence: 0.91)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `2e278109`
+- Built from commit: `88f010b5`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - EvaluationResult
-- json
-- test_paloalto_vendor.py
 - auth.py
-- compliance_framework.py
-- get_default_registry
+- test_paloalto_vendor.py
+- test_auth.py
+- src/main.py
+- TestFrameworkCrosswalkGap
 - test_juniper_vendor.py
 - test_vendor_selection_api.py
 - test_report_export.py
 - test_api_reviewer_identity.py
-- FrameworkRegistry
+- Framework
 - audit_report.py
-- ComplianceStatus
+- MultiFrameworkAggregator
 - test_api_rbac_workflow.py
-- src/main.py
+- audit_upload
 - test_database.py
 - test_configuration_progression.py
 - test_phase3d_repair.py
-- get_connection
+- Any
 - test_trusted_rule_library.py
 - report_exporter.py
 - test_vendor_foundation.py
 - package.json
 - TestDisaStigControlEvaluatorUnit
-- get_default_vendor_registry
+- Control
 - create_audit_entry
 - TestCisControlEvaluatorUnit
 - ReviewerDashboard.tsx
@@ -54,10 +54,10 @@
 - database.py
 - api.ts
 - .aggregate
-- paloalto_auditor.py
+- PaloAltoBaselineEvaluator
 - TestVendorAwareComplianceAPI
 - AIModelManager
-- Any
+- finalize_audit
 - test_api_model_manager.py
 - _create_sample_audit_ledger_entry
 - TestApiFrameworkSelectionEndpoints
@@ -66,25 +66,25 @@
 - test_docker_offline_auth.py
 - TestAristaAdapterAndRegistry
 - TestFortinetParser
-- get
-- cisco_auditor.py
-- VendorRegistry
+- Any
+- main
+- _seed_audit_session
 - create_session_for_uploader
 - compilerOptions
 - FortinetBaselineEvaluator
 - generate_remediation
 - test_arista_vendor.py
-- PaloAltoVendorAdapter
+- TestPaloAltoAdapterAndRegistry
 - assert_no_execution_imports
 - AuditLogReportScreen.tsx
 - HardwareProfile
-- CrosswalkEvaluator
+- .evaluate
 - TestAristaBaselineRules
 - App.tsx
-- ModelMode
+- test_api_full_loop.py
 - CiscoCsmFrameworkAdapter
 - UserIdentity
-- get_authenticated_report
+- Evidence
 - test_api_ownership.py
 - test_fortinet_vendor.py
 - _seed_canonical_report
@@ -98,8 +98,8 @@
 - TestAutoModeSelection
 - TestComplianceAuthorityInvariant
 - test_frontend_upload_frameworks.mjs
-- verify_api_safety_no_execution
-- TestDeviceIdentityGap
+- TestComplianceSecurityASTInvariants
+- parse_juniper
 - TestFortinetRealWorldCSM
 - TestFortinetBaselineRules
 - TestAstSafetyAndDbProtection
@@ -108,14 +108,14 @@
 - ReportError
 - TestOllamaInvocationAndFallbacks
 - TestDeterministicOnlyMode
-- AuditResultsScreen.tsx
+- UploadScreen.tsx
 - test_frontend_compliance_frameworks.mjs
 - test_frontend_rbac_workflow.mjs
 - test_api_compliance.py
 - TestComplianceFrameworkDiscovery
 - TestAristaFrameworkAndIsolation
 - TestFortinetDatasetDiscovery
-- TestFortinetFrameworkEvaluator
+- FrameworkRegistry
 - TestPaloAltoDatasetDiscovery
 - TestPaloAltoParserAndCSM
 - test_frontend_model_manager.mjs
@@ -136,13 +136,13 @@
 - TestFortinetRealWorldApiIngestion
 - TestFortinetApiIngestion
 - TestPaloAltoBaselineRules
-- TestUserSelectedModel
-- TestFastModeSelection
+- register_cis_cisco_iosxe
+- JuniperBaselineEvaluator
 - TestQualityModeSelection
 - require_role
 - delete_trusted_mapping_endpoint
 - test_frontend_auth.mjs
-- check_report_ownership
+- get_connection
 - TestComplianceEvaluateFrameworkFiltering
 - TestDisaStigCatalog
 - TestComplianceAggregatorStaticSecurityInvariants
@@ -191,6 +191,27 @@
 - test_appropriate_error_responses_do_not_leak_report_existence
 - test_viewer_role_is_strictly_read_only_and_cannot_patch
 - test_cross_owner_edits_endpoint_blocked
+- setup_isolated_test_env
+- fixture
+- make_res
+- MockFutureVendorAdapter
+- FrameworkNotFoundError
+- TestFrameworkModel
+- parse_arista
+- InvalidEvaluationResultError
+- TestInputValidation
+- TestCisEvaluationParity
+- TestDuplicateHandling
+- isolate_test_database
+- clean_db
+- TestCisStaticSecurityInvariants
+- TestSecurityAndSafetyInvariants
+- TestDisaStigStaticSecurityInvariants
+- TestFortinetProductionDbImmutability
+- TestPaloAltoAstSafety
+- TestPaloAltoProductionDbImmutability
+- clean_test_db
+- get_last_entry
 
 ## God Nodes (most connected - your core abstractions)
 1. `EvaluationResult` - 64 edges
@@ -219,39 +240,39 @@
 ## Import Cycles
 - None detected.
 
-## Communities (177 total, 61 thin omitted)
+## Communities (198 total, 72 thin omitted)
 
 ### Community 0 - "EvaluationResult"
-Cohesion: 0.05
-Nodes (49): CisCiscoIosXeEvaluator, Any, Evaluates normalized CSM data against the CIS Cisco IOS-XE Benchmark v2.2.1.…, Evaluates normalized CSM against CIS Cisco IOS-XE controls. Args: csm:…, CIS §2.1.1.2: Set version 2 for 'ip ssh version'., CIS §1.1.1: Enable 'aaa new-model'., CIS §2.3.1.1: Set 'ntp authenticate'., CIS §2.2.4: Set IP address for 'logging host'. (+41 more)
+Cohesion: 0.10
+Nodes (20): EvaluationResult, Framework-neutral compliance evaluation verdict for a single control against…, Any, Evaluates normalized CSM data against DISA STIG requirements for Cisco IOS XE.…, Evaluates normalized CSM against DISA-STIG controls. Args: csm: Normalized…, STIG V-215845 (CAT I / SSH): Confidentiality of remote maintenance sessions., STIG V-215854 (CAT I / AAA): Centralized authentication servers., STIG V-215843 (CAT II / NTP): Cryptographic NTP authentication. (+12 more)
 
-### Community 1 - "json"
-Cohesion: 0.04
-Nodes (59): fastapi_testclient, hashlib, json, NTRO PS26155 — Root Application Entrypoint Wrapper. Canonical application…, os, pathlib, pytest, sqlite3 (+51 more)
+### Community 1 - "auth.py"
+Cohesion: 0.07
+Nodes (41): ast, base64, fastapi_testclient, hmac, jinja2, json, NTRO PS26155 — Root Application Entrypoint Wrapper. Canonical application…, os (+33 more)
 
 ### Community 2 - "test_paloalto_vendor.py"
-Cohesion: 0.04
-Nodes (42): AristaVendorAdapter, JuniperVendorAdapter, ABC, NTRO PS26155 — Vendor Adapter Contract & Cisco Adapter Implementation. Defines…, Juniper Networks vendor adapter wrapping verified juniper_auditor logic.…, Abstract interface defining vendor-specific configuration parsing and…, Determines confidence that the text represents Juniper Junos configuration.…, Stable, unique identifier for the vendor (e.g. 'cisco', 'juniper'). (+34 more)
-
-### Community 3 - "auth.py"
-Cohesion: 0.07
-Nodes (54): base64, hmac, secrets, AuthError, base64url_decode(), base64url_encode(), create_access_token(), decode_and_verify_jwt() (+46 more)
-
-### Community 4 - "compliance_framework.py"
-Cohesion: 0.07
-Nodes (39): dataclasses, datetime, random, re, NTRO PS26155 — Arista EOS Compliance Auditor & Parser (Phase C). Provides pure…, NTRO PS26155 — CIS Benchmark Cisco IOS-XE Deterministic Control Catalog (Phase…, NTRO PS26155 — Multi-Framework Scoring, Aggregation & Evidence Consolidation…, FrameworkEvaluator (+31 more)
-
-### Community 5 - "get_default_registry"
 Cohesion: 0.05
-Nodes (39): Registers the 'arista-eos-baseline' framework and evaluator into…, register_arista_baseline(), Registers the CIS Cisco IOS-XE Benchmark v2.2.1 framework and evaluator into…, register_cis_cisco_iosxe(), get_default_registry(), Returns the shared process-level FrameworkRegistry instance., Registers the 'cisco-ios-xe-baseline' framework and evaluator into…, register_cisco_baseline() (+31 more)
+Nodes (29): ABC, Abstract interface defining vendor-specific configuration parsing and…, Stable, unique identifier for the vendor (e.g. 'cisco', 'juniper')., Human-readable vendor name (e.g. 'Cisco Systems', 'Juniper Networks')., List of supported operating system platforms (e.g. ('IOS-XE',), ('Junos',))., Evaluates whether the provided raw configuration text belongs to this vendor.…, VendorAdapter, Returns all registered adapters sorted by vendor_id. (+21 more)
+
+### Community 3 - "test_auth.py"
+Cohesion: 0.08
+Nodes (50): AuthError, base64url_decode(), base64url_encode(), create_access_token(), decode_and_verify_jwt(), get_jwt_secret(), InvalidTokenError, Any (+42 more)
+
+### Community 4 - "src/main.py"
+Cohesion: 0.08
+Nodes (46): dataclasses, datetime, fastapi_middleware_cors, fastapi_responses, hashlib, pydantic, random, re (+38 more)
+
+### Community 5 - "TestFrameworkCrosswalkGap"
+Cohesion: 0.10
+Nodes (12): fixture, Verifies NIST SP 800-53 rev5 and ISO/IEC 27001:2022 crosswalk evaluation., Registers crosswalk frameworks in the default registry., NIST and ISO frameworks are present in FrameworkRegistry., Every active Cisco baseline rule is mapped in NIST and ISO crosswalks., Every active Junos baseline rule is mapped in NIST and ISO crosswalks., Unmapped controls evaluate to NOT_ASSESSED with exact required reason., Unknown or unsupported vendors must NOT inherit Cisco framework mappings. (+4 more)
 
 ### Community 6 - "test_juniper_vendor.py"
 Cohesion: 0.04
-Nodes (52): fixture, NTRO PS26155 — Juniper Junos Vendor Integration Tests (Phase 2). Comprehensive…, Returns a synthetic Junos configuration in flat 'set' format., Fully compliant Junos config where all 10 initial rules PASS., Non-compliant Junos config where all 10 initial rules FAIL., Verify JuniperVendorAdapter registers cleanly in VendorRegistry., Verify process-level default registry contains both Cisco and Juniper., Verify detection accurately identifies hierarchical Junos configs. (+44 more)
+Nodes (46): JuniperVendorAdapter, Juniper Networks vendor adapter wrapping verified juniper_auditor logic.…, Determines confidence that the text represents Juniper Junos configuration.…, clean_vendor_registry(), NTRO PS26155 — Juniper Junos Vendor Integration Tests (Phase 2). Comprehensive…, Verify JuniperVendorAdapter properties conform to VendorAdapter contract., Verify JuniperVendorAdapter registers cleanly in VendorRegistry., Verify detection accurately identifies hierarchical Junos configs. (+38 more)
 
 ### Community 7 - "test_vendor_selection_api.py"
-Cohesion: 0.05
-Nodes (50): ast, NTRO PS26155 — AST Safety Verification Utility (Phase 3R.3). Provides…, ingest_configuration(), Any, Unified ingestion entry point decoupling callers from vendor-specific parsers.…, NTRO PS26155 — Vendor Selection + Detection API Integration Test Suite.…, Requirement: System supports explicit selection of cisco, juniper, fortinet,…, Requirement: Explicit vendor selection is case-insensitive. (+42 more)
+Cohesion: 0.03
+Nodes (73): src, ComplianceEvaluateRequest, evaluate_compliance(), Executes deterministic multi-framework compliance evaluation against CSM or…, PaloAltoVendorAdapter, Palo Alto Networks PAN-OS vendor adapter wrapping verified paloalto_auditor…, Determines confidence that the text represents Palo Alto PAN-OS configuration., get_default_vendor_registry() (+65 more)
 
 ### Community 8 - "test_report_export.py"
 Cohesion: 0.08
@@ -261,25 +282,25 @@ Nodes (49): pypdf, _build_cisco_multi_framework_report(), _extract_docx_xml(), _
 Cohesion: 0.06
 Nodes (49): authorized_approver_token(), non_approver_reviewer_token(), fixture, NTRO PS26155 Auditor — Reviewer Identity & Approval Accountability Binding…, Scenario 1: Authorized reviewer can approve compliance rules., Scenario 2: Reviewer identity recorded in DB equals authenticated JWT 'sub'., Scenario 3: Client-supplied reviewer_name is ignored; JWT sub is authoritative., Scenario 4: Client-supplied reviewer_id in payload is ignored. (+41 more)
 
-### Community 10 - "FrameworkRegistry"
-Cohesion: 0.07
-Nodes (23): KeyError, Framework, FrameworkNotFoundError, FrameworkRegistry, Metadata and identity contract representing an authoritative compliance…, Raised when an unregistered framework ID is requested., Explicit, dependency-injectable registry for compliance frameworks and their…, Registers a framework and its optional evaluator. Args: framework: Framework… (+15 more)
+### Community 10 - "Framework"
+Cohesion: 0.14
+Nodes (9): Framework, Metadata and identity contract representing an authoritative compliance…, Tests A, B, C: Cisco vendor matching, case-insensitivity, and platform string…, Test D: Juniper must NOT return Cisco-only frameworks., Test E: Unknown vendor returns only vendor-neutral frameworks, or [] if none., Tests F, G: Disabled frameworks excluded when enabled_only=True, included when…, Test H: Repeated calls return identical framework order., Tests empty/whitespace vendor string handling. (+1 more)
 
 ### Community 11 - "audit_report.py"
 Cohesion: 0.07
 Nodes (35): AuditReport, create_or_get_canonical_report(), create_report_from_audit_data(), FrameworkReportItem, get_canonical_report(), get_canonical_report_by_entry_id(), HumanEditableContent, InvalidFieldPathError (+27 more)
 
-### Community 12 - "ComplianceStatus"
-Cohesion: 0.07
-Nodes (21): MultiFrameworkAggregator, Deterministic aggregation engine for multi-framework compliance evaluation…, Initializes aggregator with an optional registry for framework metadata…, ComplianceStatus, Enum, str, Authoritative, deterministic compliance evaluation verdict. Strictly restricted…, make_res() (+13 more)
+### Community 12 - "MultiFrameworkAggregator"
+Cohesion: 0.18
+Nodes (8): MultiFrameworkAggregator, Deterministic aggregation engine for multi-framework compliance evaluation…, Initializes aggregator with an optional registry for framework metadata…, Attempts to resolve human-readable framework name and version from registry., Tests cross-framework macro metrics and transparency., Tests that evidence and summaries are deterministically ordered regardless of…, TestDeterminismAndOrdering, TestOverallMetrics
 
 ### Community 13 - "test_api_rbac_workflow.py"
 Cohesion: 0.06
 Nodes (44): clean_test_db(), fixture, NTRO PS26155 Auditor — Backend Audit Workflow API & Ownership Hardening Tests…, Helper to seed an audit session directly in SQLite., Unauthenticated requests to /api/audit/sessions must return 401., Verify uploader receives only own sessions, while reviewer and viewer receive…, Verify ?status= filtering returns correct subset and unknown status returns…, Verify sessions are ordered deterministically by created_at DESC, session_id… (+36 more)
 
-### Community 14 - "src/main.py"
-Cohesion: 0.07
-Nodes (43): fastapi_middleware_cors, fastapi_responses, pydantic, Request, save_session(), ai_approve(), ApproveRequest, audit_upload() (+35 more)
+### Community 14 - "audit_upload"
+Cohesion: 0.13
+Nodes (18): post, Request, save_session(), ai_approve(), ai_suggest(), ApproveRequest, audit_upload(), export_canonical_report_docx() (+10 more)
 
 ### Community 15 - "test_database.py"
 Cohesion: 0.05
@@ -291,99 +312,95 @@ Nodes (40): compute_audit_entry_metrics(), compute_version_delta(), derive_confi
 
 ### Community 17 - "test_phase3d_repair.py"
 Cohesion: 0.09
-Nodes (41): isolated_db(), _make_token(), fixture, NTRO PS26155 — Phase 3D Report Workflow Repair Verification Suite. Covers the…, Scenario 1: reviewer-authenticated user retrieves their canonical report., Scenario 2: reviewer can PATCH an allowlisted editable field., Scenario 3: each valid edit monotonically increments the report version., Scenario 4: edit_metadata.edited_by is derived from the JWT sub claim, never… (+33 more)
+Nodes (40): isolated_db(), _make_token(), fixture, NTRO PS26155 — Phase 3D Report Workflow Repair Verification Suite. Covers the…, Scenario 1: reviewer-authenticated user retrieves their canonical report., Scenario 2: reviewer can PATCH an allowlisted editable field., Scenario 3: each valid edit monotonically increments the report version., Scenario 4: edit_metadata.edited_by is derived from the JWT sub claim, never… (+32 more)
 
-### Community 18 - "get_connection"
-Cohesion: 0.08
-Nodes (40): Row, approve_suggestion(), Path, store_suggestion(), get_last_entry(), Reads the last entry of the sqlite log to retrieve the previous entryHash., create_user(), get_audit_report_by_entry_id() (+32 more)
+### Community 18 - "Any"
+Cohesion: 0.12
+Nodes (24): Row, get_audit_report(), get_pending_suggestion(), get_trusted_mapping(), list_pending_suggestions(), list_sessions(), list_trusted_mappings(), Any (+16 more)
 
 ### Community 19 - "test_trusted_rule_library.py"
-Cohesion: 0.06
-Nodes (39): approver_token(), non_approver_reviewer_token(), fixture, NTRO PS26155 Auditor — Phase 3B: Trusted Rule Library & Human-Approved AI…, A. AI mapping suggestion creates a pending suggestion but NEVER writes to…, B. Authorized reviewer promotes a suggestion to a trusted rule mapping in…, C. Viewer, uploader, and non-approver reviewer all receive HTTP 403 Forbidden., D. approve_with_correction writes the reviewer-supplied mapping with… (+31 more)
+Cohesion: 0.05
+Nodes (41): load_trusted_rules(), Loads approved trusted custom rules from SQLite trusted_mappings table.…, approver_token(), non_approver_reviewer_token(), fixture, NTRO PS26155 Auditor — Phase 3B: Trusted Rule Library & Human-Approved AI…, A. AI mapping suggestion creates a pending suggestion but NEVER writes to…, B. Authorized reviewer promotes a suggestion to a trusted rule mapping in… (+33 more)
 
 ### Community 20 - "report_exporter.py"
 Cohesion: 0.09
 Nodes (33): html, reportlab_graphics_barcode, reportlab_graphics_shapes, reportlab_lib, reportlab_lib_pagesizes, reportlab_lib_styles, reportlab_platypus, _atomic_export() (+25 more)
 
 ### Community 21 - "test_vendor_foundation.py"
-Cohesion: 0.06
-Nodes (29): MockFutureVendorAdapter, fixture, NTRO PS26155 — Vendor Foundation & Scalable Architecture Tests (Phase 1).…, Test C: Verifies Cisco CSM output remains 100% compatible with existing…, Test D: Verifies existing Cisco audit API upload behavior remains intact., Test D2: Verifies /api/compliance/evaluate route works with raw_config through…, Test E1: Explicit unsupported vendor raises UnsupportedVendorError., Test E2: Explicit unsupported vendor via upload API returns HTTP 422. (+21 more)
+Cohesion: 0.07
+Nodes (29): fixture, NTRO PS26155 — Vendor Foundation & Scalable Architecture Tests (Phase 1).…, Test C: Verifies Cisco CSM output remains 100% compatible with existing…, Test D: Verifies existing Cisco audit API upload behavior remains intact., Test D2: Verifies /api/compliance/evaluate route works with raw_config through…, Test E1: Explicit unsupported vendor raises UnsupportedVendorError., Test E2: Explicit unsupported vendor via upload API returns HTTP 422., Test E3: Ambiguous or non-network configuration without vendor raises… (+21 more)
 
 ### Community 22 - "package.json"
 Cohesion: 0.06
 Nodes (32): dependencies, lucide-react, react, react-dom, devDependencies, autoprefixer, postcss, tailwindcss (+24 more)
 
-### Community 24 - "get_default_vendor_registry"
-Cohesion: 0.07
-Nodes (25): CiscoVendorAdapter, Cisco IOS-XE vendor adapter wrapping verified cisco_auditor parsing logic.…, Parses Cisco configuration into CSM via verified cisco_auditor., Determines confidence that the text represents Cisco configuration. Scores…, Evaluates Cisco baseline rules via verified cisco_auditor., get_default_vendor_registry(), Returns the shared process-level VendorRegistry pre-seeded with Cisco, Juniper,…, clean_vendor_registry() (+17 more)
+### Community 24 - "Control"
+Cohesion: 0.09
+Nodes (20): CisCiscoIosXeEvaluator, Any, Evaluates normalized CSM data against the CIS Cisco IOS-XE Benchmark v2.2.1.…, Evaluates normalized CSM against CIS Cisco IOS-XE controls. Args: csm:…, CIS §2.1.1.2: Set version 2 for 'ip ssh version'., CIS §1.1.1: Enable 'aaa new-model'., CIS §2.3.1.1: Set 'ntp authenticate'., CIS §2.2.4: Set IP address for 'logging host'. (+12 more)
 
 ### Community 25 - "create_audit_entry"
 Cohesion: 0.13
 Nodes (30): append_audit_entry(), create_audit_entry(), Re-walks entire log table, recalculates all hashes, and verifies prevEntryHash…, Builds a new hash-chained audit entry, computing prevEntryHash and entryHash., Appends an audit entry into SQLite. Uses sort_keys=True for JSON columns so…, verify_chain(), _make_dummy_csm(), _make_dummy_evals() (+22 more)
 
-### Community 26 - "TestCisControlEvaluatorUnit"
-Cohesion: 0.06
-Nodes (5): fixture, Unit tests for each individual CIS control under PASS, FAIL, and UNKNOWN…, Tests parity between CisCiscoIosXeEvaluator and cisco_auditor.py baseline rules., TestCisControlEvaluatorUnit, TestCisEvaluationParity
-
 ### Community 27 - "ReviewerDashboard.tsx"
-Cohesion: 0.15
-Nodes (24): getAuditSessions(), getConfigurationProgression(), getLedger(), getTrustedMappings(), uploadAuditConfig(), AuditsScreen(), AuditsScreenProps, DashboardScreen() (+16 more)
+Cohesion: 0.24
+Nodes (10): getAuditSessions(), getConfigurationProgression(), AuditsScreen(), VersionGraphPoint, AuditSessionSummary, ConfigurationProgressionResponse, ConfigurationVersionNode, SuggestionQueueItem (+2 more)
 
 ### Community 28 - "types.ts"
 Cohesion: 0.09
 Nodes (26): getModelStatus(), setModelMode(), AiModelManagerScreen(), AiModelManagerScreenProps, SystemScreen(), SystemScreenProps, AuditLogEntry, AuditStatus (+18 more)
 
 ### Community 29 - "AristaBaselineEvaluator"
-Cohesion: 0.08
-Nodes (17): parametrize, AristaBaselineEvaluator, _cidr_to_netmask(), evaluate_arista_baseline(), evaluate_rules(), _netmask_to_cidr(), parse_arista(), Any (+9 more)
+Cohesion: 0.12
+Nodes (10): AristaBaselineEvaluator, evaluate_arista_baseline(), evaluate_rules(), Any, Deterministically evaluates the 10 Arista baseline security rules against…, Authoritative baseline evaluator for Arista EOS rules., Framework evaluator implementing the FrameworkEvaluator interface for Arista…, Runs deterministic Arista evaluation against normalized CSM. (+2 more)
 
 ### Community 30 - "test_api_auth.py"
 Cohesion: 0.07
 Nodes (4): fixture, NTRO PS26155 Auditor — API Authentication Integration Tests Tests for Chunk 3:…, Ensures database is initialized, test users are provisioned, and rate-limiting…, setup_test_users_and_state()
 
 ### Community 31 - "ai_model_manager.py"
-Cohesion: 0.10
-Nodes (23): ctypes, jinja2, src, AI Model Manager Subsystem (PRD Addendum §2, Benchmark Audit Architecture).…, _generate_rationale_ai(), _get_embedding(), get_model(), Local AI Unmapped Line Suggester & Reviewer Approval Workflow (PRD Addendum… (+15 more)
+Cohesion: 0.11
+Nodes (23): ctypes, ModelMode, ModelResponse, Enum, str, AI Model Manager Subsystem (PRD Addendum §2, Benchmark Audit Architecture).…, Validates an override model name against the strict allowlist. Returns…, Updates the active model selection mode and optional override tag. Enforces… (+15 more)
 
 ### Community 32 - "TestAristaParserAndCSM"
 Cohesion: 0.07
 Nodes (15): Tests Arista EOS parsing and CSM normalization., Extracts exact hostnames from all four configurations., Device metadata sets vendor='arista' and platform='EOS'., Missing hardware and OS metadata are preserved as None without fabrication., Verifies management IP extraction follows Management1 > description > Loopback…, Extracts SSH configuration accurately., Telnet remains False by default., Extracts AAA authentication and authorization commands and users. (+7 more)
 
 ### Community 33 - "test_phase3a_model_selection.py"
-Cohesion: 0.09
-Nodes (21): inspect, io, Comprehensive Test Suite for AI Model Manager (Chunk 1 Backend Core). Verifies:…, fixture, Phase 3A: Hardware-Adaptive AI Model Selection — Focused Test Suite. Covers all…, POST /api/model/mode with deterministic_only must succeed for authorized…, After setting deterministic_only, GET /api/model/status must reflect it., RBAC: viewer must not be able to change mode. (+13 more)
+Cohesion: 0.08
+Nodes (22): inspect, io, Comprehensive Test Suite for AI Model Manager (Chunk 1 Backend Core). Verifies:…, fixture, Phase 3A: Hardware-Adaptive AI Model Selection — Focused Test Suite. Covers all…, POST /api/model/mode with deterministic_only must succeed for authorized…, After setting deterministic_only, GET /api/model/status must reflect it., RBAC: viewer must not be able to change mode. (+14 more)
 
 ### Community 34 - "run_evaluation"
 Cohesion: 0.10
 Nodes (17): MultiFrameworkAuditResult, Helper orchestrating evaluation of selected frameworks against CSM and…, Verifies framework selection and strict scoping., Selecting exactly one framework evaluates only that framework., Selecting multiple frameworks evaluates only the requested frameworks., Unselected frameworks are not evaluated at all., Duplicate IDs are deduplicated deterministically preserving first occurrence., Unknown framework ID raises KeyError. (+9 more)
 
 ### Community 35 - "database.py"
-Cohesion: 0.13
-Nodes (23): Connection, on_event, initialize_database(), migrate_ledger(), migrate_pending_suggestions(), migrate_schema_add_audit_reports(), migrate_schema_add_ownership(), migrate_schema_add_trusted_library_fields() (+15 more)
+Cohesion: 0.14
+Nodes (21): Connection, on_event, secrets, initialize_database(), list_users(), migrate_ledger(), migrate_pending_suggestions(), migrate_schema_add_audit_reports() (+13 more)
 
 ### Community 36 - "api.ts"
 Cohesion: 0.17
 Nodes (20): API_BASE, approveSuggestion(), deleteTrustedMapping(), finalizeAudit(), getPendingSuggestion(), getPendingSuggestions(), getRemediation(), getReportByEntryId() (+12 more)
 
 ### Community 37 - ".aggregate"
-Cohesion: 0.10
-Nodes (17): AggregationError, ConflictingControlEvaluationError, ConsolidatedEvidence, FrameworkSummary, InvalidEvaluationResultError, OverallMetrics, Any, Exception (+9 more)
+Cohesion: 0.16
+Nodes (9): ConsolidatedEvidence, FrameworkSummary, OverallMetrics, Any, Deterministic, unified record of observed evidence for a specific evaluated…, Aggregates a sequence of EvaluationResult objects into a…, Validates that the input item adheres to the EvaluationResult contract., Consolidated summary for a single compliance framework within an audit. (+1 more)
 
-### Community 38 - "paloalto_auditor.py"
+### Community 38 - "PaloAltoBaselineEvaluator"
 Cohesion: 0.12
-Nodes (17): eval_condition(), evaluate_rules(), load_baseline_rules(), PaloAltoBaselineEvaluator, parse_panos(), Any, NTRO PS26155 — Palo Alto PAN-OS Compliance Auditor & Parser. Provides pure…, Resolves a dot-delimited path (e.g. 'csm.services.ssh') in the CSM dict. (+9 more)
+Nodes (14): eval_condition(), evaluate_rules(), load_baseline_rules(), PaloAltoBaselineEvaluator, parse_panos(), Any, Resolves a dot-delimited path (e.g. 'csm.services.ssh') in the CSM dict., Evaluates a CSM condition string deterministically returning 'Pass', 'Fail', or… (+6 more)
 
 ### Community 39 - "TestVendorAwareComplianceAPI"
 Cohesion: 0.08
 Nodes (13): Verifies vendor-scoped framework auto-selection, cross-vendor rejection, and…, When framework_ids is None, a Cisco CSM auto-evaluates only Cisco frameworks., When framework_ids is None, a Juniper CSM does not evaluate any Cisco…, When Juniper baseline is registered, Juniper CSM auto-selects only Juniper…, Client attempting to evaluate cis-cisco-iosxe on Juniper CSM is rejected with…, Client attempting to evaluate disa-stig-cisco-iosxe on Juniper CSM is rejected…, Attempting to evaluate a registered but disabled framework fails with HTTP 422., GET /api/compliance/frameworks without vendor returns all registered frameworks. (+5 more)
 
 ### Community 40 - "AIModelManager"
-Cohesion: 0.12
-Nodes (10): AIModelManager, Coordinates local model selection, invocation, and fail-safe degradation., Seeds initial manager state from environment variables at startup. Preserves…, Enforces loopback-only binding to prevent Server-Side Request Forgery (SSRF)., Resets active mode to AUTO and clears overrides (or re-bootstraps from…, TestSecurityBoundaries, Req 9: Loopback-only, no arbitrary models, no secrets via API response., An unlisted model must never reach urllib.request.urlopen. (+2 more)
+Cohesion: 0.09
+Nodes (12): AIModelManager, Coordinates local model selection, invocation, and fail-safe degradation., Seeds initial manager state from environment variables at startup. Preserves…, Enforces loopback-only binding to prevent Server-Side Request Forgery (SSRF)., Resets active mode to AUTO and clears overrides (or re-bootstraps from…, TestSecurityBoundaries, Req 1 (override mode) & 6: User-selected model validated against allowlist., Req 9: Loopback-only, no arbitrary models, no secrets via API response. (+4 more)
 
-### Community 41 - "Any"
-Cohesion: 0.13
-Nodes (22): post, Updates the workflow_status of an audit session. Validates that new_status is…, update_session_workflow_status(), check_session_ownership(), export_canonical_report_docx(), export_canonical_report_pdf(), finalize_audit(), FinalizeRequest (+14 more)
+### Community 41 - "finalize_audit"
+Cohesion: 0.40
+Nodes (5): Updates the workflow_status of an audit session. Validates that new_status is…, update_session_workflow_status(), finalize_audit(), FinalizeRequest, Writes the real hash-chained audit log entry into SQLite audit_ledger…
 
 ### Community 43 - "_create_sample_audit_ledger_entry"
 Cohesion: 0.10
@@ -398,8 +415,8 @@ Cohesion: 0.11
 Nodes (8): fastapi, fixture, NTRO PS26155 Auditor — Role-Based Access Control (RBAC) API Integration Tests…, reviewer_non_approver_token(), reviewer_token(), setup_db(), uploader_token(), viewer_token()
 
 ### Community 46 - "Any"
-Cohesion: 0.10
-Nodes (11): Any, Parses raw Juniper Junos configuration into the Common Security Model (CSM)., Evaluates Juniper baseline rules via verified juniper_auditor., Parses raw Fortinet FortiOS configuration into the Common Security Model (CSM)., Evaluates Fortinet baseline rules via verified fortinet_auditor., Parses raw Arista EOS configuration into the Common Security Model (CSM)., Evaluates Arista baseline rules via verified arista_auditor., Parses raw Palo Alto PAN-OS configuration into the Common Security Model (CSM). (+3 more)
+Cohesion: 0.08
+Nodes (13): Any, Parses Cisco configuration into CSM via verified cisco_auditor., Evaluates Cisco baseline rules via verified cisco_auditor., Parses raw Juniper Junos configuration into the Common Security Model (CSM)., Evaluates Juniper baseline rules via verified juniper_auditor., Parses raw Fortinet FortiOS configuration into the Common Security Model (CSM)., Evaluates Fortinet baseline rules via verified fortinet_auditor., Parses raw Arista EOS configuration into the Common Security Model (CSM). (+5 more)
 
 ### Community 47 - "test_docker_offline_auth.py"
 Cohesion: 0.19
@@ -413,17 +430,17 @@ Nodes (11): Verifies AristaVendorAdapter registration and detection., Verifies a
 Cohesion: 0.10
 Nodes (11): Verifies parsing of FortiOS configuration into Common Security Model (CSM)., Parsed Fortinet CSM must conform strictly to normalized_config_schema.json., Header line #config-version extracts hardware model and OS version., Extracts SSH version, lockout limits, and telnet state accurately., Extracts NTP sync status, server IP, and authentication., Extracts remote syslog server and logging status., Extracts SNMP community strings and correctly flags weak communities., Extracts dedicated management interface and priority management IP. (+3 more)
 
-### Community 50 - "get"
-Cohesion: 0.11
-Nodes (19): get, check_entry_ownership(), download_report(), get_suggestion_endpoint(), get_trusted_mapping_endpoint(), list_audit_sessions(), list_suggestions_endpoint(), list_trusted_mappings_endpoint() (+11 more)
+### Community 50 - "Any"
+Cohesion: 0.08
+Nodes (38): get, check_session_ownership(), download_report(), export_canonical_report_pdf(), get_audit_results(), get_authenticated_report(), get_authenticated_session(), get_canonical_report() (+30 more)
 
-### Community 51 - "cisco_auditor.py"
-Cohesion: 0.16
-Nodes (17): audit_pipeline(), eval_condition(), evaluate_rules(), main(), parse_cisco(), Cisco IOS-XE Compliance Auditor (PRD Addendum Section 4 Steps 1, 2, 3 & 4).…, Resolves a dot-delimited path (e.g. 'csm.services.call_home' or…, Evaluates generic conditions against resolved CSM field value. (+9 more)
+### Community 51 - "main"
+Cohesion: 0.21
+Nodes (12): audit_pipeline(), eval_condition(), evaluate_rules(), main(), parse_cisco(), Resolves a dot-delimited path (e.g. 'csm.services.call_home' or…, Evaluates generic conditions against resolved CSM field value., resolve_csm_path() (+4 more)
 
-### Community 52 - "VendorRegistry"
-Cohesion: 0.11
-Nodes (10): Returns all registered adapters sorted by vendor_id., Returns sorted list of registered vendor IDs., Unregisters an adapter. Returns True if removed, False if not found., Removes all registered adapters., Evaluates all registered adapters against configuration text. Selects the…, Central registry managing supported vendor adapters. Provides lookup,…, Registers a vendor adapter. Args: adapter: An instance of VendorAdapter.…, Retrieves an adapter by vendor ID. Args: vendor_id: Identifier string (e.g.… (+2 more)
+### Community 52 - "_seed_audit_session"
+Cohesion: 0.10
+Nodes (20): _get_auth_header(), Invariant A: POST /api/audit/finalize creates one canonical report and returns…, Invariants B & C: Calling create_or_get_canonical_report twice returns the…, Invariants D, F, G, R: Multi-framework data is unified, scores preserved, zero…, Invariants E & O: Cisco and Juniper reports preserve true vendor and do not…, Invariants H, I, J: A retry/re-fetch never resets report version or overwrites…, Invariants K & L: Lifecycle integration does not touch audit ledger hashes or…, Invariants M & N: If report creation fails, ledger is NOT rolled back; retry… (+12 more)
 
 ### Community 53 - "create_session_for_uploader"
 Cohesion: 0.11
@@ -442,60 +459,56 @@ Cohesion: 0.15
 Nodes (12): generate_remediation(), Resolves rule_id to an active baseline rule id. Returns (resolved_baseline_id,…, Renders remediation for the given rule_id (baseline, CIS, or STIG). Context…, resolve_rule_to_baseline(), Verifies baseline remediation registry and CIS/STIG resolution., Registry must contain exactly 10 Cisco and 10 Junos baseline rules., Every active Cisco baseline rule resolves to non-empty remediation., Every active Junos baseline rule resolves to non-empty remediation. (+4 more)
 
 ### Community 57 - "test_arista_vendor.py"
-Cohesion: 0.15
-Nodes (13): FortinetVendorAdapter, Fortinet vendor adapter wrapping verified fortinet_auditor logic. Implements: -…, Determines confidence that the text represents Fortinet FortiOS configuration.…, arista_zip_configs(), clean_vendor_registry(), fixture, NTRO PS26155 — Arista EOS Vendor Integration Tests (Phase C). Comprehensive TDD…, Extracts and returns the 4 real Arista EOS configuration samples from the… (+5 more)
-
-### Community 58 - "PaloAltoVendorAdapter"
-Cohesion: 0.12
-Nodes (5): PaloAltoVendorAdapter, Palo Alto Networks PAN-OS vendor adapter wrapping verified paloalto_auditor…, Determines confidence that the text represents Palo Alto PAN-OS configuration., Verifies adapter properties, registration, and deterministic detection., TestPaloAltoAdapterAndRegistry
+Cohesion: 0.06
+Nodes (36): AristaVendorAdapter, CiscoVendorAdapter, FortinetVendorAdapter, Cisco IOS-XE vendor adapter wrapping verified cisco_auditor parsing logic.…, Determines confidence that the text represents Cisco configuration. Scores…, Fortinet vendor adapter wrapping verified fortinet_auditor logic. Implements: -…, Determines confidence that the text represents Fortinet FortiOS configuration.…, Arista Networks vendor adapter wrapping verified arista_auditor logic.… (+28 more)
 
 ### Community 59 - "assert_no_execution_imports"
-Cohesion: 0.12
-Nodes (17): assert_no_execution_imports(), Path, Performs static AST analysis asserting that no forbidden execution or…, AST code analysis asserting that no process execution or device communication…, verify_safety_no_execution(), Asserts that importing a forbidden library raises RuntimeError., Asserts that 'from forbidden import ...' raises RuntimeError., Asserts that a custom forbidden set is respected. (+9 more)
+Cohesion: 0.13
+Nodes (15): assert_no_execution_imports(), Path, Performs static AST analysis asserting that no forbidden execution or…, Asserts that importing a forbidden library raises RuntimeError., Asserts that 'from forbidden import ...' raises RuntimeError., Asserts that a custom forbidden set is respected., Asserts that nonexistent path raises FileNotFoundError., Asserts that production modules pass AST safety without violation. (+7 more)
 
 ### Community 60 - "AuditLogReportScreen.tsx"
-Cohesion: 0.20
-Nodes (13): ApiError, exportCanonicalReportBlob(), getCanonicalReport(), notifyUnauthorized(), patchCanonicalReport(), verifyLedger(), verifyReport(), AuditLogReportScreen() (+5 more)
+Cohesion: 0.18
+Nodes (17): ApiError, exportCanonicalReportBlob(), getCanonicalReport(), getLedger(), notifyUnauthorized(), patchCanonicalReport(), verifyLedger(), verifyReport() (+9 more)
 
 ### Community 61 - "HardwareProfile"
 Cohesion: 0.16
 Nodes (9): HardwareProfile, _MEMORYSTATUSEX, probe_system_hardware(), Any, Probes system memory, CPU cores, and GPU capabilities using stdlib where…, Returns physical hardware capabilities., Checks if local Ollama daemon is reachable and responding on loopback., Returns comprehensive operational status of the AI Model Manager. (+1 more)
 
-### Community 62 - "CrosswalkEvaluator"
-Cohesion: 0.13
-Nodes (12): create_iso_crosswalk_evaluator(), create_nist_crosswalk_evaluator(), CrosswalkEvaluator, detect_vendor(), Any, Evaluates normalized CSM data against applicable framework controls. Consumes…, Factory creating the NIST SP 800-53 rev5 CrosswalkEvaluator., Factory creating the ISO/IEC 27001:2022 CrosswalkEvaluator. (+4 more)
+### Community 62 - ".evaluate"
+Cohesion: 0.33
+Nodes (5): detect_vendor(), Any, Evaluates normalized CSM data against applicable framework controls. Consumes…, Detects vendor type from normalized CSM device info. Recognizes Cisco, Juniper,…, Verifies detect_vendor returns correct vendor and never defaults unknown to…
 
 ### Community 63 - "TestAristaBaselineRules"
 Cohesion: 0.12
 Nodes (9): Verifies deterministic evaluation of the 10 Arista baseline security rules., Verifies evaluation produces all 10 authoritative ARISTA-* rules., Hardened sample passes 9 controls, with unconfigured dynamic routing as Unknown., Intentionally weak sample fails all 9 applicable controls., Partially compliant sample has mixed Pass/Fail status., Sample EOS configuration passes routing and SSH, fails SNMP weak and ACL., 5 consecutive evaluation runs yield identical SHA-256 hashes., Arista evaluation evaluates exclusively ARISTA-* rules; zero Cisco rule leakage. (+1 more)
 
 ### Community 64 - "App.tsx"
-Cohesion: 0.23
-Nodes (12): clearAccessToken(), getAccessToken(), getCurrentUser(), login(), onUnauthorized(), setAccessToken(), App(), LoginScreen() (+4 more)
-
-### Community 65 - "ModelMode"
 Cohesion: 0.20
-Nodes (10): ModelMode, ModelResponse, Enum, str, Validates an override model name against the strict allowlist. Returns…, Updates the active model selection mode and optional override tag. Enforces…, Determines the appropriate model tag based on operational mode, workload, and…, Enforces bounded timeouts to prevent connection pool starvation and DoS. (+2 more)
+Nodes (14): clearAccessToken(), getAccessToken(), getAuditResults(), getCurrentUser(), login(), onUnauthorized(), setAccessToken(), App() (+6 more)
+
+### Community 65 - "test_api_full_loop.py"
+Cohesion: 0.13
+Nodes (18): get_remediation(), Path, Renders Jinja2 remediation CLI, runs static conflict analysis and AI…, AST code analysis asserting that no process execution or device communication…, RemediationRequest, verify_api_safety_no_execution(), check_static_conflicts(), explain_failure_ai() (+10 more)
 
 ### Community 66 - "CiscoCsmFrameworkAdapter"
-Cohesion: 0.14
-Nodes (7): CiscoCsmFrameworkAdapter, Any, Evaluates normalized CSM data against applicable framework controls. Args: csm:…, Adapts existing Cisco IOS-XE rule evaluation to the FrameworkEvaluator…, TestCiscoCsmAdapterParity, Verify evaluating a Juniper CSM against Cisco framework adapters returns…, test_juniper_csm_against_cisco_framework()
+Cohesion: 0.15
+Nodes (6): CiscoCsmFrameworkAdapter, Any, Evaluates normalized CSM data against applicable framework controls. Args: csm:…, Adapts existing Cisco IOS-XE rule evaluation to the FrameworkEvaluator…, Runs the deterministic Cisco rule evaluation on the provided normalized CSM., TestCiscoCsmAdapterParity
 
 ### Community 67 - "UserIdentity"
-Cohesion: 0.23
-Nodes (12): submitAuditSession(), AuditWorkspace(), AuditWorkspaceProps, TAB_DISPLAY_NAMES, Navbar(), NavbarProps, RemediationDetailScreenProps, ReviewerDashboardProps (+4 more)
+Cohesion: 0.26
+Nodes (13): submitAuditSession(), AuditsScreenProps, AuditWorkspace(), AuditWorkspaceProps, TAB_DISPLAY_NAMES, DashboardScreenProps, NavbarProps, ReviewerDashboardProps (+5 more)
 
-### Community 68 - "get_authenticated_report"
+### Community 68 - "Evidence"
 Cohesion: 0.16
-Nodes (14): get_audit_report(), Retrieves an AuditReport by its report_id, including complete edit provenance…, Records a human edit to an audit report with optimistic concurrency protection.…, record_report_edit(), get_authenticated_report(), get_canonical_report(), get_canonical_report_edits(), patch_canonical_report() (+6 more)
+Nodes (8): Evidence, Deterministic evidence explaining the factual basis for an evaluation verdict.…, MockDeterministicEvaluator, Test implementation of FrameworkEvaluator., TestEvidenceModel, TestFrameworkEvaluatorContract, _build_multi_framework_result(), Generates realistic multi-framework evaluation data for CIS and DISA STIG.
 
 ### Community 69 - "test_api_ownership.py"
 Cohesion: 0.19
 Nodes (13): fixture, NTRO PS26155 Auditor — Resource Ownership & Session Isolation Tests (Chunk 5)…, Scenario 13: Remediation with non-existent session_id returns 404., Scenario 17: Finalize with non-existent session_id returns 404., Scenario 20: Direct unit testing of check_session_ownership helper semantics., reviewer_token(), setup_db(), test_check_session_ownership_direct_unit() (+5 more)
 
 ### Community 70 - "test_fortinet_vendor.py"
-Cohesion: 0.21
-Nodes (11): copy, clean_vendor_registry(), fixture, NTRO PS26155 — Fortinet FortiOS Vendor Integration Tests (Phase B).…, Returns a non-compliant FortiOS configuration failing multiple baseline…, Returns a minimal FortiOS config with only a header and hostname., Returns a fresh VendorRegistry with Cisco, Juniper, and Fortinet registered., Returns a hardened FortiOS configuration with all 10 baseline security controls… (+3 more)
+Cohesion: 0.13
+Nodes (15): copy, clean_vendor_registry(), fixture, NTRO PS26155 — Fortinet FortiOS Vendor Integration Tests (Phase B).…, Returns a non-compliant FortiOS configuration failing multiple baseline…, Returns a minimal FortiOS config with only a header and hostname., Verifies FortinetBaselineEvaluator and cross-vendor isolation., Evaluating Cisco CSM with Fortinet evaluator returns UNKNOWN for all rules. (+7 more)
 
 ### Community 71 - "_seed_canonical_report"
 Cohesion: 0.17
@@ -510,12 +523,12 @@ Cohesion: 0.17
 Nodes (7): Verifies that Fortinet, Arista, and unknown vendors never inherit Cisco…, Cisco CSM evaluates NIST and ISO with mapped Cisco baseline rules., Juniper CSM evaluates NIST and ISO with mapped Juniper baseline rules., Fortinet CSM yields NOT_ASSESSED for all controls under crosswalk frameworks., Arista CSM yields NOT_ASSESSED for all controls under crosswalk frameworks., Unknown vendor config yields NOT_ASSESSED for all crosswalk controls., TestCrosswalkVendorIsolationAndFailSoft
 
 ### Community 74 - "TestFailureHandlingFallbacks"
-Cohesion: 0.24
-Nodes (4): patch, Req 8: All failure modes produce deterministic fallback, never PASS/FAIL…, Invalid override must fall back before any network call., TestFailureHandlingFallbacks
+Cohesion: 0.14
+Nodes (6): patch, Req 8: All failure modes produce deterministic fallback, never PASS/FAIL…, Invalid override must fall back before any network call., Req 1 & 4: Fast mode prefers the lightweight configured model., TestFailureHandlingFallbacks, TestFastModeSelection
 
 ### Community 75 - "BaseModel"
-Cohesion: 0.20
-Nodes (11): BaseModel, ai_suggest(), FrameworkMetadataResponse, FrameworksListResponse, get_me(), list_compliance_frameworks(), Returns list of registered deterministic compliance frameworks with metadata…, Returns the sanitized identity of the authenticated user. Extracts identity… (+3 more)
+Cohesion: 0.11
+Nodes (21): BaseModel, get_user_by_username(), Retrieves a user by username using case-insensitive match (COLLATE NOCASE)., check_login_rate_limit(), _clean_expired_login_attempts(), FrameworkMetadataResponse, FrameworksListResponse, get_me() (+13 more)
 
 ### Community 76 - "ref_node_assert_strict"
 Cohesion: 0.25
@@ -541,13 +554,13 @@ Nodes (5): Req 8 & invariant: No AI failure may become a compliance PASS/FAIL de
 Cohesion: 0.22
 Nodes (5): localStorageStore, MockFormData, mockLocalStorage, mockSessionStorage, sessionStorageStore
 
-### Community 82 - "verify_api_safety_no_execution"
-Cohesion: 0.20
-Nodes (8): Path, AST code analysis asserting that no process execution or device communication…, verify_api_safety_no_execution(), Verifies that the API layer maintains clean boundaries and zero execution…, Asserts main.py passes execution-free AST safety checks., Verifies that all Phase 3 compliance modules contain zero process/socket…, TestComplianceSecurityASTInvariants, test_no_external_jwt_dependency_and_ast_safety()
+### Community 82 - "TestComplianceSecurityASTInvariants"
+Cohesion: 0.33
+Nodes (4): Verifies that the API layer maintains clean boundaries and zero execution…, Asserts main.py passes execution-free AST safety checks., Verifies that all Phase 3 compliance modules contain zero process/socket…, TestComplianceSecurityASTInvariants
 
-### Community 83 - "TestDeviceIdentityGap"
-Cohesion: 0.20
-Nodes (6): Verifies metadata extraction, preferred management IP, and Not In Config…, Extracts hardware_model, serial_number, os_version, and preferred Loopback0 IP., When hardware details are absent from config, fields remain None in CSM., Extracts Junos model, serial, version, and preferred fxp0 management IP., When hardware details are absent, fields remain None in CSM., TestDeviceIdentityGap
+### Community 83 - "parse_juniper"
+Cohesion: 0.14
+Nodes (10): canonicalize_junos_statements(), parse_juniper(), Tokenizes raw Junos configuration into canonical statement strings and unmapped…, Parses raw Juniper Junos configuration text into a normalized CSM dictionary.…, Verifies metadata extraction, preferred management IP, and Not In Config…, Extracts hardware_model, serial_number, os_version, and preferred Loopback0 IP., When hardware details are absent from config, fields remain None in CSM., Extracts Junos model, serial, version, and preferred fxp0 management IP. (+2 more)
 
 ### Community 84 - "TestFortinetRealWorldCSM"
 Cohesion: 0.20
@@ -573,9 +586,9 @@ Nodes (8): compute_entry_hash(), Computes SHA256 over canonical JSON of all entr
 Cohesion: 0.22
 Nodes (9): DuplicateReportError, Exception, Base exception for audit report domain errors., Raised when an edit is submitted with an expected_version that does not match…, Raised when a requested report ID or audit_entry_id does not exist., Raised when attempting to create a second canonical report for an audit record., ReportError, ReportNotFoundError (+1 more)
 
-### Community 92 - "AuditResultsScreen.tsx"
-Cohesion: 0.36
-Nodes (7): evaluateCompliance(), getAuditResults(), getComplianceFrameworks(), AuditResultsScreen(), AuditResultsScreenProps, FrameworkSummaryItem, MultiFrameworkAuditResult
+### Community 92 - "UploadScreen.tsx"
+Cohesion: 0.14
+Nodes (17): evaluateCompliance(), getComplianceFrameworks(), uploadAuditConfig(), AuditResultsScreen(), AuditResultsScreenProps, AUDIT_STAGES, detectVendorFromContent(), UploadScreen() (+9 more)
 
 ### Community 93 - "test_frontend_compliance_frameworks.mjs"
 Cohesion: 0.25
@@ -590,16 +603,16 @@ Cohesion: 0.39
 Nodes (7): fixture, NTRO PS26155 — Multi-Framework Compliance REST API Tests (Phase 3A.5).…, reviewer_token(), setup_environment(), uploader_a_token(), uploader_b_token(), viewer_token()
 
 ### Community 97 - "TestAristaFrameworkAndIsolation"
-Cohesion: 0.25
-Nodes (5): Verifies FrameworkRegistry integration and cross-vendor isolation., Registers arista-eos-baseline in FrameworkRegistry., Evaluating Cisco CSM with Arista evaluator returns UNKNOWN for all rules., Evaluating Fortinet CSM with Arista evaluator returns UNKNOWN for all rules., TestAristaFrameworkAndIsolation
+Cohesion: 0.33
+Nodes (4): Verifies FrameworkRegistry integration and cross-vendor isolation., Evaluating Cisco CSM with Arista evaluator returns UNKNOWN for all rules., Evaluating Fortinet CSM with Arista evaluator returns UNKNOWN for all rules., TestAristaFrameworkAndIsolation
 
 ### Community 98 - "TestFortinetDatasetDiscovery"
 Cohesion: 0.25
 Nodes (5): Verifies files match SHA256SUMS.json inside the archive., Verifies presence, manifest integrity, and structure of the real-world Fortinet…, Asserts that SIH26155_Fortinet_FortiGate_RealWorld_PublicDataset_v1.zip exists., Validates all 3 expected configuration files exist in the zip., TestFortinetDatasetDiscovery
 
-### Community 99 - "TestFortinetFrameworkEvaluator"
-Cohesion: 0.25
-Nodes (5): Verifies FortinetBaselineEvaluator and cross-vendor isolation., Registers fortinet-fortios-baseline in FrameworkRegistry., Evaluating Cisco CSM with Fortinet evaluator returns UNKNOWN for all rules., Asserts zero execution imports (subprocess, socket, paramiko) in…, TestFortinetFrameworkEvaluator
+### Community 99 - "FrameworkRegistry"
+Cohesion: 0.08
+Nodes (14): FrameworkRegistry, Explicit, dependency-injectable registry for compliance frameworks and their…, Registers a framework and its optional evaluator. Args: framework: Framework…, Checks if a framework is registered., Lists all registered frameworks sorted by framework_id., Lists registered frameworks applicable to the specified vendor or platform.…, Unregisters a framework and its evaluator. Returns True if found and removed., Clears all registered frameworks and evaluators. (+6 more)
 
 ### Community 100 - "TestPaloAltoDatasetDiscovery"
 Cohesion: 0.25
@@ -661,6 +674,14 @@ Nodes (4): Verifies end-to-end API upload with real-world Fortinet configuration
 Cohesion: 0.33
 Nodes (4): Verifies /api/audit/upload end-to-end with Fortinet configuration., POST /api/audit/upload with vendor='fortinet' successfully parses and evaluates., POST /api/audit/upload with vendor='auto' auto-detects Fortinet., TestFortinetApiIngestion
 
+### Community 120 - "register_cis_cisco_iosxe"
+Cohesion: 0.14
+Nodes (11): Registers the CIS Cisco IOS-XE Benchmark v2.2.1 framework and evaluator into…, register_cis_cisco_iosxe(), Registers the DISA STIG Cisco IOS-XE Benchmark V3R7 framework and evaluator…, register_disa_stig_cisco_iosxe(), Tests registration into FrameworkRegistry., TestCisRegistryIntegration, Tests registration and side-by-side coexistence of CIS and DISA-STIG., TestFrameworkCoexistence (+3 more)
+
+### Community 121 - "JuniperBaselineEvaluator"
+Cohesion: 0.17
+Nodes (12): eval_condition(), evaluate_juniper_baseline(), evaluate_rules(), JuniperBaselineEvaluator, Any, Resolves a dot-delimited path (e.g. 'csm.services.ssh_version') in the CSM dict., Generic condition evaluator on CSM values., Deterministically evaluates the 10 initial Junos rules against normalized CSM. (+4 more)
+
 ### Community 123 - "require_role"
 Cohesion: 0.40
 Nodes (4): anyio, FastAPI dependency factory enforcing Role-Based Access Control (RBAC). Consumes…, require_role(), test_require_role_rejects_unknown_roles()
@@ -673,9 +694,9 @@ Nodes (5): delete, delete_trusted_mapping(), Deletes/retires a trusted mapping b
 Cohesion: 0.40
 Nodes (4): localStorageStore, mockLocalStorage, mockSessionStorage, sessionStorageStore
 
-### Community 126 - "check_report_ownership"
-Cohesion: 0.40
-Nodes (5): get_session(), check_report_ownership(), get_canonical_report_by_entry(), Retrieves the canonical AuditReport for a given audit ledger entry_id. Allows…, Enforces audit report resource isolation and anti-enumeration. Reviewers and…
+### Community 126 - "get_connection"
+Cohesion: 0.12
+Nodes (21): approve_suggestion(), Path, store_suggestion(), create_user(), get_audit_report_by_entry_id(), get_connection(), get_session(), get_user_by_id() (+13 more)
 
 ### Community 129 - "TestComplianceAggregatorStaticSecurityInvariants"
 Cohesion: 0.40
@@ -685,20 +706,60 @@ Nodes (3): Static AST analysis ensuring compliance_aggregator.py contains zero u
 Cohesion: 0.40
 Nodes (5): clean_export_dir(), clean_test_db(), fixture, Provides a sterile, isolated export directory for each test run., Provides an isolated database for verifying database/ledger non-mutation.
 
+### Community 177 - "setup_isolated_test_env"
+Cohesion: 0.21
+Nodes (12): Registers the 'arista-eos-baseline' framework and evaluator into…, register_arista_baseline(), Registers the 'cisco-ios-xe-baseline' framework and evaluator into…, register_cisco_baseline(), Registers the 'fortinet-fortios-baseline' framework and evaluator into…, register_fortinet_baseline(), Registers the 'juniper-junos-baseline' framework and evaluator into…, register_juniper_baseline() (+4 more)
+
+### Community 178 - "fixture"
+Cohesion: 0.18
+Nodes (11): fixture, Returns a synthetic Junos configuration in flat 'set' format., Fully compliant Junos config where all 10 initial rules PASS., Non-compliant Junos config where all 10 initial rules FAIL., Returns the actual synthetic Junos sample from the repository zip file., Returns a synthetic Junos hierarchical configuration with full security…, sample_junos_compliant(), sample_junos_from_repo_zip() (+3 more)
+
+### Community 179 - "make_res"
+Cohesion: 0.29
+Nodes (4): make_res(), Any, Tests count aggregation and pass-rate calculations across all mathematical…, TestPassRateAndFrameworkSummary
+
+### Community 181 - "FrameworkNotFoundError"
+Cohesion: 0.29
+Nodes (5): KeyError, FrameworkNotFoundError, Raised when an unregistered framework ID is requested., Retrieves a registered framework by ID., Retrieves the evaluator registered for a framework, if any.
+
+### Community 183 - "parse_arista"
+Cohesion: 0.29
+Nodes (6): _cidr_to_netmask(), _netmask_to_cidr(), parse_arista(), Converts CIDR integer (e.g. 24) to dotted decimal netmask., Converts dotted decimal netmask to CIDR prefix integer., Parses raw Arista EOS configuration into normalized Common Security Model…
+
+### Community 184 - "InvalidEvaluationResultError"
+Cohesion: 0.29
+Nodes (7): AggregationError, ConflictingControlEvaluationError, InvalidEvaluationResultError, Exception, Base exception for multi-framework aggregation failures., Raised when conflicting evaluation statuses exist for the same control in the…, Raised when an input result object is malformed or missing required attributes.
+
+### Community 186 - "TestCisEvaluationParity"
+Cohesion: 0.33
+Nodes (3): fixture, Tests parity between CisCiscoIosXeEvaluator and cisco_auditor.py baseline rules., TestCisEvaluationParity
+
+### Community 188 - "isolate_test_database"
+Cohesion: 0.67
+Nodes (3): isolate_test_database(), fixture, Isolates tests from production database (data/auditor.db). If the test module…
+
+### Community 189 - "clean_db"
+Cohesion: 0.67
+Nodes (3): clean_db(), fixture, Initializes a fresh isolated database for each test.
+
+### Community 196 - "clean_test_db"
+Cohesion: 0.67
+Nodes (3): clean_test_db(), fixture, Provides an isolated database for each test to prevent cross-test contamination.
+
 ## Knowledge Gaps
-- **103 isolated node(s):** `name`, `private`, `version`, `type`, `dev` (+98 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1330 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **61 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **106 isolated node(s):** `name`, `private`, `version`, `type`, `dev` (+101 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1333 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **72 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `ComplianceStatus` connect `ComplianceStatus` to `EvaluationResult`, `test_paloalto_vendor.py`, `compliance_framework.py`, `get_default_registry`, `test_juniper_vendor.py`, `audit_report.py`, `test_vendor_foundation.py`, `TestDisaStigControlEvaluatorUnit`, `TestCisControlEvaluatorUnit`, `AristaBaselineEvaluator`, `paloalto_auditor.py`, `_create_sample_audit_ledger_entry`, `FortinetBaselineEvaluator`, `test_arista_vendor.py`, `CrosswalkEvaluator`, `CiscoCsmFrameworkAdapter`, `test_fortinet_vendor.py`, `TestCrosswalkVendorIsolationAndFailSoft`, `TestAristaFrameworkAndIsolation`, `TestFortinetFrameworkEvaluator`, `TestDisaStigEvaluationParity`, `TestFortinetRealWorldBaselineRules`, `TestPaloAltoBaselineRules`?**
-  _High betweenness centrality (0.048) - this node is a cross-community bridge._
-- **Why does `FrameworkRegistry` connect `FrameworkRegistry` to `TestAristaFrameworkAndIsolation`, `test_paloalto_vendor.py`, `TestFortinetFrameworkEvaluator`, `compliance_framework.py`, `get_default_registry`, `paloalto_auditor.py`, `test_fortinet_vendor.py`, `run_evaluation`, `test_juniper_vendor.py`, `ComplianceStatus`, `test_arista_vendor.py`?**
-  _High betweenness centrality (0.039) - this node is a cross-community bridge._
-- **Why does `EvaluationResult` connect `EvaluationResult` to `CiscoCsmFrameworkAdapter`, `compliance_framework.py`, `.aggregate`, `paloalto_auditor.py`, `audit_report.py`, `ComplianceStatus`, `_create_sample_audit_ledger_entry`, `test_vendor_foundation.py`, `FortinetBaselineEvaluator`, `AristaBaselineEvaluator`, `CrosswalkEvaluator`?**
-  _High betweenness centrality (0.031) - this node is a cross-community bridge._
+- **Why does `FrameworkRegistry` connect `FrameworkRegistry` to `TestAristaFrameworkAndIsolation`, `run_evaluation`, `test_paloalto_vendor.py`, `src/main.py`, `test_fortinet_vendor.py`, `Framework`, `MultiFrameworkAggregator`, `setup_isolated_test_env`, `FrameworkNotFoundError`, `register_cis_cisco_iosxe`, `test_arista_vendor.py`?**
+  _High betweenness centrality (0.049) - this node is a cross-community bridge._
+- **Why does `ComplianceStatus` connect `src/main.py` to `EvaluationResult`, `test_paloalto_vendor.py`, `TestFrameworkCrosswalkGap`, `test_juniper_vendor.py`, `audit_report.py`, `MultiFrameworkAggregator`, `test_vendor_foundation.py`, `TestDisaStigControlEvaluatorUnit`, `Control`, `TestCisControlEvaluatorUnit`, `AristaBaselineEvaluator`, `PaloAltoBaselineEvaluator`, `_create_sample_audit_ledger_entry`, `make_res`, `FortinetBaselineEvaluator`, `test_arista_vendor.py`, `TestCisEvaluationParity`, `TestDuplicateHandling`, `TestInputValidation`, `Evidence`, `test_fortinet_vendor.py`, `TestCrosswalkVendorIsolationAndFailSoft`, `TestAristaFrameworkAndIsolation`, `TestDisaStigEvaluationParity`, `TestFortinetRealWorldBaselineRules`, `TestPaloAltoBaselineRules`, `JuniperBaselineEvaluator`?**
+  _High betweenness centrality (0.046) - this node is a cross-community bridge._
+- **Why does `AuditReport` connect `audit_report.py` to `src/main.py`, `_seed_canonical_report`, `test_report_export.py`, `TestReportExportCompliance`, `test_phase3d_repair.py`, `report_exporter.py`?**
+  _High betweenness centrality (0.035) - this node is a cross-community bridge._
 - **Are the 22 inferred relationships involving `EvaluationResult` (e.g. with `AristaBaselineEvaluator` and `CisCiscoIosXeEvaluator`) actually correct?**
   _`EvaluationResult` has 22 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 32 inferred relationships involving `FrameworkRegistry` (e.g. with `register_arista_baseline()` and `register_cis_cisco_iosxe()`) actually correct?**

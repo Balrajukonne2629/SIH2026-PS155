@@ -20,15 +20,41 @@ export const DOCUMENTATION_RESOURCES: DocumentationResource[] = [
   {
     id: "v7-interactive-arch",
     category: "Architecture",
-    title: "Master System Architecture (Interactive)",
-    subtitle: "Interactive 4-Tier Architecture Pipeline & AST Knowledge Graph",
+    title: "Master System Architecture (Archify Interactive)",
+    subtitle: "Official Archify 2.17 System Architecture Studio",
     format: "HTML / Interactive",
     status: "Interactive Viewer",
-    path: "graphify-out/graph.html",
+    path: "docs/v7_system_architecture.html",
     targetBlank: true,
-    description: "Features clean 4-tier functional pipeline with 13 directed dataflow highways, progressive disclosure AST drill-down, and 4 exploration modes (Flow, Detailed Topology, +Verification, Full Evidence).",
-    primaryActionLabel: "Launch Interactive Architecture",
-    primaryActionUrl: "./interactive/graph.html"
+    description: "Official Archify 2.17 interactive blueprint featuring 4-tier functional pipeline, real-time trace motion, search, dark/light presets, and subsystem isolation boundaries.",
+    primaryActionLabel: "Launch Archify Studio",
+    primaryActionUrl: "./interactive/v7_system_architecture.html"
+  },
+  {
+    id: "archify-visual-checks",
+    category: "Architecture",
+    title: "Archify Visual Verification Evidence",
+    subtitle: "Automated Browser Visual Test Evidence Report",
+    format: "HTML / Interactive",
+    status: "Authoritative",
+    path: "docs/v7_system_architecture.visual-check.html",
+    targetBlank: true,
+    description: "Automated browser containment verification evidence capturing both Master Architecture and Compliance Workflow in dark and light modes at 2048x1320 and 1440x900.",
+    primaryActionLabel: "View Visual Check Report",
+    primaryActionUrl: "./screenshots/v7_system_architecture.visual-check.html"
+  },
+  {
+    id: "arch-compact-svg",
+    category: "Architecture",
+    title: "Compact Architecture Flow (Vector SVG)",
+    subtitle: "Horizontal Pipeline Flow Blueprint",
+    format: "Vector SVG",
+    status: "Authoritative",
+    path: "docs/short_architecture_diagram.svg",
+    targetBlank: true,
+    description: "Streamlined horizontal vector flowchart outlining device config ingestion, CSM normalization, pure Python rule evaluation, and SHA-256 ledger chaining.",
+    primaryActionLabel: "Open Compact SVG",
+    primaryActionUrl: "./diagrams/short_architecture_diagram.svg"
   },
   {
     id: "arch-2pager",

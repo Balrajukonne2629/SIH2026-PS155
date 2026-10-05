@@ -50,7 +50,7 @@ export const App: React.FC = () => {
         {/* Section 8: Technical Evidence, Empirical Benchmarks & Tamper Simulator */}
         <TechnicalEvidence />
 
-        {/* Section 9: Graphify Codebase Knowledge Graph Spotlight (6,364 Nodes) */}
+        {/* Section 9: Graphify Codebase Knowledge Graph Spotlight (2,744 Nodes) */}
         <GraphifySpotlight />
 
         {/* Section 10: Operational Prototype Showcase (Retina Screenshots & Zoom) */}

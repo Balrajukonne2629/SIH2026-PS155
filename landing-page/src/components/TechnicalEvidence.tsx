@@ -40,7 +40,8 @@ export const TechnicalEvidence: React.FC = () => {
   ];
 
   return (
-    <section id="evidence" className="py-16 md:py-24 bg-surface border-b border-border">
+    <section id="evidence" className="py-16 md:py-24 bg-surface border-b border-border relative">
+      <div id="technical-evidence" className="absolute -top-24 pointer-events-none" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="max-w-3xl mb-12">

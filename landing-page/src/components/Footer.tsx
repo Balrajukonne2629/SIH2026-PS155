@@ -80,7 +80,12 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <a href="#knowledge-graph" className="hover:text-sky-300 transition-colors">
-                  Graphify AST Graph (6,364 Nodes)
+                  Graphify AST Graph (2,744 Nodes)
+                </a>
+              </li>
+              <li>
+                <a href="./interactive/v7_system_architecture.html" target="_blank" rel="noopener noreferrer" className="hover:text-sky-300 transition-colors">
+                  Archify Master Blueprint (Interactive Studio)
                 </a>
               </li>
             </ul>
