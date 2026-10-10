@@ -431,20 +431,43 @@ function applyPreset(mode) {
   const btn = document.getElementById('btn-preset-' + mode);
   if (btn) btn.classList.add('active');
 
-  const updates = [];
+  // Step 1: Candidate set based on preset filter
+  const candidateIds = new Set();
   RAW_NODES.forEach(n => {
     const cat = getCategory(n.source_file);
-    let isHidden = false;
+    const lbl = n.label || '';
+    const isSyntheticOrTest = cat === 'test' || lbl.startsWith('test_') || ['fixture', 'pytest', 'Any', 'BaseModel', 'compilerOptions'].includes(lbl);
 
     if (mode === 'core') {
-      isHidden = (cat === 'test') || (n.degree < 10);
+      if (!isSyntheticOrTest && n.degree >= 8) {
+        candidateIds.add(n.id);
+      }
     } else if (mode === 'prod') {
-      isHidden = (cat === 'test');
+      if (!isSyntheticOrTest) {
+        candidateIds.add(n.id);
+      }
     } else {
-      isHidden = false;
+      candidateIds.add(n.id);
     }
+  });
 
-    updates.push({ id: n.id, hidden: isHidden });
+  // Step 2: Strict graph connection pruning — guarantee zero orphan/isolated floating nodes!
+  // Count visible mutual edges within candidateIds
+  const activeDegree = new Map();
+  candidateIds.forEach(id => activeDegree.set(id, 0));
+
+  RAW_EDGES.forEach(e => {
+    if (candidateIds.has(e.from) && candidateIds.has(e.to)) {
+      activeDegree.set(e.from, (activeDegree.get(e.from) || 0) + 1);
+      activeDegree.set(e.to, (activeDegree.get(e.to) || 0) + 1);
+    }
+  });
+
+  // Step 3: Hide nodes that have zero connected edges in this view
+  const updates = [];
+  RAW_NODES.forEach(n => {
+    const isVisible = candidateIds.has(n.id) && (mode === 'all' || (activeDegree.get(n.id) || 0) > 0);
+    updates.push({ id: n.id, hidden: !isVisible });
   });
 
   nodesDS.update(updates);
