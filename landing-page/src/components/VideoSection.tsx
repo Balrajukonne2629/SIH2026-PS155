@@ -18,7 +18,7 @@ export const VideoSection: React.FC = () => {
           </h2>
           <p className="mt-3.5 text-sm sm:text-base text-slate-600 leading-relaxed font-sans">
             Structured for executive evaluation and technical deep-dives: a 30-second problem/solution executive brief 
-            and a 5-minute timestamped operational walkthrough.
+            and a 2-minute operational walkthrough.
           </p>
         </div>
 
@@ -98,7 +98,7 @@ export const VideoSection: React.FC = () => {
                   {video.chapters ? (
                     <div className="mt-4 pt-4 border-t border-slate-100">
                       <h4 className="text-xs font-bold font-mono uppercase tracking-wider text-slate-500 mb-2.5">
-                        Timestamp Chapters (5:00 Structure)
+                        Timestamp Chapters ({video.durationLabel} Structure)
                       </h4>
                       <div className="space-y-1.5">
                         {video.chapters.map((ch, cIdx) => (
@@ -146,7 +146,7 @@ export const VideoSection: React.FC = () => {
                   {video.youtubeUrl ? (
                     <>
                       <CheckCircle2 className="w-3.5 h-3.5 text-red-600 shrink-0" />
-                      <span className="text-slate-800 font-semibold">Live Stream: Official 5-minute technical demo embedded via YouTube.</span>
+                      <span className="text-slate-800 font-semibold">Live Stream: Official 2-minute technical prototype demo embedded via YouTube.</span>
                     </>
                   ) : video.videoSrc ? (
                     <>

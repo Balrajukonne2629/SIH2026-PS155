@@ -47,43 +47,43 @@ export const VIDEO_CONFIG: { videos: VideoData[] } = {
       ]
     },
     {
-      id: "video-5m",
-      title: "5-Minute Comprehensive Technical Walkthrough",
-      durationLabel: "5:00",
+      id: "video-demo",
+      title: "Operational Technical Prototype Walkthrough",
+      durationLabel: "2:00",
       category: "Technical Deep-Dive",
       targetAudience: "Technical Mentors, Network Security Architects & Evaluators",
-      purpose: "End-to-end operational walkthrough covering Cisco/Juniper ingestion, deterministic scoring, HITL AI suggestions, and ledger verification.",
+      purpose: "End-to-end operational walkthrough covering multi-vendor ingestion, deterministic scoring, HITL AI remediation, and cryptographic ledger verification.",
       isAvailable: true,
-      statusLabel: "YouTube Interactive Technical Demo",
+      statusLabel: "YouTube Technical Walkthrough",
       youtubeUrl: "https://www.youtube.com/embed/YGzcPgUpD8o",
       posterSrc: "./screenshots/ntro-compliance-workflow.visual-check.1440x900.dark.png",
       synopsis: [
-        "Structured walk from air-gapped ingestion through vendor normalization, multi-framework audit, reviewer approval gate, and cryptographic PDF export."
+        "Structured walk from air-gapped ingestion through vendor normalization, multi-framework audit, reviewer approval gate, and cryptographic verification."
       ],
       chapters: [
         {
-          timeFormatted: "0:00–0:30",
+          timeFormatted: "0:00–0:25",
           seconds: 0,
-          title: "Introduction & Critical Infrastructure Compliance Stakes",
-          description: "Problem statement context, air-gap requirements, and the failure modes of cloud AI in enterprise network backbones."
+          title: "Architecture & Air-Gapped Ingestion Boundary",
+          description: "System overview, deterministic AST isolation, and multi-vendor configuration ingestion."
         },
         {
-          timeFormatted: "0:30–1:30",
-          seconds: 30,
-          title: "7-Layer System Architecture & CSM",
-          description: "Walkthrough of the unified ingestion boundary, AST safety sandbox, vendor detection, and CSM normalization."
+          timeFormatted: "0:25–1:05",
+          seconds: 25,
+          title: "Multi-Framework Audit & Normalized CSM v7",
+          description: "Live CIS, DISA-STIG, and NIST SP 800-53 scoring across normalized vendor models."
         },
         {
-          timeFormatted: "1:30–4:30",
-          seconds: 90,
-          title: "Live Operational Prototype Demonstration",
-          description: "Uploading sample Cisco and Juniper configurations, deterministic CIS/STIG evaluation, staging unmapped syntax to local DistilBERT/SLM, reviewer approval, and safe remediation preview."
+          timeFormatted: "1:05–1:40",
+          seconds: 65,
+          title: "Out-of-Band SLM & Reviewer Approval Gate",
+          description: "Local DistilBERT/SLM remediation suggestion with mandatory SecOps human-in-the-loop authorization."
         },
         {
-          timeFormatted: "4:30–5:00",
-          seconds: 270,
-          title: "Cryptographic Proof, Ledger Verification & Conclusion",
-          description: "Live SHA-256 hash-chain verification (/api/audit-log/verify), tamper simulation, and canonical PDF export with vector QR code."
+          timeFormatted: "1:40–2:00",
+          seconds: 100,
+          title: "Cryptographic Non-Repudiation & Ledger Proof",
+          description: "Immutable SHA-256 Merkel audit trail verification and cryptographic tamper detection."
         }
       ]
     }
