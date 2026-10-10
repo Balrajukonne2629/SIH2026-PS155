@@ -27,18 +27,22 @@ export const VIDEO_CONFIG: { videos: VideoData[] } = {
   videos: [
     {
       id: "video-30s",
-      title: "30-Second Sovereign Overview",
+      title: "30-Second Sovereign Overview & Mission-Critical Architecture",
       durationLabel: "0:30",
       category: "Executive Attention",
       targetAudience: "Executive Evaluators & Jury Panel",
-      purpose: "Rapid synthesis of the sovereign compliance challenge, deterministic certainty, and air-gapped defense architecture.",
+      purpose: "High-impact synthesis of the air-gapped sovereign compliance engine: 5 enterprise vendors (Cisco, Juniper, Arista, Fortinet, Palo Alto), 82 deterministic controls in 0.065ms, out-of-band SLM, and SHA-256 cryptographic non-repudiation.",
       isAvailable: true,
-      statusLabel: "Executive Briefing Session",
-      posterSrc: "./screenshots/v7_system_architecture.visual-check.2048x1320.dark.png",
+      statusLabel: "Official 30s Launch Feature Video",
+      videoSrc: "./videos/ntro-ps26155-launch-30s.mp4",
+      posterSrc: "./videos/ntro-ps26155-launch-30s-poster.jpg",
       synopsis: [
-        "[0:00–0:10] The Sovereign Dilemma: Mission-critical networks run heterogeneous hardware with diverging CLI syntax.",
-        "[0:10–0:20] The Deterministic Solution: Pure Python AST rules evaluate on normalized CSM. Zero generative hallucinations in verdicts.",
-        "[0:20–0:30] Proof & Integrity: Append-only SHA-256 ledger chaining guarantees cryptographic non-repudiation."
+        "[0:00–0:05] The Sovereign Invariant Hook: 0.065 ms latency, zero cloud egress, and complete air-gapped isolation.",
+        "[0:05–0:10] 5 Enterprise Vendors: Cisco, Juniper, Arista, Fortinet & Palo Alto normalized via Common Security Model (CSM v7).",
+        "[0:10–0:15] Deterministic AST Rules: 82 controls across CIS v2.0, DISA-STIG, NIST SP 800-53, and ISO 27001.",
+        "[0:15–0:20] The Safety Invariant: Out-of-band local SLM advises on unmapped syntax; AI never mutates verdicts or touches live hardware.",
+        "[0:20–0:25] Mandatory Human Governance: SecOps reviewer authorization, signed and sealed out-of-band.",
+        "[0:25–0:30] Cryptographic Non-Repudiation: Immutable SHA-256 Merkel chain and 8.47 GB offline standalone verification."
       ]
     },
     {

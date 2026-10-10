@@ -1,0 +1,647 @@
+<!doctype html>
+<html lang="en" data-resolution="landscape">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>NTRO PS26155 Launch Video</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html, body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #0b0f19;
+        font-family: 'Space Grotesk', sans-serif;
+        color: #f8fafc;
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #0b0f19;
+      }
+
+      /* Cyber grid background */
+      .grid-backdrop {
+        position: absolute;
+        inset: 0;
+        background-size: 50px 50px;
+        background-image: 
+          linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+        mask-image: radial-gradient(circle at 50% 50%, black 50%, transparent 95%);
+        pointer-events: none;
+      }
+
+      .glow-orb {
+        position: absolute;
+        width: 1000px;
+        height: 600px;
+        border-radius: 50%;
+        filter: blur(160px);
+        pointer-events: none;
+        opacity: 0.35;
+      }
+      .glow-blue {
+        top: 15%;
+        left: 25%;
+        background: #0284c7;
+      }
+      .glow-emerald {
+        bottom: 15%;
+        right: 20%;
+        background: #10b981;
+      }
+
+      .font-mono {
+        font-family: 'JetBrains Mono', monospace;
+      }
+
+      /* Scene container */
+      .scene {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 100px;
+      }
+
+      /* Telemetry elements */
+      .telemetry-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 24px;
+        border-radius: 9999px;
+        background: rgba(15, 23, 42, 0.85);
+        border: 1px solid rgba(56, 189, 248, 0.35);
+        box-shadow: 0 0 25px rgba(2, 132, 199, 0.2);
+        margin-bottom: 24px;
+      }
+      .pulse-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #10b981;
+        box-shadow: 0 0 12px #10b981;
+      }
+      .hero-title {
+        font-size: 92px;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        line-height: 1.05;
+        text-align: center;
+        background: linear-gradient(180deg, #ffffff 40%, #94a3b8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .hero-tagline {
+        margin-top: 20px;
+        font-size: 28px;
+        color: #cbd5e1;
+        font-weight: 500;
+        text-align: center;
+        max-width: 1200px;
+        line-height: 1.4;
+      }
+
+      .section-badge {
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        color: #bae6fd;
+        font-weight: 700;
+        margin-bottom: 12px;
+      }
+      .scene-heading {
+        font-size: 48px;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        margin-bottom: 32px;
+        text-align: center;
+      }
+
+      /* 5 Enterprise Vendors Grid */
+      .vendors-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 20px;
+        width: 100%;
+        max-width: 1400px;
+        margin-bottom: 32px;
+      }
+      .vendor-card {
+        background: rgba(15, 23, 42, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 16px;
+        padding: 24px 16px;
+        text-align: center;
+        backdrop-filter: blur(12px);
+      }
+      .vendor-name {
+        font-size: 24px;
+        font-weight: 700;
+        color: #f8fafc;
+        margin-bottom: 6px;
+      }
+      .vendor-os {
+        font-size: 14px;
+        color: #38bdf8;
+        font-family: 'JetBrains Mono', monospace;
+      }
+      .vendor-status {
+        margin-top: 10px;
+        display: inline-block;
+        font-size: 11px;
+        font-family: 'JetBrains Mono', monospace;
+        padding: 4px 10px;
+        border-radius: 6px;
+        background: rgba(16, 185, 129, 0.15);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        color: #34d399;
+      }
+
+      .csm-banner {
+        background: rgba(2, 132, 199, 0.15);
+        border: 1px solid rgba(56, 189, 248, 0.35);
+        border-radius: 14px;
+        padding: 16px 40px;
+        display: flex;
+        align-items: center;
+        gap: 24px;
+      }
+
+      /* Scene 3: Frameworks & AST Rule Engine */
+      .frameworks-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 24px;
+        width: 100%;
+        max-width: 1300px;
+        margin-bottom: 32px;
+      }
+      .framework-card {
+        background: rgba(15, 23, 42, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 16px;
+        padding: 24px;
+        text-align: left;
+      }
+      .fw-name {
+        font-size: 20px;
+        font-weight: 700;
+        color: #f8fafc;
+        margin-bottom: 8px;
+      }
+      .fw-desc {
+        font-size: 13px;
+        color: #94a3b8;
+        line-height: 1.4;
+      }
+      .fw-count {
+        margin-top: 14px;
+        font-size: 13px;
+        font-family: 'JetBrains Mono', monospace;
+        color: #34d399;
+      }
+
+      .perf-bar {
+        background: rgba(16, 185, 129, 0.12);
+        border: 1px solid rgba(16, 185, 129, 0.35);
+        border-radius: 14px;
+        padding: 16px 48px;
+        display: flex;
+        gap: 40px;
+        align-items: center;
+      }
+
+      /* Scene 4: Invariant AI Split */
+      .invariant-banner {
+        background: rgba(16, 185, 129, 0.12);
+        border: 1px solid rgba(16, 185, 129, 0.35);
+        border-radius: 9999px;
+        padding: 10px 32px;
+        color: #6ee7b7;
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        margin-bottom: 28px;
+      }
+      .pillars-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 36px;
+        width: 100%;
+        max-width: 1260px;
+        margin-bottom: 28px;
+      }
+      .pillar-card {
+        background: rgba(15, 23, 42, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 20px;
+        padding: 32px;
+      }
+      .pillar-tag {
+        display: inline-block;
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 14px;
+      }
+      .tag-det {
+        background: rgba(2, 132, 199, 0.2);
+        color: #38bdf8;
+        border: 1px solid rgba(56, 189, 248, 0.3);
+      }
+      .tag-ai {
+        background: rgba(168, 85, 247, 0.2);
+        color: #c084fc;
+        border: 1px solid rgba(192, 132, 252, 0.3);
+      }
+      .pillar-title {
+        font-size: 26px;
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+      .pillar-desc {
+        font-size: 15px;
+        color: #94a3b8;
+        line-height: 1.5;
+      }
+
+      /* Scene 5: HITL Governance Walkthrough */
+      .hitl-flow-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 28px;
+        width: 100%;
+        max-width: 1280px;
+        margin-bottom: 32px;
+      }
+      .hitl-box {
+        background: rgba(15, 23, 42, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 18px;
+        padding: 28px;
+      }
+      .hitl-step {
+        font-size: 12px;
+        font-family: 'JetBrains Mono', monospace;
+        color: #38bdf8;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+      .hitl-title {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+      .hitl-desc {
+        font-size: 14px;
+        color: #94a3b8;
+        line-height: 1.5;
+      }
+      .stamp-badge {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        background: rgba(15, 23, 42, 0.95);
+        border: 1px solid #10b981;
+        box-shadow: 0 0 35px rgba(16, 185, 129, 0.25);
+        padding: 14px 32px;
+        border-radius: 12px;
+      }
+
+      /* Scene 6: Cryptographic Chain Card */
+      .crypto-seal-card {
+        background: rgba(15, 23, 42, 0.9);
+        border: 1px solid rgba(56, 189, 248, 0.35);
+        border-radius: 24px;
+        padding: 44px 64px;
+        text-align: center;
+        max-width: 1080px;
+        box-shadow: 0 0 60px rgba(2, 132, 199, 0.25);
+      }
+      .hash-pill {
+        display: inline-block;
+        font-size: 15px;
+        color: #38bdf8;
+        background: rgba(2, 132, 199, 0.15);
+        border: 1px solid rgba(56, 189, 248, 0.3);
+        padding: 10px 24px;
+        border-radius: 9999px;
+        margin-bottom: 24px;
+      }
+      .stats-strip {
+        display: flex;
+        justify-content: center;
+        gap: 56px;
+        margin: 32px 0;
+      }
+      .stat-item {
+        text-align: center;
+      }
+      .stat-number {
+        font-size: 44px;
+        font-weight: 800;
+        color: #ffffff;
+        font-family: 'JetBrains Mono', monospace;
+      }
+      .stat-label {
+        font-size: 14px;
+        color: #94a3b8;
+        margin-top: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="30"
+      data-width="1920"
+      data-height="1080"
+    >
+      <!-- Background Ambient Grid & Glow -->
+      <div class="grid-backdrop"></div>
+      <div class="glow-orb glow-blue" id="bg-glow"></div>
+      <div class="glow-orb glow-emerald"></div>
+
+      <!-- Music Track (Vol-1 Track, 30s runtime) -->
+      <audio
+        id="bgm"
+        src="assets/music/music.mp3"
+        data-start="0"
+        data-duration="30"
+        data-track-index="0"
+      ></audio>
+
+      <!-- Precision SFX Audio Cues -->
+      <audio id="sfx-1" src="assets/sfx/click.ogg" data-start="0.4" data-duration="0.06" data-track-index="1"></audio>
+      <audio id="sfx-2" src="assets/sfx/whoosh.ogg" data-start="4.5" data-duration="0.23" data-track-index="1"></audio>
+      <audio id="sfx-3" src="assets/sfx/click.ogg" data-start="9.5" data-duration="0.06" data-track-index="1"></audio>
+      <audio id="sfx-4" src="assets/sfx/whoosh.ogg" data-start="15.0" data-duration="0.23" data-track-index="1"></audio>
+      <audio id="sfx-5" src="assets/sfx/click.ogg" data-start="20.0" data-duration="0.06" data-track-index="1"></audio>
+      <audio id="sfx-6" src="assets/sfx/whoosh.ogg" data-start="25.0" data-duration="0.23" data-track-index="1"></audio>
+
+      <!-- SCENE 1: The Sovereign Hook (0.0s – 4.5s) -->
+      <div class="scene clip" id="scene-1" data-start="0" data-duration="4.5" data-track-index="2">
+        <div class="telemetry-pill font-mono" id="s1-pill">
+          <span class="pulse-dot"></span>
+          <span style="color: #38bdf8; font-weight: 700;">LATENCY: 0.065 ms</span>
+          <span style="color: #94a3b8;">·</span>
+          <span style="color: #cbd5e1;">AIR-GAPPED COMPLIANCE CORE · ZERO CLOUD</span>
+        </div>
+        <h1 class="hero-title" id="s1-title">NTRO PS26155</h1>
+        <p class="hero-tagline" id="s1-tagline">
+          AI-Driven Multi-Vendor Network Security Compliance Auditor
+        </p>
+      </div>
+
+      <!-- SCENE 2: 5 Enterprise Vendors · Common Security Model (4.5s – 9.5s) -->
+      <div class="scene clip" id="scene-2" data-start="4.5" data-duration="5.0" data-track-index="2">
+        <div class="section-badge font-mono" id="s2-badge">Multi-Vendor Heterogeneity</div>
+        <h2 class="scene-heading" id="s2-heading">5 Enterprise Vendor Architectures Supported</h2>
+        <div class="vendors-grid" id="s2-vendors">
+          <div class="vendor-card" id="v-1">
+            <div class="vendor-name">Cisco</div>
+            <div class="vendor-os">IOS-XE</div>
+            <div class="vendor-status">Active Gold</div>
+          </div>
+          <div class="vendor-card" id="v-2">
+            <div class="vendor-name">Juniper</div>
+            <div class="vendor-os">Junos OS</div>
+            <div class="vendor-status">Active Gold</div>
+          </div>
+          <div class="vendor-card" id="v-3">
+            <div class="vendor-name">Arista</div>
+            <div class="vendor-os">EOS</div>
+            <div class="vendor-status">Active Gold</div>
+          </div>
+          <div class="vendor-card" id="v-4">
+            <div class="vendor-name">Fortinet</div>
+            <div class="vendor-os">FortiOS</div>
+            <div class="vendor-status">Adapter Ready</div>
+          </div>
+          <div class="vendor-card" id="v-5">
+            <div class="vendor-name">Palo Alto</div>
+            <div class="vendor-os">PAN-OS</div>
+            <div class="vendor-status">Adapter Ready</div>
+          </div>
+        </div>
+        <div class="csm-banner font-mono" id="s2-csm">
+          <span style="color: #7dd3fc; font-weight: 700;">Common Security Model (CSM v7)</span>
+          <span style="color: #cbd5e1;">·</span>
+          <span style="color: #f1f5f9;">Unified Normalization AST · Prevents M × N Rule Explosion</span>
+        </div>
+      </div>
+
+      <!-- SCENE 3: Deterministic AST Rule Evaluation (9.5s – 15.0s) -->
+      <div class="scene clip" id="scene-3" data-start="9.5" data-duration="5.5" data-track-index="2">
+        <div class="section-badge font-mono" id="s3-badge">Deterministic Rule Engine</div>
+        <h2 class="scene-heading" id="s3-heading">82 Authoritative Controls Evaluated in 0.065 ms</h2>
+        <div class="frameworks-grid" id="s3-frameworks">
+          <div class="framework-card" id="fw-1">
+            <div class="fw-name">CIS Benchmark v2.0</div>
+            <div class="fw-desc">L1 &amp; L2 Hardening controls for network edge and core devices.</div>
+            <div class="fw-count">PASS / FAIL · DETERMINISTIC</div>
+          </div>
+          <div class="framework-card" id="fw-2">
+            <div class="fw-name">DISA-STIG</div>
+            <div class="fw-desc">Defense Department security requirements &amp; encryption invariants.</div>
+            <div class="fw-count">CAT I / II / III RULES</div>
+          </div>
+          <div class="framework-card" id="fw-3">
+            <div class="fw-name">NIST SP 800-53</div>
+            <div class="fw-desc">Federal information security controls: AC, IA, SC, AU families.</div>
+            <div class="fw-count">MAPPED TO CSM AST</div>
+          </div>
+          <div class="framework-card" id="fw-4">
+            <div class="fw-name">ISO/IEC 27001</div>
+            <div class="fw-desc">Information security management standard Annex A controls.</div>
+            <div class="fw-count">AUTOMATED EVIDENCE</div>
+          </div>
+        </div>
+        <div class="perf-bar font-mono" id="s3-perf">
+          <div style="color: #6ee7b7; font-weight: 700;">Sub-Millisecond Engine</div>
+          <div style="color: #cbd5e1;">|</div>
+          <div style="color: #f8fafc;">Zero Hallucinations · Strict AST Python Safety Checks</div>
+          <div style="color: #cbd5e1;">|</div>
+          <div style="color: #7dd3fc; font-weight: 700;">~0.33 ms End-to-End Latency</div>
+        </div>
+      </div>
+
+      <!-- SCENE 4: Sovereign Invariant Axiom (15.0s – 20.0s) -->
+      <div class="scene clip" id="scene-4" data-start="15.0" data-duration="5.0" data-track-index="2">
+        <div class="invariant-banner font-mono" id="s4-banner">
+          THE SOVEREIGN INVARIANT AXIOM
+        </div>
+        <div class="pillars-grid" id="s4-pillars">
+          <div class="pillar-card" id="p-1">
+            <div class="pillar-tag tag-det font-mono">DETERMINISTIC EVALUATION</div>
+            <div class="pillar-title">AST Compliance Engine</div>
+            <div class="pillar-desc">
+              Rules strictly evaluate pass/fail based on mathematical syntax trees. AI never touches or mutates verdicts.
+            </div>
+          </div>
+          <div class="pillar-card" id="p-2">
+            <div class="pillar-tag tag-ai font-mono">AIR-GAPPED LOCAL SLM</div>
+            <div class="pillar-title">DistilBERT &amp; Local NLP Explainer</div>
+            <div class="pillar-desc">
+              Unmapped proprietary directives resolved semantically out-of-band on localhost. Zero external API calls.
+            </div>
+          </div>
+        </div>
+        <div class="csm-banner font-mono" id="s4-subtext">
+          <span style="color: #6ee7b7; font-weight: 700;">Fail-Closed Security Guarantee:</span>
+          <span style="color: #f1f5f9;">Probabilistic AI Never Touches Live Routing Tables</span>
+        </div>
+      </div>
+
+      <!-- SCENE 5: Human-in-the-Loop Governance (20.0s – 25.0s) -->
+      <div class="scene clip" id="scene-5" data-start="20.0" data-duration="5.0" data-track-index="2">
+        <div class="section-badge font-mono" id="s5-badge">Human-in-the-Loop Governance</div>
+        <h2 class="scene-heading" id="s5-heading">Out-of-Band Disambiguation &amp; Safe Remediation</h2>
+        <div class="hitl-flow-grid" id="s5-grid">
+          <div class="hitl-box" id="h-1">
+            <div class="hitl-step">STAGE 01 · DETECTION</div>
+            <div class="hitl-title">Unmapped Syntax Isolated</div>
+            <div class="hitl-desc">Proprietary directives flagged without affecting established deterministic rules.</div>
+          </div>
+          <div class="hitl-box" id="h-2">
+            <div class="hitl-step">STAGE 02 · LOCAL SLM</div>
+            <div class="hitl-title">Advisory Semantics</div>
+            <div class="hitl-desc">Local DistilBERT proposes CSM schema mapping with confidence metrics on loopback.</div>
+          </div>
+          <div class="hitl-box" id="h-3">
+            <div class="hitl-step">STAGE 03 · APPROVAL</div>
+            <div class="hitl-title">Human Verification</div>
+            <div class="hitl-desc">SecOps engineers approve mappings before insertion into the trusted rule library.</div>
+          </div>
+        </div>
+        <div class="stamp-badge font-mono" id="s5-stamp">
+          <span class="pulse-dot"></span>
+          <span style="color: #f8fafc; font-weight: 700;">secops_reviewer</span>
+          <span style="color: #10b981; font-weight: 700;">[MANDATORY HUMAN APPROVAL · SIGNED &amp; SEALED]</span>
+        </div>
+      </div>
+
+      <!-- SCENE 6: Cryptographic Chain & Outro (25.0s – 30.0s) -->
+      <div class="scene clip" id="scene-6" data-start="25.0" data-duration="5.0" data-track-index="2">
+        <div class="crypto-seal-card" id="s6-card">
+          <div class="hash-pill font-mono" id="s6-hash">
+            SHA-256 LEDGER: 34eef192b0c13bbd8fffe968ce1204d557f932eecf130e527a296eebeaa28a5d
+          </div>
+          <h2 style="font-size: 52px; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 8px;">
+            Cryptographic Non-Repudiation &amp; Verification
+          </h2>
+          <p style="font-size: 19px; color: #94a3b8; font-family: 'JetBrains Mono', monospace;">
+            Engineered for Critical Sovereign National Infrastructure
+          </p>
+          <div class="stats-strip" id="s6-stats">
+            <div class="stat-item">
+              <div class="stat-number">780+</div>
+              <div class="stat-label">Verified Test Suite</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">8.47 GB</div>
+              <div class="stat-label">Air-Gapped Package</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">5 Vendors</div>
+              <div class="stat-label">Cisco · Juniper · Arista · Fortinet · Palo Alto</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">0.00%</div>
+              <div class="stat-label">Cloud Telemetry</div>
+            </div>
+          </div>
+          <div style="font-size: 16px; color: #38bdf8; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;">
+            Smart India Hackathon (SIH) 2026 · NTRO PS26155
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const tl = gsap.timeline({ paused: true });
+
+      const bgm = document.getElementById("bgm");
+      if (bgm) bgm.volume = 0.28;
+
+      // Ambient background glow pulse
+      tl.to("#bg-glow", { opacity: 0.65, duration: 2.2, repeat: 13, yoyo: true, ease: "sine.inOut" }, 0);
+
+      // --- SCENE 1: The Sovereign Hook (0.0s – 4.5s) ---
+      tl.fromTo("#s1-pill", { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.3);
+      tl.fromTo("#s1-title", { opacity: 0, scale: 0.92 }, { opacity: 1, scale: 1, duration: 0.8, ease: "back.out(1.2)" }, 0.9);
+      tl.fromTo("#s1-tagline", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.7, ease: "power2.out" }, 1.6);
+      tl.to(["#s1-pill", "#s1-title", "#s1-tagline"], { opacity: 0, y: -24, duration: 0.4, ease: "power2.in" }, 4.1);
+
+      // --- SCENE 2: 5 Enterprise Vendors (4.5s – 9.5s) ---
+      tl.fromTo("#s2-badge", { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 4.6);
+      tl.fromTo("#s2-heading", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 4.8);
+
+      tl.fromTo("#v-1", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.4, ease: "back.out(1.4)" }, 5.1);
+      tl.fromTo("#v-2", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.4, ease: "back.out(1.4)" }, 5.4);
+      tl.fromTo("#v-3", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.4, ease: "back.out(1.4)" }, 5.7);
+      tl.fromTo("#v-4", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.4, ease: "back.out(1.4)" }, 6.0);
+      tl.fromTo("#v-5", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.4, ease: "back.out(1.4)" }, 6.3);
+
+      tl.fromTo("#s2-csm", { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1, duration: 0.5, ease: "power3.out" }, 6.9);
+      tl.to(["#s2-badge", "#s2-heading", "#s2-vendors", "#s2-csm"], { opacity: 0, y: -20, duration: 0.4, ease: "power2.in" }, 9.1);
+
+      // --- SCENE 3: Deterministic AST Rule Evaluation (9.5s – 15.0s) ---
+      tl.fromTo("#s3-badge", { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 9.6);
+      tl.fromTo("#s3-heading", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 9.8);
+
+      tl.fromTo("#fw-1", { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.4, ease: "power3.out" }, 10.2);
+      tl.fromTo("#fw-2", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 10.5);
+      tl.fromTo("#fw-3", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 10.8);
+      tl.fromTo("#fw-4", { opacity: 0, x: 20 }, { opacity: 1, x: 0, duration: 0.4, ease: "power3.out" }, 11.1);
+
+      tl.fromTo("#s3-perf", { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1, duration: 0.5, ease: "power3.out" }, 11.7);
+      tl.to(["#s3-badge", "#s3-heading", "#s3-frameworks", "#s3-perf"], { opacity: 0, y: -20, duration: 0.4, ease: "power2.in" }, 14.6);
+
+      // --- SCENE 4: Sovereign Invariant Axiom (15.0s – 20.0s) ---
+      tl.fromTo("#s4-banner", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.5, ease: "power3.out" }, 15.2);
+      tl.fromTo("#p-1", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, 15.6);
+      tl.fromTo("#p-2", { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, 16.0);
+      tl.fromTo("#s4-subtext", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 16.6);
+      tl.to(["#s4-banner", "#s4-pillars", "#s4-subtext"], { opacity: 0, scale: 0.96, duration: 0.4, ease: "power2.in" }, 19.6);
+
+      // --- SCENE 5: Human-in-the-Loop Governance (20.0s – 25.0s) ---
+      tl.fromTo("#s5-badge", { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 20.2);
+      tl.fromTo("#s5-heading", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 20.4);
+      tl.fromTo("#h-1", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 20.8);
+      tl.fromTo("#h-2", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 21.2);
+      tl.fromTo("#h-3", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 21.6);
+      tl.fromTo("#s5-stamp", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.5)" }, 22.3);
+      tl.to(["#s5-badge", "#s5-heading", "#s5-grid", "#s5-stamp"], { opacity: 0, y: -20, duration: 0.4, ease: "power2.in" }, 24.6);
+
+      // --- SCENE 6: Cryptographic Chain & Outro (25.0s – 30.0s) ---
+      tl.fromTo("#s6-card", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 25.2);
+      tl.fromTo("#s6-hash", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 25.7);
+      tl.fromTo("#s6-stats", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 26.2);
+
+      // Audio fade out into closing mark
+      tl.to("#bgm", { volume: 0, duration: 1.8, ease: "power1.out" }, 28.2);
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
