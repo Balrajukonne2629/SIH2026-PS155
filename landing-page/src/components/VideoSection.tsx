@@ -32,7 +32,15 @@ export const VideoSection: React.FC = () => {
               <div>
                 {/* Video Player Display / Poster Container */}
                 <div className="relative aspect-video bg-slate-900 border-b border-slate-200 overflow-hidden">
-                  {video.videoSrc ? (
+                  {video.youtubeUrl ? (
+                    <iframe
+                      src={video.youtubeUrl}
+                      title={video.title}
+                      className="w-full h-full border-0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                    />
+                  ) : video.videoSrc ? (
                     <video
                       controls
                       preload="metadata"
@@ -132,18 +140,35 @@ export const VideoSection: React.FC = () => {
                 </div>
               </div>
 
-              {/* Zero Fabrication Note */}
-              <div className="p-3 bg-slate-50 border-t border-slate-100 text-[11px] font-mono text-slate-500 flex items-center gap-2">
-                {video.videoSrc ? (
-                  <>
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span className="text-emerald-700 font-semibold">Active Standalone Video: Live 1080p MP4 with embedded cryptographic poster.</span>
-                  </>
-                ) : (
-                  <>
-                    <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                    <span>Zero fabrication guarantee: Video player will stream local MP4 upon final production recording.</span>
-                  </>
+              {/* Verification & Live Status Note */}
+              <div className="p-3 bg-slate-50 border-t border-slate-100 text-[11px] font-mono text-slate-500 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  {video.youtubeUrl ? (
+                    <>
+                      <CheckCircle2 className="w-3.5 h-3.5 text-red-600 shrink-0" />
+                      <span className="text-slate-800 font-semibold">Live Stream: Official 5-minute technical demo embedded via YouTube.</span>
+                    </>
+                  ) : video.videoSrc ? (
+                    <>
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      <span className="text-emerald-700 font-semibold">Active Standalone Video: Live 1080p MP4 with embedded cryptographic poster.</span>
+                    </>
+                  ) : (
+                    <>
+                      <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                      <span>Zero fabrication guarantee: Video player will stream local MP4 upon final production recording.</span>
+                    </>
+                  )}
+                </div>
+                {video.youtubeUrl && (
+                  <a
+                    href="https://youtu.be/YGzcPgUpD8o"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-red-600 hover:text-red-700 font-semibold flex items-center gap-1 hover:underline ml-2"
+                  >
+                    Watch on YouTube ↗
+                  </a>
                 )}
               </div>
             </div>

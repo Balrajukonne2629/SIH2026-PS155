@@ -19,6 +19,7 @@ export interface VideoData {
   statusLabel: string;
   videoSrc?: string;
   posterSrc?: string;
+  youtubeUrl?: string;
   synopsis: string[];
   chapters?: VideoChapter[];
 }
@@ -53,7 +54,8 @@ export const VIDEO_CONFIG: { videos: VideoData[] } = {
       targetAudience: "Technical Mentors, Network Security Architects & Evaluators",
       purpose: "End-to-end operational walkthrough covering Cisco/Juniper ingestion, deterministic scoring, HITL AI suggestions, and ledger verification.",
       isAvailable: true,
-      statusLabel: "Interactive Prototype Walkthrough",
+      statusLabel: "YouTube Interactive Technical Demo",
+      youtubeUrl: "https://www.youtube.com/embed/YGzcPgUpD8o",
       posterSrc: "./screenshots/ntro-compliance-workflow.visual-check.1440x900.dark.png",
       synopsis: [
         "Structured walk from air-gapped ingestion through vendor normalization, multi-framework audit, reviewer approval gate, and cryptographic PDF export."
