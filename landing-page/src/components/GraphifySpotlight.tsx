@@ -80,16 +80,16 @@ export const GraphifySpotlight: React.FC = () => {
 
         {/* First-Class Live Interactive Graphify WebGL Frame */}
         <div className="rounded-xl border border-slate-300 bg-white overflow-hidden shadow-xl mb-8">
-          <div className="px-4 py-2.5 bg-slate-100 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
-            <div className="flex items-center gap-2 text-slate-700 font-medium">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>LIVE ARCHITECTURE ENGINE: 4-Tier Pipeline · Click cards to drill into AST nodes · Mode Switcher</span>
+          <div className="px-4 py-2.5 bg-slate-900 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs font-mono text-slate-300">
+            <div className="flex items-center gap-2 font-medium">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-white">SOVEREIGN ARCHITECTURE ENGINE: Clean Tiers · Multi-Vendor Hubs · Progressive Drilldown</span>
             </div>
-            <div className="flex items-center gap-3 text-slate-500">
-              <span>Artifact: <code>graphify-out/graph.html</code></span>
+            <div className="flex items-center gap-3 text-slate-400">
+              <span>Interactive Controls: <code>[Core Tiers]</code> · <code>[Production]</code> · <code>[2,744 AST]</code></span>
             </div>
           </div>
-          <div className="relative w-full h-[620px] bg-[#0f0f1a]">
+          <div className="relative w-full h-[640px] bg-[#080c14]">
             <iframe
               key={iframeKey}
               src="./interactive/graph.html"
